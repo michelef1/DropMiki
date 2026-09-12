@@ -411,7 +411,7 @@
   </div>
 
   <footer>
-    <span id="app-version">v1.2</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v1.3</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
@@ -847,10 +847,22 @@
     }
   }
 
-  // --- service worker ---
+  // --- service worker: registrazione + aggiornamento automatico ---
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(console.error);
+      navigator.serviceWorker.register('./sw.js').then((reg) => {
+        // forza subito un controllo di aggiornamento, invece di aspettare i tempi del browser
+        reg.update();
+      }).catch(console.error);
+    });
+
+    // quando un nuovo service worker prende il controllo (nuova versione attivata),
+    // ricarica la pagina per mostrare subito i file aggiornati
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(refreshing) return;
+      refreshing = true;
+      window.location.reload();
     });
   }
 
