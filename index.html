@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#4f46e5" />
   <link rel="manifest" href="/manifest.json" />
   <link rel="stylesheet" href="styles.css" />
-<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=949Z2XZtn_rIErchdLJPV7XI23dTBKtNbhNaIGCGC79aipxuIsV0kexbQh4AQw7g_oIzGWBTsdTCxHntH7c7x4u-JMBga4JXF3CqbJshsrm2R529VvuJLr6bF1Bdg7wtUqtkmk3YS9zC8yHQk8kdy4kRpAZpfUIN6iUWb7dN-1aR6sr56SsrzrWHG4JsPAXCKYi1B7Aayj7mTEgQ-FDRxGQjBQnMOk3LOdBOXxbdRG25QntrwMMaLiGbnxmtMBeFv4NxbRO0G7bdLOnhDO8kktN2zzzTgeScXil6uEyNgeGdPLgaAoHr4JcvrvxzQTtp" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9jb250cmlidXRpb24udXNlcmNvbnRlbnQuZ29vZ2xlLmNvbS9kb3dubG9hZD9jPUNneGlZWEprWDNOMGIzSmhaMlVTVUJJTmNtVnpjRzl1YzJWZlpHRjBZUm9fQ2pCbU5tWmhNekJoTVRObU5URmhOMk0zTURBd05qVmlOR1ExWkdGbU1XRTFaakF4TnpVd01URTJZV0V3TVdNNVltUVNDeElIRUstN3Q2aVVHQmdCJmZpbGVuYW1lPWluZGV4Lmh0bWwmb3BpPTEwMzEzNTA1MA"/></head>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=yYA1mFksK36W4ZKVktjgJP4SEVDWB4OZ9wFP62658kJZRKKNT0DwOqLkebXSbP7YMQ9qfEMpNtytkkT71VNEnAxt4i5dMD98p1IHx1Mac0zaWwQaYWk8bSVJJ8jpKS1pG0kFnajtPdt-vDsyNZrSYsVSglNb9TdmwLjpUn4fadLjofrz3UgFc8j1y4GNpj6E2JeFgIwWsnaR0lG8fKPcqeWY11r5r6HZfjDUdIa4Ly7xKA03lJeJ6kk1sf1JJYrGdryi_EHKlrFOZfUHcmCg1jw7Nb6PROQAcfDdKatDJbkUxIWzoH6FJARgYxwVMD5Y" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9jb250cmlidXRpb24udXNlcmNvbnRlbnQuZ29vZ2xlLmNvbS9kb3dubG9hZD9jPUNneGlZWEprWDNOMGIzSmhaMlVTVUJJTmNtVnpjRzl1YzJWZlpHRjBZUm9fQ2pBeVl6aGlOMll4Wmpjd1l6TTFabUpoTURBd05qVmlOR1EzWXpBek16SXlOREF5TWpkaU9HRTVaV0l3TWpaaFpEWVNDeElIRUstN3Q2aVVHQmdCJmZpbGVuYW1lPWluZGV4Lmh0bWwmb3BpPTEwMzEzNTA1MA"/></head>
 <body>
   <header class="app-header">
     <h1>DropMiki</h1>
@@ -15,20 +15,47 @@
   </header>
 
   <main class="app-main">
+    <!-- Stato -->
     <section class="section">
       <h2>Stato</h2>
       <p id="status-text">Caricamento…</p>
     </section>
 
+    <!-- Il tuo ID -->
     <section class="section">
-      <h2>Dispositivi vicini</h2>
-      <p id="peers-info">Nessun dispositivo rilevato.</p>
-      <ul id="peers-list" class="peers-list"></ul>
+      <h2>Il tuo ID</h2>
+      <p style="margin-bottom:8px;">
+        Condividi questo ID con un altro dispositivo per connetterti.
+      </p>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="my-id" type="text" readonly style="flex:1;padding:8px;border-radius:6px;border:1px solid #d1d5db;" />
+        <button id="copy-id-btn" style="padding:8px 10px;border-radius:6px;border:none;background:#4f46e5;color:#fff;">Copia</button>
+      </div>
     </section>
 
+    <!-- Connetti a un peer -->
     <section class="section">
-      <h2>Invia</h2>
-      <p>Funzionalità di invio file e testo in arrivo.</p>
+      <h2>Connettiti a un dispositivo</h2>
+      <p style="margin-bottom:8px;">
+        Incolla qui l’ID di un altro dispositivo DropMiki aperto nella stessa rete.
+      </p>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <input id="peer-id-input" type="text" placeholder="Incolla ID peer" style="flex:1;padding:8px;border-radius:6px;border:1px solid #d1d5db;" />
+        <button id="connect-btn" style="padding:8px 10px;border-radius:6px;border:none;background:#10b981;color:#fff;">Connetti</button>
+      </div>
+      <p id="conn-status">Nessuna connessione attiva.</p>
+    </section>
+
+    <!-- Chat testo -->
+    <section class="section">
+      <h2>Messaggi</h2>
+      <div id="chat-box" style="max-height:220px;overflow:auto;border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin-bottom:8px;background:#fafafa;">
+        <p style="font-size:0.85rem;color:#6b7280;">I messaggi appariranno qui.</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="msg-input" type="text" placeholder="Scrivi un messaggio…" style="flex:1;padding:8px;border-radius:6px;border:1px solid #d1d5db;" />
+        <button id="send-btn" style="padding:8px 10px;border-radius:6px;border:none;background:#4f46e5;color:#fff;">Invia</button>
+      </div>
     </section>
   </main>
 
@@ -36,6 +63,8 @@
     <small>DropMiki – PWA sperimentale</small>
   </footer>
 
+  <!-- PeerJS da CDN -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
