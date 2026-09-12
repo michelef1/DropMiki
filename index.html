@@ -81,13 +81,20 @@
     margin-bottom:18px;
   }
 
-  .panel h2{
+  .panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .panel h2, .panel-head h2{
     font-family:'IBM Plex Mono', monospace;
     font-size:12px;
     font-weight:600;
     color:var(--gold);
-    margin:0 0 14px 0;
+    margin:0;
   }
+  .panel > h2{ margin-bottom:14px; }
 
   .code-display{
     display:flex;
@@ -119,16 +126,18 @@
   .row{display:flex; gap:8px;}
 
   input[type="text"]{
-    flex:1;
     background:var(--pine-900);
     border:1px solid var(--pine-600);
     color:var(--cream);
     font-family:'IBM Plex Mono', monospace;
+    border-radius:var(--radius);
+  }
+  .row input[type="text"]{
+    flex:1;
     font-size:18px;
     letter-spacing:3px;
     text-transform:uppercase;
     padding:12px 14px;
-    border-radius:var(--radius);
     text-align:center;
   }
   input[type="text"]:focus{
@@ -149,7 +158,7 @@
     border-radius:var(--radius);
     padding:12px 18px;
     cursor:pointer;
-    transition:background .15s ease;
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
   }
   button.primary{
     background:var(--rust);
@@ -169,6 +178,10 @@
   button.ghost:hover{
     color:var(--cream);
     border-color:var(--gold-dim);
+  }
+  button.small{
+    padding:6px 10px;
+    font-size:11px;
   }
 
   .status-line{
@@ -192,6 +205,57 @@
     50%{opacity:0.35;}
   }
 
+  /* dispositivi salvati */
+  .device-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 6px;
+    border-bottom:1px solid var(--pine-600);
+    border-radius:var(--radius);
+    cursor:pointer;
+  }
+  .device-row:last-child{border-bottom:none;}
+  .device-row:hover{background:rgba(217,165,68,0.05);}
+  .device-row.selected{
+    background:rgba(217,165,68,0.10);
+    box-shadow:inset 2px 0 0 var(--gold);
+  }
+  .device-row .dot{flex-shrink:0;}
+  .device-name-input{
+    flex:1;
+    background:transparent;
+    border:1px solid transparent;
+    color:var(--cream);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:5px 6px;
+    border-radius:var(--radius);
+    min-width:0;
+  }
+  .device-name-input:hover{border-color:var(--pine-600);}
+  .device-name-input:focus{
+    outline:none;
+    border-color:var(--gold-dim);
+    background:var(--pine-900);
+  }
+  .device-code{
+    font-size:10.5px;
+    color:var(--cream-dim);
+    letter-spacing:1px;
+    flex-shrink:0;
+  }
+  .device-remove{
+    background:transparent;
+    border:none;
+    color:var(--cream-dim);
+    font-size:14px;
+    padding:4px 6px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .device-remove:hover{color:var(--err);}
+
   .dropzone{
     border:1.5px dashed var(--pine-600);
     border-radius:var(--radius);
@@ -211,6 +275,14 @@
     cursor:not-allowed;
   }
   .dropzone strong{color:var(--cream);}
+
+  .send-target{
+    font-size:11px;
+    color:var(--cream-dim);
+    text-align:center;
+    margin-bottom:10px;
+  }
+  .send-target b{color:var(--gold);}
 
   #fileInput{display:none;}
 
@@ -286,7 +358,7 @@
     <div class="code-display" id="myCodeDisplay">
       <div class="digit">·</div><div class="digit">·</div><div class="digit">·</div><div class="digit">·</div><div class="digit">·</div><div class="digit">·</div>
     </div>
-    <div class="code-hint">Comunicalo all'altro dispositivo per farti trovare</div>
+    <div class="code-hint">Resta fisso su questo dispositivo: i dispositivi salvati ti ritroveranno da soli</div>
     <div class="status-line">
       <span class="dot" id="myStatusDot"></span>
       <span id="myStatusText">Connessione alla stazione in corso…</span>
@@ -294,19 +366,28 @@
   </div>
 
   <div class="panel">
-    <h2>RAGGIUNGI UN DISPOSITIVO</h2>
+    <div class="panel-head">
+      <h2>DISPOSITIVI SALVATI</h2>
+    </div>
+    <div id="devicesList"></div>
+    <div class="empty-note" id="devicesEmpty">Nessun dispositivo salvato — collegane uno qui sotto</div>
+  </div>
+
+  <div class="panel">
+    <h2>AGGIUNGI UN DISPOSITIVO</h2>
     <div class="row">
       <input type="text" id="peerCodeInput" placeholder="CODICE" maxlength="6" autocomplete="off" autocapitalize="characters">
       <button class="primary" id="connectBtn">Connetti</button>
     </div>
     <div class="status-line">
       <span class="dot" id="peerStatusDot"></span>
-      <span id="peerStatusText">In attesa di una connessione</span>
+      <span id="peerStatusText">Inserisci il codice mostrato sull'altro dispositivo</span>
     </div>
   </div>
 
   <div class="panel">
     <h2>SPEDIZIONE</h2>
+    <div class="send-target" id="sendTarget">Tocca un dispositivo salvato e connesso per scegliere a chi inviare</div>
     <div class="dropzone disabled" id="dropzone">
       <div><strong>Trascina un file qui</strong></div>
       <div style="margin-top:4px;">oppure tocca per scegliere · connetti prima un dispositivo</div>
@@ -314,13 +395,17 @@
     <input type="file" id="fileInput">
   </div>
 
-  <div class="panel" id="transfersPanel" style="display:none;">
-    <h2>REGISTRO TRASFERIMENTI</h2>
+  <div class="panel">
+    <div class="panel-head">
+      <h2>REGISTRO TRASFERIMENTI</h2>
+      <button class="ghost small" id="clearTransfersBtn">Cancella</button>
+    </div>
     <div id="transfersList"></div>
+    <div class="empty-note" id="transfersEmpty">Nessun trasferimento ancora</div>
   </div>
 
   <footer>
-    <span>v1.0</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v1.1</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
@@ -330,6 +415,9 @@
   'use strict';
 
   const CHUNK_SIZE = 64 * 1024;
+  const PEER_PREFIX = 'dropmiki-';
+  const LS_MYCODE = 'dropmiki_mycode';
+  const LS_DEVICES = 'dropmiki_devices';
 
   const myCodeDisplay = document.getElementById('myCodeDisplay');
   const myStatusDot = document.getElementById('myStatusDot');
@@ -340,15 +428,54 @@
   const peerStatusText = document.getElementById('peerStatusText');
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
-  const transfersPanel = document.getElementById('transfersPanel');
+  const sendTarget = document.getElementById('sendTarget');
   const transfersList = document.getElementById('transfersList');
+  const transfersEmpty = document.getElementById('transfersEmpty');
+  const clearTransfersBtn = document.getElementById('clearTransfersBtn');
+  const devicesList = document.getElementById('devicesList');
+  const devicesEmpty = document.getElementById('devicesEmpty');
 
   let peer = null;
-  let activeConn = null;
   let myCode = '';
+  let savedDevices = [];       // [{code, name}]
+  let connections = {};        // code -> PeerJS DataConnection
+  let selectedTarget = null;   // code of device currently chosen to receive sends
+  let incoming = null;         // file in ricezione
 
-  // ricezione file in arrivo
-  let incoming = null;
+  // ---------- persistenza locale ----------
+
+  function loadDevices(){
+    try{
+      const raw = localStorage.getItem(LS_DEVICES);
+      savedDevices = raw ? JSON.parse(raw) : [];
+    }catch(e){ savedDevices = []; }
+  }
+  function persistDevices(){
+    localStorage.setItem(LS_DEVICES, JSON.stringify(savedDevices));
+  }
+  function upsertDevice(code, name){
+    let d = savedDevices.find(x => x.code === code);
+    if(d){
+      if(name) d.name = name;
+    } else {
+      d = { code, name: name || ('Dispositivo ' + code) };
+      savedDevices.push(d);
+    }
+    persistDevices();
+    return d;
+  }
+  function removeDevice(code){
+    savedDevices = savedDevices.filter(x => x.code !== code);
+    persistDevices();
+    if(connections[code]){
+      connections[code].close();
+      delete connections[code];
+    }
+    if(selectedTarget === code) chooseFallbackTarget();
+    renderDevicesList();
+  }
+
+  // ---------- codice locale ----------
 
   function randomCode(){
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // niente O/0/I/1 ambigui
@@ -377,7 +504,91 @@
     peerStatusText.textContent = text;
   }
 
-  function setDropzoneEnabled(enabled){
+  // ---------- lista dispositivi salvati ----------
+
+  function renderDevicesList(){
+    devicesList.innerHTML = '';
+    devicesEmpty.style.display = savedDevices.length ? 'none' : 'block';
+
+    savedDevices.forEach((d) => {
+      const row = document.createElement('div');
+      row.className = 'device-row';
+      row.dataset.code = d.code;
+      if(d.code === selectedTarget) row.classList.add('selected');
+
+      const dot = document.createElement('span');
+      const conn = connections[d.code];
+      dot.className = 'dot' + (conn && conn.open ? ' connected' : (conn ? ' connecting' : ''));
+
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.className = 'device-name-input';
+      nameInput.value = d.name;
+      nameInput.addEventListener('click', (e) => e.stopPropagation());
+      nameInput.addEventListener('change', () => {
+        upsertDevice(d.code, nameInput.value.trim() || d.name);
+        renderDevicesList();
+      });
+
+      const codeSpan = document.createElement('span');
+      codeSpan.className = 'device-code';
+      codeSpan.textContent = d.code;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'device-remove';
+      removeBtn.textContent = '✕';
+      removeBtn.title = 'Rimuovi dispositivo';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeDevice(d.code);
+      });
+
+      row.appendChild(dot);
+      row.appendChild(nameInput);
+      row.appendChild(codeSpan);
+      row.appendChild(removeBtn);
+
+      row.addEventListener('click', () => onDeviceRowClick(d.code));
+
+      devicesList.appendChild(row);
+    });
+
+    updateSendTargetLabel();
+  }
+
+  function onDeviceRowClick(code){
+    const conn = connections[code];
+    if(conn && conn.open){
+      selectedTarget = code;
+      renderDevicesList();
+      updateDropzoneState();
+    } else {
+      attemptConnect(code);
+    }
+  }
+
+  function deviceName(code){
+    const d = savedDevices.find(x => x.code === code);
+    return d ? d.name : code;
+  }
+
+  function updateSendTargetLabel(){
+    if(selectedTarget && connections[selectedTarget] && connections[selectedTarget].open){
+      sendTarget.innerHTML = 'Invio a: <b>' + escapeHtml(deviceName(selectedTarget)) + '</b>';
+    } else {
+      sendTarget.textContent = 'Tocca un dispositivo salvato e connesso per scegliere a chi inviare';
+    }
+  }
+
+  function chooseFallbackTarget(){
+    const openCode = Object.keys(connections).find(c => connections[c] && connections[c].open);
+    selectedTarget = openCode || null;
+    updateSendTargetLabel();
+    updateDropzoneState();
+  }
+
+  function updateDropzoneState(){
+    const enabled = !!(selectedTarget && connections[selectedTarget] && connections[selectedTarget].open);
     if(enabled){
       dropzone.classList.remove('disabled');
       dropzone.querySelector('div:last-child').textContent = 'oppure tocca per scegliere';
@@ -387,31 +598,45 @@
     }
   }
 
+  // ---------- peer / connessioni ----------
+
   function initPeer(){
-    myCode = randomCode();
+    myCode = localStorage.getItem(LS_MYCODE);
+    if(!myCode){
+      myCode = randomCode();
+      localStorage.setItem(LS_MYCODE, myCode);
+    }
     renderMyCode(myCode);
     setMyStatus('connecting', 'Connessione alla stazione in corso…');
 
-    peer = new Peer('staz-' + myCode, {
-      debug: 0
-    });
+    peer = new Peer(PEER_PREFIX + myCode, { debug: 0 });
 
     peer.on('open', () => {
       setMyStatus('connected', 'In ascolto — pronto a essere raggiunto');
+      // riconoscimento automatico: prova a ricollegarti a tutti i dispositivi salvati
+      savedDevices.forEach(d => attemptConnect(d.code, { silent: true }));
     });
 
     peer.on('error', (err) => {
       console.error(err);
       if(err.type === 'unavailable-id'){
-        // codice già in uso, riprova con uno nuovo
+        // il codice risulta occupato sul broker (raro): libera lo storage e riprova
+        localStorage.removeItem(LS_MYCODE);
         setTimeout(initPeer, 300);
+        return;
+      }
+      if(err.type === 'peer-unavailable'){
+        // un tentativo di connessione (manuale o automatico) non ha trovato nessuno online
+        setPeerStatus('error', 'Dispositivo non raggiungibile: verifica che sia online');
         return;
       }
       setMyStatus('error', 'Errore di connessione alla stazione — ricarica la pagina');
     });
 
     peer.on('connection', (conn) => {
-      bindConnection(conn);
+      const code = conn.peer.replace(PEER_PREFIX, '');
+      upsertDevice(code);
+      bindConnection(conn, code);
     });
 
     peer.on('disconnected', () => {
@@ -420,30 +645,51 @@
     });
   }
 
-  function bindConnection(conn){
-    if(activeConn){
-      activeConn.close();
+  function attemptConnect(code, opts){
+    opts = opts || {};
+    if(!peer || peer.disconnected){
+      if(!opts.silent) setPeerStatus('error', 'In attesa della connessione alla stazione…');
+      return;
     }
-    activeConn = conn;
-    setPeerStatus('connecting', 'Connessione a ' + conn.peer.replace('staz-','') + ' in corso…');
+    if(connections[code] && (connections[code].open || !opts.silent)){
+      // già connesso, o già in corso un tentativo non silenzioso: non duplicare
+      if(connections[code].open){
+        selectedTarget = code;
+        renderDevicesList();
+        updateDropzoneState();
+        return;
+      }
+    }
+    if(!opts.silent) setPeerStatus('connecting', 'Connessione a ' + deviceName(code) + ' in corso…');
+    const conn = peer.connect(PEER_PREFIX + code, { reliable: true });
+    bindConnection(conn, code);
+  }
+
+  function bindConnection(conn, code){
+    connections[code] = conn;
+    renderDevicesList();
 
     conn.on('open', () => {
-      setPeerStatus('connected', 'Connesso a ' + conn.peer.replace('staz-',''));
-      setDropzoneEnabled(true);
+      upsertDevice(code);
+      if(!selectedTarget) selectedTarget = code;
+      setPeerStatus('connected', 'Connesso a ' + deviceName(code));
+      renderDevicesList();
+      updateDropzoneState();
     });
 
-    conn.on('data', handleIncomingData);
+    conn.on('data', (msg) => handleIncomingData(msg, code));
 
     conn.on('close', () => {
-      setPeerStatus('', 'Connessione chiusa');
-      setDropzoneEnabled(false);
-      activeConn = null;
+      delete connections[code];
+      if(selectedTarget === code) chooseFallbackTarget();
+      renderDevicesList();
     });
 
     conn.on('error', (err) => {
       console.error(err);
-      setPeerStatus('error', 'Errore nella connessione');
-      setDropzoneEnabled(false);
+      delete connections[code];
+      if(selectedTarget === code) chooseFallbackTarget();
+      renderDevicesList();
     });
   }
 
@@ -453,12 +699,9 @@
       setPeerStatus('error', 'Inserisci il codice a 6 caratteri');
       return;
     }
-    if(!peer || peer.disconnected){
-      setPeerStatus('error', 'In attesa della connessione alla stazione…');
-      return;
-    }
-    const conn = peer.connect('staz-' + code, { reliable: true });
-    bindConnection(conn);
+    upsertDevice(code);
+    attemptConnect(code);
+    peerCodeInput.value = '';
   });
 
   peerCodeInput.addEventListener('keydown', (e) => {
@@ -495,12 +738,8 @@
     if(f) sendFile(f);
   });
 
-  function ensureTransfersVisible(){
-    transfersPanel.style.display = 'block';
-  }
-
   function addTransferRow(id, name, size, direction){
-    ensureTransfersVisible();
+    transfersEmpty.style.display = 'none';
     const row = document.createElement('div');
     row.className = 'transfer';
     row.id = 'transfer-' + id;
@@ -530,6 +769,11 @@
     }
   }
 
+  clearTransfersBtn.addEventListener('click', () => {
+    transfersList.innerHTML = '';
+    transfersEmpty.style.display = 'block';
+  });
+
   function escapeHtml(s){
     return s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -541,15 +785,16 @@
   }
 
   async function sendFile(file){
-    if(!activeConn || !activeConn.open){
-      setPeerStatus('error', 'Nessun dispositivo connesso');
+    const conn = selectedTarget ? connections[selectedTarget] : null;
+    if(!conn || !conn.open){
+      setPeerStatus('error', "Nessun dispositivo selezionato per l'invio");
       return;
     }
 
     const transferId = 't' + Date.now();
     addTransferRow(transferId, file.name, file.size, 'up');
 
-    activeConn.send({
+    conn.send({
       type: 'meta',
       transferId,
       name: file.name,
@@ -561,14 +806,13 @@
     while(offset < file.size){
       const slice = file.slice(offset, offset + CHUNK_SIZE);
       const buffer = await slice.arrayBuffer();
-      activeConn.send({ type: 'chunk', transferId, data: buffer });
+      conn.send({ type: 'chunk', transferId, data: buffer });
       offset += buffer.byteLength;
       updateProgress(transferId, Math.min(100, Math.round((offset / file.size) * 100)));
-      // piccola pausa per non saturare il canale dati
       await new Promise(r => setTimeout(r, 0));
     }
 
-    activeConn.send({ type: 'end', transferId });
+    conn.send({ type: 'end', transferId });
     markDone(transferId, null, file.name);
   }
 
@@ -604,6 +848,8 @@
     });
   }
 
+  loadDevices();
+  renderDevicesList();
   initPeer();
 })();
 </script>
