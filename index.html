@@ -123,7 +123,13 @@
     margin-top:10px;
   }
 
-  .row{display:flex; gap:8px;}
+  .row{display:flex; flex-wrap:wrap; gap:8px;}
+  .row input[type="text"]{min-width:0;}
+  .row button{flex-shrink:0;}
+  @media (max-width:420px){
+    .row input[type="text"]{flex-basis:100%;}
+    .row button{flex:1;}
+  }
 
   input[type="text"]{
     background:var(--pine-900);
@@ -405,7 +411,7 @@
   </div>
 
   <footer>
-    <span id="app-version">v1.1</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v1.2</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
