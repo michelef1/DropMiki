@@ -6,7 +6,7 @@
 <title>DropMiki — Trasferimento file P2P</title>
 <meta name="description" content="Invia file tra i tuoi dispositivi in modo diretto, senza cloud">
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#16211C">
+<meta name="theme-color" content="#0D1E32">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <link rel="icon" href="./icons/icon-192.png">
 
@@ -16,26 +16,27 @@
 
 <style>
   :root{
-    --pine-900:#101913;
-    --pine-800:#16211C;
-    --pine-700:#1E2C25;
-    --pine-600:#2A3C32;
-    --gold:#D9A544;
-    --gold-dim:#8C723A;
-    --rust:#B5602F;
-    --rust-hover:#C56B37;
-    --cream:#E8E2D0;
-    --cream-dim:#A9A292;
-    --ok:#6FA97A;
-    --err:#C1584A;
+    --navy-900:#081422;
+    --navy-800:#0D1E32;
+    --navy-700:#132C46;
+    --navy-600:#1E3F5E;
+    --cyan:#5FC7E8;
+    --cyan-dim:#3A7C93;
+    --coral:#E8834A;
+    --coral-hover:#F0925C;
+    --ice:#E9F1F7;
+    --ice-dim:#8FA7BC;
+    --ok:#5FBE8A;
+    --err:#E2685C;
     --radius:2px;
   }
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--pine-800);
-    color:var(--cream);
+    background:linear-gradient(160deg, #060F1C 0%, #0D2036 40%, #163A57 78%, #1B4869 100%);
+    background-attachment:fixed;
+    color:var(--ice);
     font-family:'IBM Plex Mono', monospace;
     min-height:100vh;
     min-height:100dvh;
@@ -52,12 +53,15 @@
   }
 
   header.topline{
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    border-bottom:1px solid var(--pine-600);
+    border-bottom:1px solid var(--navy-600);
     padding-bottom:14px;
     margin-bottom:28px;
+  }
+  .title-row{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
   }
   header.topline h1{
     font-family:'Fraunces', serif;
@@ -65,17 +69,113 @@
     font-size:28px;
     letter-spacing:0.2px;
     margin:0;
-    color:var(--cream);
+    color:var(--ice);
   }
   header.topline .tag{
-    font-size:11px;
-    color:var(--cream-dim);
+    display:block;
+    font-size:12px;
+    color:var(--ice-dim);
     letter-spacing:0.3px;
+    margin-top:6px;
   }
+  .menu-btn{
+    background:transparent;
+    border:none;
+    color:var(--ice-dim);
+    font-size:22px;
+    line-height:1;
+    padding:6px 10px;
+    cursor:pointer;
+    border-radius:var(--radius);
+    flex-shrink:0;
+  }
+  .menu-btn:hover{color:var(--ice); background:rgba(95,199,232,0.08);}
+  .menu-dropdown{
+    position:absolute;
+    top:100%;
+    right:0;
+    margin-top:6px;
+    background:rgba(19,44,70,0.97);
+    border:1px solid var(--navy-600);
+    border-radius:var(--radius);
+    min-width:150px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.4);
+    z-index:20;
+    display:none;
+    overflow:hidden;
+  }
+  .menu-dropdown.open{display:block;}
+  .menu-dropdown button{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--navy-600);
+    color:var(--ice);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:13px 15px;
+    cursor:pointer;
+  }
+  .menu-dropdown button:last-child{border-bottom:none;}
+  .menu-dropdown button:hover{background:rgba(95,199,232,0.12);}
+
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(6,15,28,0.75);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:var(--navy-700);
+    border:1px solid var(--navy-600);
+    border-radius:var(--radius);
+    max-width:420px;
+    width:100%;
+    max-height:80vh;
+    overflow-y:auto;
+    padding:22px;
+  }
+  .modal-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .modal-head h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:19px;
+    color:var(--ice);
+    margin:0;
+  }
+  .modal-close{
+    background:transparent;
+    border:none;
+    color:var(--ice-dim);
+    font-size:18px;
+    cursor:pointer;
+    padding:4px 8px;
+  }
+  .modal-close:hover{color:var(--ice);}
+  .modal-body{
+    font-size:13px;
+    line-height:1.65;
+    color:var(--ice-dim);
+  }
+  .modal-body b{color:var(--ice);}
+  .modal-body p{margin:0 0 12px;}
+  .modal-body p:last-child{margin-bottom:0;}
 
   .panel{
-    background:var(--pine-700);
-    border:1px solid var(--pine-600);
+    background:rgba(19,44,70,0.62);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(30,63,94,0.9);
     border-radius:var(--radius);
     padding:22px;
     margin-bottom:18px;
@@ -91,7 +191,7 @@
     font-family:'IBM Plex Mono', monospace;
     font-size:12px;
     font-weight:600;
-    color:var(--gold);
+    color:var(--cyan);
     margin:0;
   }
   .panel > h2{ margin-bottom:14px; }
@@ -103,9 +203,9 @@
     margin:6px 0 4px;
   }
   .code-display .digit{
-    background:var(--pine-900);
-    border:1px solid var(--pine-600);
-    color:var(--gold);
+    background:var(--navy-900);
+    border:1px solid var(--navy-600);
+    color:var(--cyan);
     font-size:30px;
     font-weight:600;
     width:38px;
@@ -119,7 +219,7 @@
   .code-hint{
     text-align:center;
     font-size:11px;
-    color:var(--cream-dim);
+    color:var(--ice-dim);
     margin-top:10px;
   }
 
@@ -132,9 +232,9 @@
   }
 
   input[type="text"]{
-    background:var(--pine-900);
-    border:1px solid var(--pine-600);
-    color:var(--cream);
+    background:var(--navy-900);
+    border:1px solid var(--navy-600);
+    color:var(--ice);
     font-family:'IBM Plex Mono', monospace;
     border-radius:var(--radius);
   }
@@ -148,10 +248,10 @@
   }
   input[type="text"]:focus{
     outline:none;
-    border-color:var(--gold-dim);
+    border-color:var(--cyan-dim);
   }
   input[type="text"]::placeholder{
-    color:var(--cream-dim);
+    color:var(--ice-dim);
     letter-spacing:2px;
   }
 
@@ -167,23 +267,23 @@
     transition:background .15s ease, border-color .15s ease, color .15s ease;
   }
   button.primary{
-    background:var(--rust);
-    color:var(--cream);
+    background:var(--coral);
+    color:var(--ice);
   }
-  button.primary:hover{background:var(--rust-hover);}
+  button.primary:hover{background:var(--coral-hover);}
   button.primary:disabled{
-    background:var(--pine-600);
-    color:var(--cream-dim);
+    background:var(--navy-600);
+    color:var(--ice-dim);
     cursor:not-allowed;
   }
   button.ghost{
     background:transparent;
-    border:1px solid var(--pine-600);
-    color:var(--cream-dim);
+    border:1px solid var(--navy-600);
+    color:var(--ice-dim);
   }
   button.ghost:hover{
-    color:var(--cream);
-    border-color:var(--gold-dim);
+    color:var(--ice);
+    border-color:var(--cyan-dim);
   }
   button.small{
     padding:6px 10px;
@@ -195,15 +295,15 @@
     align-items:center;
     gap:9px;
     font-size:12px;
-    color:var(--cream-dim);
+    color:var(--ice-dim);
     margin-top:14px;
   }
   .dot{
     width:7px;height:7px;border-radius:50%;
-    background:var(--cream-dim);
+    background:var(--ice-dim);
     flex-shrink:0;
   }
-  .dot.connecting{background:var(--gold); animation:pulse 1.2s infinite ease-in-out;}
+  .dot.connecting{background:var(--cyan); animation:pulse 1.2s infinite ease-in-out;}
   .dot.connected{background:var(--ok);}
   .dot.error{background:var(--err);}
   @keyframes pulse{
@@ -217,7 +317,7 @@
     align-items:center;
     gap:10px;
     padding:10px 6px;
-    border-bottom:1px solid var(--pine-600);
+    border-bottom:1px solid var(--navy-600);
     border-radius:var(--radius);
     cursor:pointer;
   }
@@ -225,36 +325,36 @@
   .device-row:hover{background:rgba(217,165,68,0.05);}
   .device-row.selected{
     background:rgba(217,165,68,0.10);
-    box-shadow:inset 2px 0 0 var(--gold);
+    box-shadow:inset 2px 0 0 var(--cyan);
   }
   .device-row .dot{flex-shrink:0;}
   .device-name-input{
     flex:1;
     background:transparent;
     border:1px solid transparent;
-    color:var(--cream);
+    color:var(--ice);
     font-family:'IBM Plex Mono', monospace;
     font-size:13px;
     padding:5px 6px;
     border-radius:var(--radius);
     min-width:0;
   }
-  .device-name-input:hover{border-color:var(--pine-600);}
+  .device-name-input:hover{border-color:var(--navy-600);}
   .device-name-input:focus{
     outline:none;
-    border-color:var(--gold-dim);
-    background:var(--pine-900);
+    border-color:var(--cyan-dim);
+    background:var(--navy-900);
   }
   .device-code{
     font-size:10.5px;
-    color:var(--cream-dim);
+    color:var(--ice-dim);
     letter-spacing:1px;
     flex-shrink:0;
   }
   .device-remove{
     background:transparent;
     border:none;
-    color:var(--cream-dim);
+    color:var(--ice-dim);
     font-size:14px;
     padding:4px 6px;
     cursor:pointer;
@@ -263,32 +363,32 @@
   .device-remove:hover{color:var(--err);}
 
   .dropzone{
-    border:1.5px dashed var(--pine-600);
+    border:1.5px dashed var(--navy-600);
     border-radius:var(--radius);
     padding:36px 18px;
     text-align:center;
-    color:var(--cream-dim);
+    color:var(--ice-dim);
     font-size:13px;
     cursor:pointer;
     transition:border-color .15s ease, background .15s ease;
   }
   .dropzone.hover{
-    border-color:var(--gold);
+    border-color:var(--cyan);
     background:rgba(217,165,68,0.06);
   }
   .dropzone.disabled{
     opacity:0.4;
     cursor:not-allowed;
   }
-  .dropzone strong{color:var(--cream);}
+  .dropzone strong{color:var(--ice);}
 
   .send-target{
     font-size:11px;
-    color:var(--cream-dim);
+    color:var(--ice-dim);
     text-align:center;
     margin-bottom:10px;
   }
-  .send-target b{color:var(--gold);}
+  .send-target b{color:var(--cyan);}
 
   #fileInput{display:none;}
 
@@ -297,7 +397,7 @@
     flex-direction:column;
     gap:8px;
     padding:14px 0;
-    border-bottom:1px solid var(--pine-600);
+    border-bottom:1px solid var(--navy-600);
   }
   .transfer:last-child{border-bottom:none;}
   .transfer .meta{
@@ -305,18 +405,18 @@
     justify-content:space-between;
     font-size:12px;
   }
-  .transfer .meta .name{color:var(--cream); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;}
-  .transfer .meta .size{color:var(--cream-dim);}
+  .transfer .meta .name{color:var(--ice); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;}
+  .transfer .meta .size{color:var(--ice-dim);}
   .bar-track{
     width:100%;
     height:5px;
-    background:var(--pine-900);
+    background:var(--navy-900);
     border-radius:3px;
     overflow:hidden;
   }
   .bar-fill{
     height:100%;
-    background:var(--gold);
+    background:var(--cyan);
     width:0%;
     transition:width .12s linear;
   }
@@ -324,15 +424,15 @@
   .transfer .dl-link{
     align-self:flex-start;
     font-size:12px;
-    color:var(--gold);
+    color:var(--cyan);
     text-decoration:none;
-    border-bottom:1px solid var(--gold-dim);
+    border-bottom:1px solid var(--cyan-dim);
   }
-  .transfer .dl-link:hover{color:var(--cream);}
+  .transfer .dl-link:hover{color:var(--ice);}
 
   .empty-note{
     font-size:12px;
-    color:var(--cream-dim);
+    color:var(--ice-dim);
     text-align:center;
     padding:6px 0 2px;
   }
@@ -341,10 +441,10 @@
     margin-top:auto;
     padding-top:28px;
     font-size:10.5px;
-    color:var(--pine-600);
+    color:var(--navy-600);
     text-align:center;
   }
-  footer span{color:var(--cream-dim);}
+  footer span{color:var(--ice-dim);}
 
   @media (max-width:380px){
     .code-display .digit{width:32px; height:46px; font-size:24px;}
@@ -355,8 +455,15 @@
 
 <div class="board">
   <header class="topline">
-    <h1>DropMiki</h1>
-    <span class="tag">dispacci diretti tra dispositivi</span>
+    <div class="title-row">
+      <h1>DropMiki</h1>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false">⋮</button>
+      <div class="menu-dropdown" id="menuDropdown">
+        <button type="button" id="menuGuida">Guida</button>
+        <button type="button" id="menuInfo">Info</button>
+      </div>
+    </div>
+    <span class="tag">App per scambio file</span>
   </header>
 
   <div class="panel">
@@ -411,8 +518,18 @@
   </div>
 
   <footer>
-    <span id="app-version">v1.3</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v1.4</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle"></h3>
+      <button class="modal-close" id="modalClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -865,6 +982,59 @@
       window.location.reload();
     });
   }
+
+  // --- menu a tendina + modali Guida/Info ---
+  const menuBtn = document.getElementById('menuBtn');
+  const menuDropdown = document.getElementById('menuDropdown');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBody = document.getElementById('modalBody');
+  const modalClose = document.getElementById('modalClose');
+
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = menuDropdown.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', () => {
+    menuDropdown.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  });
+  menuDropdown.addEventListener('click', (e) => e.stopPropagation());
+
+  function openModal(title, html){
+    modalTitle.textContent = title;
+    modalBody.innerHTML = html;
+    modalOverlay.classList.add('open');
+    menuDropdown.classList.remove('open');
+  }
+  function closeModal(){
+    modalOverlay.classList.remove('open');
+  }
+  modalClose.addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeModal(); });
+
+  document.getElementById('menuGuida').addEventListener('click', () => {
+    openModal('Guida', `
+      <p><b>Il tuo codice</b> è fisso su questo dispositivo: comunicalo all'altro dispositivo per farti trovare.</p>
+      <p><b>Aggiungi un dispositivo</b> inserendo il suo codice a 6 caratteri e premendo Connetti.</p>
+      <p>I dispositivi collegati vengono <b>salvati</b>: al prossimo avvio l'app prova a ricollegarsi da sola, se entrambi hanno la pagina aperta.</p>
+      <p>Tocca il nome di un dispositivo salvato per rinominarlo, oppure ✕ per rimuoverlo.</p>
+      <p>Tocca un dispositivo <b>connesso</b> per selezionarlo come destinatario, poi trascina un file (o toccalo per sceglierlo dal telefono).</p>
+      <p>I file viaggiano <b>direttamente</b> tra i due dispositivi: nessun file passa da un server.</p>
+    `);
+  });
+
+  document.getElementById('menuInfo').addEventListener('click', () => {
+    const version = document.getElementById('app-version').textContent;
+    openModal('Info', `
+      <p><b>DropMiki</b> — app per scambio file</p>
+      <p>Versione ${version}</p>
+      <p>Miki by Claude</p>
+    `);
+  });
+
 
   loadDevices();
   renderDevicesList();
