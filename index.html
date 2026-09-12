@@ -1,126 +1,191 @@
-<script src="https://cdn.jsdelivr.net/npm/trystero@0.19.0/mqtt.min.js"></script>
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-    }
-
-    const ROOM_ID = 'dropmiki-secure-room-992';
-    // Usiamo MQTT broker pubblici e gratuiti per la connessione istantanea
-    const config = { 
-        appId: ROOM_ID,
-        brokers: ['wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt']
-    };
-    
-    const room = trystero.joinRoom(config, 'dropmiki');
-
-    const [sendFileInfo, getFileInfo] = room.makeAction('fileInfo');
-    const [sendFileChunk, getFileChunk] = room.makeAction('fileChunk');
-
-    const peersGrid = document.getElementById('peersGrid');
-    const noPeers = document.getElementById('noPeers');
-    const netStatus = document.getElementById('netStatus');
-    const fileInput = document.getElementById('fileInput');
-    const dropZone = document.getElementById('dropZone');
-    const transferCard = document.getElementById('transferCard');
-    const transfersList = document.getElementById('transfersList');
-
-    let activePeers = {};
-    let selectedFiles = [];
-
-    netStatus.textContent = 'Online';
-    netStatus.style.color = 'var(--accent-green)';
-    netStatus.style.background = 'rgba(3, 218, 198, 0.1)';
-
-    room.onPeerJoin(peerId => {
-        activePeers[peerId] = { name: 'Dispositivo ' + peerId.substring(0, 4) };
-        updatePeersUI();
-    });
-
-    room.onPeerLeave(peerId => {
-        delete activePeers[peerId];
-        updatePeersUI();
-    });
-
-    function updatePeersUI() {
-        peersGrid.innerHTML = '';
-        const peerIds = Object.keys(activePeers);
-        if (peerIds.length === 0) {
-            peersGrid.appendChild(noPeers);
-            noPeers.style.display = 'block';
-            return;
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DropMiki</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #bb86fc;
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #2c2c2c;
+            --accent-green: #03dac6;
         }
-        noPeers.style.display = 'none';
-        peerIds.forEach(peerId => {
-            const p = activePeers[peerId];
-            const node = document.createElement('div');
-            node.className = 'peer-node';
-            node.innerHTML = `
-                <div class="peer-avatar">${p.name.charAt(p.name.length - 1)}</div>
-                <span class="peer-name">${p.name}</span>
-            `;
-            node.onclick = () => sendFilesToPeer(peerId);
-            peersGrid.appendChild(node);
-        });
-    }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; padding: 16px; align-items: center; }
+        header { width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        h1 { font-size: 1.5rem; color: var(--primary-color); }
+        .status { font-size: 0.85rem; color: var(--accent-green); background: rgba(3, 218, 198, 0.1); padding: 4px 10px; border-radius: 12px; }
+        main { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+        .card { background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center; text-align: center; }
+        .drop-zone { border: 2px dashed var(--primary-color); border-radius: 12px; padding: 24px 20px; width: 100%; cursor: pointer; }
+        .drop-zone p { color: var(--text-secondary); font-size: 0.95rem; }
+        .drop-zone b { color: var(--primary-color); }
+        input[type="file"] { display: none; }
+        .peers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-top: 5px; }
+        .peer-node { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+        .peer-node:active { transform: scale(0.96); }
+        .peer-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--accent-green)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; font-size: 1rem; }
+        .peer-name { font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .transfers-list { width: 100%; display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; }
+        .transfer-item { background: var(--bg-color); border-radius: 8px; padding: 10px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color); }
+        .file-name { color: var(--text-color); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; text-align: left; }
+        .btn-download { background: var(--primary-color); color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; text-decoration: none; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
 
-    dropZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-        selectedFiles = Array.from(e.target.files);
-        if (selectedFiles.length > 0) {
-            dropZone.style.borderColor = 'var(--accent-green)';
-            dropZone.querySelector('p').innerHTML = `<b>${selectedFiles.length} file pronti</b><br><span style="font-size:0.75rem">Tocca un cerchio sotto per inviare</span>`;
-        }
-    });
+    <header>
+        <h1>DropMiki</h1>
+        <span class="status" id="netStatus">Connessione...</span>
+    </header>
 
-    function sendFilesToPeer(peerId) {
-        if (selectedFiles.length === 0) {
-            alert('Prima seleziona un file da inviare.');
-            return;
-        }
-        selectedFiles.forEach(file => {
-            sendFileInfo({ name: file.name, size: file.size, type: file.type }, peerId);
-            addTransferLog(`Invio: ${file.name}`, file.size);
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                sendFileChunk(e.target.result, peerId);
-            };
-            reader.readAsArrayBuffer(file);
-        });
-        selectedFiles = [];
-        dropZone.style.borderColor = 'var(--primary-color)';
-        dropZone.querySelector('p').innerHTML = `Tocca o trascina file<br><b>per condividere</b>`;
-    }
+    <main>
+        <div class="card">
+            <label class="drop-zone" id="dropZone">
+                <p>Tocca o trascina file<br><b>per condividere</b></p>
+                <input type="file" id="fileInput" multiple>
+            </label>
+        </div>
 
-    let incomingFiles = {};
-    getFileInfo((info, peerId) => {
-        incomingFiles[peerId] = info;
-    });
-
-    getFileChunk((chunk, peerId) => {
-        const info = incomingFiles[peerId];
-        if (!info) return;
-        const blob = new Blob([chunk], { type: info.type });
-        const url = URL.createObjectURL(blob);
-        addTransferLog(info.name, info.size, url);
-        delete incomingFiles[peerId];
-    });
-
-    function addTransferLog(name, size, url = null) {
-        transferCard.style.display = 'flex';
-        const item = document.createElement('div');
-        item.className = 'transfer-item';
-        let actionHtml = `<span style="font-size:0.75rem; color:var(--text-secondary)">Inviato</span>`;
-        if (url) {
-            actionHtml = `<a href="${url}" download="${name}" class="btn-download">Salva</a>`;
-        }
-        item.innerHTML = `
-            <div style="overflow:hidden; text-align:left;">
-                <div class="file-name">${name}</div>
-                <div style="font-size:0.7rem; color:var(--text-secondary)">${(size / 1024).toFixed(1)} KB</div>
+        <div class="card">
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Dispositivi online nella stanza</p>
+            <div class="peers-grid" id="peersGrid">
+                <span id="noPeers" style="font-size: 0.8rem; color: var(--text-secondary); grid-column: span 3;">Nessun altro dispositivo</span>
             </div>
-            ${actionHtml}
-        `;
-        transfersList.prepend(item);
-    }
-</script>
+        </div>
+
+        <div class="card" id="transferCard" style="display:none;">
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Trasferimenti</p>
+            <div class="transfers-list" id="transfersList"></div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { joinRoom } from 'https://esm.run/trystero';
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+
+        const ROOM_ID = 'dropmiki-secure-room-992';
+        const config = { appId: ROOM_ID };
+        const room = joinRoom(config, 'dropmiki');
+
+        const [sendFileInfo, getFileInfo] = room.makeAction('fileInfo');
+        const [sendFileChunk, getFileChunk] = room.makeAction('fileChunk');
+
+        const peersGrid = document.getElementById('peersGrid');
+        const noPeers = document.getElementById('noPeers');
+        const netStatus = document.getElementById('netStatus');
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const transferCard = document.getElementById('transferCard');
+        const transfersList = document.getElementById('transfersList');
+
+        let activePeers = {};
+        let selectedFiles = [];
+
+        netStatus.textContent = 'Online';
+
+        room.onPeerJoin(peerId => {
+            activePeers[peerId] = { name: 'Device ' + peerId.substring(0, 4) };
+            updatePeersUI();
+        });
+
+        room.onPeerLeave(peerId => {
+            delete activePeers[peerId];
+            updatePeersUI();
+        });
+
+        function updatePeersUI() {
+            peersGrid.innerHTML = '';
+            const peerIds = Object.keys(activePeers);
+            if (peerIds.length === 0) {
+                peersGrid.appendChild(noPeers);
+                noPeers.style.display = 'block';
+                return;
+            }
+            noPeers.style.display = 'none';
+            peerIds.forEach(peerId => {
+                const p = activePeers[peerId];
+                const node = document.createElement('div');
+                node.className = 'peer-node';
+                node.innerHTML = `
+                    <div class="peer-avatar">${p.name.charAt(p.name.length - 1)}</div>
+                    <span class="peer-name">${p.name}</span>
+                `;
+                node.onclick = () => sendFilesToPeer(peerId);
+                peersGrid.appendChild(node);
+            });
+        }
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            selectedFiles = Array.from(e.target.files);
+            if (selectedFiles.length > 0) {
+                dropZone.style.borderColor = 'var(--accent-green)';
+                dropZone.querySelector('p').innerHTML = `<b>${selectedFiles.length} file pronti</b><br><span style="font-size:0.75rem">Tocca un cerchio sotto per inviare</span>`;
+            }
+        });
+
+        function sendFilesToPeer(peerId) {
+            if (selectedFiles.length === 0) {
+                alert('Prima seleziona un file da inviare.');
+                return;
+            }
+            selectedFiles.forEach(file => {
+                sendFileInfo({ name: file.name, size: file.size, type: file.type }, peerId);
+                addTransferLog(`Invio: ${file.name}`, file.size);
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    sendFileChunk(e.target.result, peerId);
+                };
+                reader.readAsArrayBuffer(file);
+            });
+            selectedFiles = [];
+            dropZone.style.borderColor = 'var(--primary-color)';
+            dropZone.querySelector('p').innerHTML = `Tocca o trascina file<br><b>per condividere</b>`;
+        }
+
+        let incomingFiles = {};
+        getFileInfo((info, peerId) => {
+            incomingFiles[peerId] = info;
+        });
+
+        getFileChunk((chunk, peerId) => {
+            const info = incomingFiles[peerId];
+            if (!info) return;
+            const blob = new Blob([chunk], { type: info.type });
+            const url = URL.createObjectURL(blob);
+            addTransferLog(info.name, info.size, url);
+            delete incomingFiles[peerId];
+        });
+
+        function addTransferLog(name, size, url = null) {
+            transferCard.style.display = 'flex';
+            const item = document.createElement('div');
+            item.className = 'transfer-item';
+            let actionHtml = `<span style="font-size:0.75rem; color:var(--text-secondary)">Inviato</span>`;
+            if (url) {
+                actionHtml = `<a href="${url}" download="${name}" class="btn-download">Salva</a>`;
+            }
+            item.innerHTML = `
+                <div style="overflow:hidden; text-align:left;">
+                    <div class="file-name">${name}</div>
+                    <div style="font-size:0.7rem; color:var(--text-secondary)">${(size / 1024).toFixed(1)} KB</div>
+                </div>
+                ${actionHtml}
+            `;
+            transfersList.prepend(item);
+        }
+    </script>
+</body>
+</html>
