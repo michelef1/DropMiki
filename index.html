@@ -5,9 +5,122 @@
   <title>DropMiki</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#4f46e5" />
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="stylesheet" href="styles.css" />
-<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=yYA1mFksK36W4ZKVktjgJP4SEVDWB4OZ9wFP62658kJZRKKNT0DwOqLkebXSbP7YMQ9qfEMpNtytkkT71VNEnAxt4i5dMD98p1IHx1Mac0zaWwQaYWk8bSVJJ8jpKS1pG0kFnajtPdt-vDsyNZrSYsVSglNb9TdmwLjpUn4fadLjofrz3UgFc8j1y4GNpj6E2JeFgIwWsnaR0lG8fKPcqeWY11r5r6HZfjDUdIa4Ly7xKA03lJeJ6kk1sf1JJYrGdryi_EHKlrFOZfUHcmCg1jw7Nb6PROQAcfDdKatDJbkUxIWzoH6FJARgYxwVMD5Y" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9jb250cmlidXRpb24udXNlcmNvbnRlbnQuZ29vZ2xlLmNvbS9kb3dubG9hZD9jPUNneGlZWEprWDNOMGIzSmhaMlVTVUJJTmNtVnpjRzl1YzJWZlpHRjBZUm9fQ2pBeVl6aGlOMll4Wmpjd1l6TTFabUpoTURBd05qVmlOR1EzWXpBek16SXlOREF5TWpkaU9HRTVaV0l3TWpaaFpEWVNDeElIRUstN3Q2aVVHQmdCJmZpbGVuYW1lPWluZGV4Lmh0bWwmb3BpPTEwMzEzNTA1MA"/></head>
+
+  <!-- Manifest inline per PWA -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"DropMiki","short_name":"DropMiki","description":"Condividi file e testo in locale, senza server.","lang":"it","dir":"ltr","start_url":".","scope":".","display":"standalone","background_color":"#ffffff","theme_color":"#4f46e5","orientation":"any","icons":[{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}' />
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f7f7fb;
+      color: #1f2937;
+      line-height: 1.4;
+    }
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #4f46e5;
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .app-header h1 {
+      font-size: 1.1rem;
+      margin: 0;
+      font-weight: 700;
+    }
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.2);
+      white-space: nowrap;
+    }
+    .app-main {
+      padding: 16px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .section h2 {
+      font-size: 0.95rem;
+      margin: 0 0 8px 0;
+      color: #111827;
+    }
+    .section p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #374151;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+    }
+    button {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: none;
+      background: #4f46e5;
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #10b981;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .chat-box {
+      max-height: 220px;
+      overflow: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 8px;
+      background: #fafafa;
+      font-size: 0.9rem;
+    }
+    .chat-line {
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+    .file-box {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+    .app-footer {
+      padding: 16px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
 <body>
   <header class="app-header">
     <h1>DropMiki</h1>
@@ -21,41 +134,38 @@
       <p id="status-text">Caricamento…</p>
     </section>
 
-    <!-- Il tuo ID -->
+    <!-- Stanza -->
     <section class="section">
-      <h2>Il tuo ID</h2>
-      <p style="margin-bottom:8px;">
-        Condividi questo ID con un altro dispositivo per connetterti.
-      </p>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input id="my-id" type="text" readonly style="flex:1;padding:8px;border-radius:6px;border:1px solid #d1d5db;" />
-        <button id="copy-id-btn" style="padding:8px 10px;border-radius:6px;border:none;background:#4f46e5;color:#fff;">Copia</button>
+      <h2>Stanza</h2>
+      <p>Usa la stessa stanza su due dispositivi per connetterti.</p>
+      <div class="row">
+        <input id="room-input" type="text" placeholder="Nome stanza (es. casa)" />
+        <button id="create-join-btn" class="secondary">Crea / Unisciti</button>
       </div>
-    </section>
-
-    <!-- Connetti a un peer -->
-    <section class="section">
-      <h2>Connettiti a un dispositivo</h2>
-      <p style="margin-bottom:8px;">
-        Incolla qui l’ID di un altro dispositivo DropMiki aperto nella stessa rete.
-      </p>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-        <input id="peer-id-input" type="text" placeholder="Incolla ID peer" style="flex:1;padding:8px;border-radius:6px;border:1px solid #d1d5db;" />
-        <button id="connect-btn" style="padding:8px 10px;border-radius:6px;border:none;background:#10b981;color:#fff;">Connetti</button>
-      </div>
-      <p id="conn-status">Nessuna connessione attiva.</p>
+      <p id="room-status" style="margin-top:8px;">Nessuna stanza attiva.</p>
     </section>
 
     <!-- Chat testo -->
     <section class="section">
       <h2>Messaggi</h2>
-      <div id="chat-box" style="max-height:220px;overflow:auto;border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin-bottom:8px;background:#fafafa;">
-        <p style="font-size:0.85rem;color:#6b7280;">I messaggi appariranno qui.</p>
+      <div id="chat-box" class="chat-box">
+        <div class="chat-line" style="color:#6b7280;">I messaggi appariranno qui.</div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input id="msg-input" type="text" placeholder="Scrivi un messaggio…" style="flex:1;padding:8px;border-radius:6px;border:1px solid #d1d5db;" />
-        <button id="send-btn" style="padding:8px 10px;border-radius:6px;border:none;background:#4f46e5;color:#fff;">Invia</button>
+      <div class="row">
+        <input id="msg-input" type="text" placeholder="Scrivi un messaggio…" />
+        <button id="send-btn">Invia</button>
       </div>
+    </section>
+
+    <!-- Invio file -->
+    <section class="section">
+      <h2>File</h2>
+      <p>Allega un file da inviare all’altro dispositivo.</p>
+      <div class="row">
+        <input id="file-input" type="file" />
+        <button id="send-file-btn" class="secondary">Invia file</button>
+      </div>
+      <div id="file-status" class="file-box">Nessun file in invio.</div>
     </section>
   </main>
 
@@ -63,8 +173,273 @@
     <small>DropMiki – PWA sperimentale</small>
   </footer>
 
-  <!-- PeerJS da CDN -->
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <script src="app.js"></script>
+  <script>
+    // --- Service Worker inline (PWA offline shell) ---
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        const CACHE_NAME = 'dropmiki-v1';
+        const ASSETS = [ '.', './index.html' ];
+        self.addEventListener('install', e => {
+          e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
+          self.skipWaiting();
+        });
+        self.addEventListener('activate', e => {
+          e.waitUntil(
+            caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+          );
+          self.clients.claim();
+        });
+        self.addEventListener('fetch', e => {
+          const req = e.request;
+          if (req.mode === 'navigate') {
+            e.respondWith(
+              fetch(req).then(res => {
+                const clone = res.clone();
+                caches.open(CACHE_NAME).then(c => c.put(req, clone));
+                return res;
+              }).catch(() => caches.match('./index.html'))
+            );
+            return;
+          }
+          e.respondWith(
+            caches.match(req).then(cached => {
+              if (cached) return cached;
+              return fetch(req).then(res => {
+                if (!res || res.status !== 200 || req.method !== 'GET') return res;
+                const clone = res.clone();
+                caches.open(CACHE_NAME).then(c => c.put(req, clone));
+                return res;
+              });
+            })
+          );
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl)
+        .then(() => console.log('[DropMiki] SW registrato'))
+        .catch(err => console.error('[DropMiki] Errore SW:', err));
+    }
+
+    // --- UI e logica WebRTC ---
+    const statusBadge = document.getElementById('status-badge');
+    const statusText = document.getElementById('status-text');
+    const roomInput = document.getElementById('room-input');
+    const createJoinBtn = document.getElementById('create-join-btn');
+    const roomStatus = document.getElementById('room-status');
+    const chatBox = document.getElementById('chat-box');
+    const msgInput = document.getElementById('msg-input');
+    const sendBtn = document.getElementById('send-btn');
+    const fileInput = document.getElementById('file-input');
+    const sendFileBtn = document.getElementById('send-file-btn');
+    const fileStatus = document.getElementById('file-status');
+
+    let pcLocal = null;
+    let dataChannel = null;
+    let ws = null;
+    let myId = null;
+    let inRoom = null;
+
+    function updateStatus(online) {
+      if (online) {
+        statusBadge.textContent = 'Online';
+        statusBadge.style.background = 'rgba(255,255,255,0.25)';
+        statusText.textContent = 'Sei online. Crea o unisciti a una stanza per connetterti.';
+      } else {
+        statusBadge.textContent = 'Offline';
+        statusBadge.style.background = 'rgba(255,255,255,0.15)';
+        statusText.textContent = 'Sei offline. L’app è caricata, ma non può connettersi ad altri dispositivi.';
+      }
+    }
+
+    function appendLine(html) {
+      if (chatBox.querySelector('.chat-line')?.textContent.includes('appariranno')) {
+        chatBox.innerHTML = '';
+      }
+      const div = document.createElement('div');
+      div.className = 'chat-line';
+      div.innerHTML = html;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function createPeerConnection() {
+      const pc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      });
+      pc.onicecandidate = e => {
+        if (e.candidate) {
+          ws && ws.send(JSON.stringify({ type: 'candidate', candidate: e.candidate, to: inRoom }));
+        }
+      };
+      pc.onconnectionstatechange = () => {
+        if (pc.connectionState === 'connected') {
+          roomStatus.textContent = 'Connesso in stanza: ' + inRoom;
+          appendLine('<b>(connessione stabilita)</b>');
+        } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+          roomStatus.textContent = 'Connessione persa.';
+          appendLine('<b>(connessione persa)</b>');
+        }
+      };
+      return pc;
+    }
+
+    function setupDataChannel(dc) {
+      dataChannel = dc;
+      dc.onopen = () => {
+        appendLine('<b>(canale dati aperto)</b>');
+      };
+      dc.onmessage = e => {
+        const msg = e.data;
+        if (typeof msg === 'string') {
+          try {
+            const obj = JSON.parse(msg);
+            if (obj.kind === 'file-start') {
+              appendLine(`Ricezione file: <b>${obj.name}</b> (${obj.size} byte)`);
+              handleFileReception(obj);
+              return;
+            }
+          } catch {}
+          appendLine('Peer: ' + msg);
+        }
+      };
+      dc.onclose = () => {
+        appendLine('<b>(canale dati chiuso)</b>');
+        dataChannel = null;
+      };
+    }
+
+    let receivingFile = null;
+    function handleFileReception(meta) {
+      receivingFile = {
+        name: meta.name,
+        size: meta.size,
+        chunks: [],
+        expected: meta.chunks
+      };
+    }
+
+    async function sendFile(file) {
+      if (!dataChannel || dataChannel.readyState !== 'open') {
+        fileStatus.textContent = 'Nessuna connessione attiva.';
+        return;
+      }
+      fileStatus.textContent = `Invio file: ${file.name} (${file.size} byte)…`;
+      const chunkSize = 16 * 1024;
+      const totalChunks = Math.ceil(file.size / chunkSize);
+      const meta = {
+        kind: 'file-start',
+        name: file.name,
+        size: file.size,
+        chunks: totalChunks
+      };
+      dataChannel.send(JSON.stringify(meta));
+
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunk = file.slice(start, end);
+        const ab = await chunk.arrayBuffer();
+        dataChannel.send(ab);
+        fileStatus.textContent = `Invio file: ${file.name} – chunk ${i+1}/${totalChunks}`;
+        await new Promise(r => setTimeout(r, 5));
+      }
+      dataChannel.send(JSON.stringify({ kind: 'file-end', name: file.name }));
+      fileStatus.textContent = `File inviato: ${file.name}`;
+      appendLine(`File inviato: <b>${file.name}</b>`);
+    }
+
+    async function initRoom(room) {
+      inRoom = room;
+      roomStatus.textContent = 'Connessione in corso…';
+
+      const signalingUrl = 'wss://signaling.metacall.io';
+      ws = new WebSocket(signalingUrl);
+
+      ws.onopen = () => {
+        myId = Math.random().toString(36).slice(2);
+        ws.send(JSON.stringify({ type: 'join', room, id: myId }));
+        roomStatus.textContent = 'In attesa di un peer…';
+      };
+
+      ws.onmessage = async e => {
+        const msg = JSON.parse(e.data);
+        if (msg.room !== room) return;
+
+        if (msg.type === 'offer' && msg.to === myId) {
+          pcLocal = createPeerConnection();
+          const dc = pcLocal.createDataChannel('chat');
+          setupDataChannel(dc);
+          await pcLocal.setRemoteDescription(new RTCSessionDescription(msg.offer));
+          const answer = await pcLocal.createAnswer();
+          await pcLocal.setLocalDescription(answer);
+          ws.send(JSON.stringify({ type: 'answer', answer: pcLocal.localDescription, to: msg.from, room }));
+        } else if (msg.type === 'answer' && msg.to === myId) {
+          await pcLocal.setRemoteDescription(new RTCSessionDescription(msg.answer));
+        } else if (msg.type === 'candidate' && msg.to === myId) {
+          if (pcLocal) {
+            try {
+              await pcLocal.addIceCandidate(new RTCIceCandidate(msg.candidate));
+            } catch {}
+          }
+        } else if (msg.type === 'newpeer' && msg.id !== myId) {
+          if (!pcLocal) {
+            pcLocal = createPeerConnection();
+            pcLocal.ondatachannel = e => setupDataChannel(e.channel);
+            const offer = await pcLocal.createOffer();
+            await pcLocal.setLocalDescription(offer);
+            ws.send(JSON.stringify({ type: 'offer', offer: pcLocal.localDescription, to: msg.id, room }));
+          }
+        }
+      };
+
+      ws.onclose = () => {
+        roomStatus.textContent = 'Connessione al signaling persa.';
+      };
+    }
+
+    createJoinBtn.addEventListener('click', () => {
+      const room = roomInput.value.trim();
+      if (!room) {
+        roomStatus.textContent = 'Inserisci un nome stanza.';
+        return;
+      }
+      if (ws) {
+        roomStatus.textContent = 'Già in una stanza. Ricarica per cambiarla.';
+        return;
+      }
+      initRoom(room);
+    });
+
+    function sendMessage() {
+      const text = msgInput.value.trim();
+      if (!text) return;
+      if (!dataChannel || dataChannel.readyState !== 'open') {
+        roomStatus.textContent = 'Nessuna connessione attiva.';
+        return;
+      }
+      dataChannel.send(text);
+      appendLine('Tu: ' + text);
+      msgInput.value = '';
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    msgInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    sendFileBtn.addEventListener('click', () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        fileStatus.textContent = 'Seleziona prima un file.';
+        return;
+      }
+      sendFile(file);
+    });
+
+    updateStatus(navigator.onLine);
+    window.addEventListener('online', () => updateStatus(true));
+    window.addEventListener('offline', () => updateStatus(false));
+  </script>
 </body>
 </html>
