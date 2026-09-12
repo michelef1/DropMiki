@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DropMiki</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #bb86fc;
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #2c2c2c;
+            --accent-green: #03dac6;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 16px;
+            align-items: center;
+        }
+        header {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        .status {
+            font-size: 0.85rem;
+            color: var(--accent-green);
+            background: rgba(3, 218, 198, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        main {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+        }
+        .card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            text-align: center;
+        }
+        .drop-zone {
+            border: 2px dashed var(--primary-color);
+            border-radius: 12px;
+            padding: 30px 20px;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .drop-zone:active {
+            background: rgba(187, 134, 252, 0.05);
+        }
+        .drop-zone p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .drop-zone b {
+            color: var(--primary-color);
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .peers-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .peer-node {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+        }
+        .peer-node:active {
+            transform: scale(0.96);
+        }
+        .peer-avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-green));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 1.1rem;
+        }
+        .peer-name {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+        .transfers-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .transfer-item {
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+        }
+        .transfer-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            overflow: hidden;
+            text-align: left;
+        }
+        .file-name {
+            color: var(--text-color);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+        .file-meta {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+        .btn-download {
+            background: var(--primary-color);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>DropMiki</h1>
+        <span class="status" id="netStatus">Pronto</span>
+    </header>
+
+    <main>
+        <div class="card">
+            <label class="drop-zone" id="dropZone">
+                <p>Ticca qui o trascina file<br><b>per condividere</b></p>
+                <input type="file" id="fileInput" multiple>
+            </label>
+        </div>
+
+        <div class="card">
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Dispositivi nelle vicinanze (Seleziona per inviare)</p>
+            <div class="peers-grid" id="peersGrid">
+                <div class="peer-node" onclick="alert('Seleziona un file prima di inviarlo a un dispositivo.')">
+                    <div class="peer-avatar">M</div>
+                    <span class="peer-name">Miki-Phone</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="transferCard" style="display:none;">
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">File trasferiti</p>
+            <div class="transfers-list" id="transfersList"></div>
+        </div>
+    </main>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("Service Worker registrato con successo."))
+                .catch(err => console.log("Errore Service Worker:", err));
+        }
+
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const transferCard = document.getElementById('transferCard');
+        const transfersList = document.getElementById('transfersList');
+
+        let selectedFiles = [];
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            selectedFiles = Array.from(e.target.files);
+            if (selectedFiles.length > 0) {
+                dropZone.style.borderColor = 'var(--accent-green)';
+                dropZone.querySelector('p').innerHTML = `<b>${selectedFiles.length} file pronti</b><br><span style="font-size:0.8rem">Tocca un dispositivo sotto per inviare</span>`;
+            }
+        });
+
+        function addTransferLog(name, size, url = null) {
+            transferCard.style.display = 'flex';
+            const item = document.createElement('div');
+            item.className = 'transfer-item';
+            
+            let actionHtml = `<span class="file-meta">Completato</span>`;
+            if (url) {
+                actionHtml = `<a href="${url}" download="${name}" class="btn-download">Salva</a>`;
+            }
+
+            item.innerHTML = `
+                <div class="transfer-info">
+                    <span class="file-name">${name}</span>
+                    <span class="file-meta">${(size / 1024).toFixed(1)} KB</span>
+                </div>
+                ${actionHtml}
+            `;
+            transfersList.prepend(item);
+        }
+    </script>
+</body>
+</html>
