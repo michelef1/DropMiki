@@ -28,6 +28,10 @@
     --ice-dim:#8FA7BC;
     --ok:#5FBE8A;
     --err:#E2685C;
+    --teal:#5DCAA5;
+    --amber:#EF9F27;
+    --panel-send:#F0997B;
+    --lavender:#AFA9EC;
     --radius:2px;
   }
 
@@ -196,6 +200,21 @@
   }
   .panel > h2{ margin-bottom:14px; }
 
+  .panel--code{ border-left:3px solid var(--cyan); background:rgba(95,199,232,0.08); }
+  .panel--code h2{ color:var(--cyan); }
+
+  .panel--devices{ border-left:3px solid var(--teal); background:rgba(93,202,165,0.08); }
+  .panel--devices h2{ color:var(--teal); }
+
+  .panel--add{ border-left:3px solid var(--amber); background:rgba(239,159,39,0.08); }
+  .panel--add h2{ color:var(--amber); }
+
+  .panel--send{ border-left:3px solid var(--panel-send); background:rgba(240,153,123,0.08); }
+  .panel--send h2{ color:var(--panel-send); }
+
+  .panel--log{ border-left:3px solid var(--lavender); background:rgba(175,169,236,0.08); }
+  .panel--log h2{ color:var(--lavender); }
+
   .code-display{
     display:flex;
     gap:8px;
@@ -322,10 +341,10 @@
     cursor:pointer;
   }
   .device-row:last-child{border-bottom:none;}
-  .device-row:hover{background:rgba(217,165,68,0.05);}
+  .device-row:hover{background:rgba(93,202,165,0.06);}
   .device-row.selected{
-    background:rgba(217,165,68,0.10);
-    box-shadow:inset 2px 0 0 var(--cyan);
+    background:rgba(93,202,165,0.12);
+    box-shadow:inset 2px 0 0 var(--teal);
   }
   .device-row .dot{flex-shrink:0;}
   .device-name-input{
@@ -388,7 +407,7 @@
     text-align:center;
     margin-bottom:10px;
   }
-  .send-target b{color:var(--cyan);}
+  .send-target b{color:var(--panel-send);}
 
   #fileInput{display:none;}
 
@@ -466,7 +485,7 @@
     <span class="tag">App per scambio file</span>
   </header>
 
-  <div class="panel">
+  <div class="panel panel--code">
     <h2>IL TUO CODICE</h2>
     <div class="code-display" id="myCodeDisplay">
       <div class="digit">·</div><div class="digit">·</div><div class="digit">·</div><div class="digit">·</div><div class="digit">·</div><div class="digit">·</div>
@@ -478,7 +497,7 @@
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel panel--devices">
     <div class="panel-head">
       <h2>DISPOSITIVI SALVATI</h2>
     </div>
@@ -486,7 +505,7 @@
     <div class="empty-note" id="devicesEmpty">Nessun dispositivo salvato — collegane uno qui sotto</div>
   </div>
 
-  <div class="panel">
+  <div class="panel panel--add">
     <h2>AGGIUNGI UN DISPOSITIVO</h2>
     <div class="row">
       <input type="text" id="peerCodeInput" placeholder="CODICE" maxlength="6" autocomplete="off" autocapitalize="characters">
@@ -498,7 +517,7 @@
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel panel--send">
     <h2>SPEDIZIONE</h2>
     <div class="send-target" id="sendTarget">Tocca un dispositivo salvato e connesso per scegliere a chi inviare</div>
     <div class="dropzone disabled" id="dropzone">
@@ -508,7 +527,7 @@
     <input type="file" id="fileInput">
   </div>
 
-  <div class="panel">
+  <div class="panel panel--log">
     <div class="panel-head">
       <h2>REGISTRO TRASFERIMENTI</h2>
       <button class="ghost small" id="clearTransfersBtn">Cancella</button>
@@ -518,7 +537,7 @@
   </div>
 
   <footer>
-    <span id="app-version">v1.5</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v1.6</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
