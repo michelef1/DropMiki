@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dropmiki-v7';
+const CACHE_NAME = 'dropmiki-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -11,7 +11,17 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // fetch con {cache:'reload'} ignora la cache HTTP del browser:
+      // senza questo, un file vecchio già in cache HTTP verrebbe
+      // "fotografato" di nuovo anche dentro la nuova cache del SW
+      await Promise.all(
+        ASSETS.map(async (url) => {
+          const response = await fetch(url, { cache: 'reload' });
+          await cache.put(url, response);
+        })
+      );
+    })
   );
   self.skipWaiting();
 });
