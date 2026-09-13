@@ -147,9 +147,17 @@
     box-shadow:0 0 22px rgba(95,199,232,0.55);
   }
   .radar-avatars{ position:absolute; top:50%; left:50%; width:0; height:0; }
-  .radar-avatar{
+  .radar-avatar-wrap{
     position:absolute;
-    top:-14px; left:-14px;
+    top:0; left:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    cursor:pointer;
+  }
+  .radar-avatar-wrap.label-above{ flex-direction:column-reverse; }
+  .radar-avatar{
     width:28px; height:28px;
     border-radius:50%;
     background:var(--card);
@@ -157,7 +165,7 @@
     color:var(--ice-dim);
     display:flex; align-items:center; justify-content:center;
     font-size:11px; font-weight:600;
-    cursor:pointer;
+    flex-shrink:0;
   }
   .radar-avatar.online{
     background:rgba(93,202,165,0.22);
@@ -167,6 +175,18 @@
   .radar-avatar.selected{
     box-shadow:0 0 0 2px var(--cyan);
   }
+  .radar-avatar-label{
+    font-size:10px;
+    color:var(--ice-dim);
+    background:rgba(5,7,9,0.85);
+    padding:2px 7px;
+    border-radius:8px;
+    white-space:nowrap;
+    max-width:96px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .radar-avatar-label.online{ color:var(--ice); }
 
   .my-name-row{
     font-size:13px;
@@ -488,7 +508,7 @@
   </div>
 
   <footer>
-    <span id="app-version">v2.0</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v2.1</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
@@ -709,15 +729,26 @@
       const rad = angle * Math.PI / 180;
       const x = Math.cos(rad) * radius;
       const y = Math.sin(rad) * radius;
-      const conn = connections[d.code];
+      const isOnline = !!(connections[d.code] && connections[d.code].open);
+      const isSelected = d.code === selectedTarget;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'radar-avatar-wrap' + (y < 0 ? ' label-above' : '');
+      wrap.style.transform = 'translate(calc(-50% + ' + x + 'px), calc(-50% + ' + y + 'px))';
+      wrap.title = d.name;
+      wrap.addEventListener('click', () => onDeviceRowClick(d.code));
 
       const dot = document.createElement('div');
-      dot.className = 'radar-avatar' + (conn && conn.open ? ' online' : '') + (d.code === selectedTarget ? ' selected' : '');
-      dot.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
-      dot.title = d.name;
+      dot.className = 'radar-avatar' + (isOnline ? ' online' : '') + (isSelected ? ' selected' : '');
       dot.textContent = (d.name || '?').trim().charAt(0).toUpperCase();
-      dot.addEventListener('click', () => onDeviceRowClick(d.code));
-      radarAvatars.appendChild(dot);
+
+      const label = document.createElement('div');
+      label.className = 'radar-avatar-label' + (isOnline ? ' online' : '');
+      label.textContent = d.name;
+
+      wrap.appendChild(dot);
+      wrap.appendChild(label);
+      radarAvatars.appendChild(wrap);
     });
 
     heroHeading.style.display = n === 0 ? 'block' : 'none';
