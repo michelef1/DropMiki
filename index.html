@@ -66,7 +66,7 @@
   .brand{
     font-family:'Fraunces', serif;
     font-weight:600;
-    font-size:20px;
+    font-size:21px;
     color:var(--ice);
   }
   .header-icons{display:flex; gap:6px;}
@@ -91,13 +91,13 @@
   .hero-heading{
     font-family:'Fraunces', serif;
     font-weight:600;
-    font-size:22px;
+    font-size:23px;
     line-height:1.3;
     color:var(--cyan);
     margin-bottom:6px;
   }
   .hero-sub{
-    font-size:11.5px;
+    font-size:12.5px;
     color:var(--ice-dim);
     margin-bottom:6px;
   }
@@ -176,9 +176,10 @@
     box-shadow:0 0 0 2px var(--cyan);
   }
   .radar-avatar-label{
-    font-size:10px;
-    color:var(--ice-dim);
-    background:rgba(5,7,9,0.85);
+    font-size:11px;
+    font-weight:400;
+    color:rgba(143,167,188,0.55);
+    background:rgba(5,7,9,0.7);
     padding:2px 7px;
     border-radius:8px;
     white-space:nowrap;
@@ -186,10 +187,10 @@
     overflow:hidden;
     text-overflow:ellipsis;
   }
-  .radar-avatar-label.online{ color:var(--ice); }
+  .radar-avatar-label.online{ color:var(--ice); font-weight:600; background:rgba(5,7,9,0.85); }
 
   .my-name-row{
-    font-size:13px;
+    font-size:14px;
     color:var(--ice-dim);
     display:flex;
     align-items:center;
@@ -203,7 +204,7 @@
     border:1px solid var(--card-border);
     color:var(--ice);
     font-family:'IBM Plex Mono', monospace;
-    font-size:12.5px;
+    font-size:13.5px;
     padding:6px 12px;
     border-radius:14px;
     text-align:center;
@@ -211,13 +212,13 @@
     max-width:170px;
   }
   .my-name-input:focus{ outline:none; border-color:var(--cyan-dim); }
-  .edit-hint{ color:var(--cyan); font-size:13px; }
+  .edit-hint{ color:var(--cyan); font-size:14px; }
 
   .status-pills{
     display:flex; justify-content:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;
   }
   .pill{
-    font-size:10.5px;
+    font-size:11.5px;
     padding:5px 12px;
     border-radius:14px;
     background:rgba(95,199,232,0.14);
@@ -227,7 +228,7 @@
   .pill.err{ background:rgba(226,104,92,0.14); color:var(--err); }
 
   .my-code-line{
-    font-size:11px;
+    font-size:12px;
     color:var(--ice-dim);
   }
   .my-code-line b{ color:var(--ice); letter-spacing:1px; }
@@ -248,7 +249,7 @@
   }
   .panel h2{
     font-family:'IBM Plex Mono', monospace;
-    font-size:11.5px;
+    font-size:12.5px;
     font-weight:600;
     letter-spacing:0.4px;
     color:var(--ice-dim);
@@ -293,7 +294,7 @@
 
   button{
     font-family:'IBM Plex Mono', monospace;
-    font-size:13px;
+    font-size:14px;
     font-weight:600;
     letter-spacing:0.3px;
     border:none;
@@ -307,11 +308,11 @@
   button.primary:disabled{ background:var(--card-border); color:var(--ice-dim); cursor:not-allowed; }
   button.ghost{ background:transparent; border:1px solid var(--card-border); color:var(--ice-dim); border-radius:14px; }
   button.ghost:hover{ color:var(--ice); border-color:var(--cyan-dim); }
-  button.small{ padding:6px 12px; font-size:11px; }
+  button.small{ padding:6px 12px; font-size:12px; }
 
   .status-line{
     display:flex; align-items:center; gap:9px;
-    font-size:12px; color:var(--ice-dim);
+    font-size:13px; color:var(--ice-dim);
     margin-top:14px;
   }
   .dot{ width:7px; height:7px; border-radius:50%; background:var(--ice-dim); flex-shrink:0; }
@@ -338,14 +339,14 @@
     border:1px solid transparent;
     color:var(--ice);
     font-family:'IBM Plex Mono', monospace;
-    font-size:13px;
+    font-size:14px;
     padding:5px 6px;
     border-radius:8px;
     min-width:0;
   }
   .device-name-input:hover{ border-color:var(--card-border); }
   .device-name-input:focus{ outline:none; border-color:var(--cyan-dim); background:#080B0F; }
-  .device-code{ font-size:10.5px; color:var(--ice-dim); letter-spacing:1px; flex-shrink:0; }
+  .device-code{ font-size:11.5px; color:var(--ice-dim); letter-spacing:1px; flex-shrink:0; }
   .device-remove{
     background:transparent; border:none; color:var(--ice-dim);
     font-size:14px; padding:4px 6px; cursor:pointer; flex-shrink:0;
@@ -358,7 +359,7 @@
     padding:34px 18px;
     text-align:center;
     color:var(--ice-dim);
-    font-size:13px;
+    font-size:14px;
     cursor:pointer;
     transition:border-color .15s ease, background .15s ease;
   }
@@ -366,14 +367,14 @@
   .dropzone.disabled{ opacity:0.4; cursor:not-allowed; }
   .dropzone strong{ color:var(--ice); }
 
-  .send-target{ font-size:11px; color:var(--ice-dim); text-align:center; margin-bottom:10px; }
+  .send-target{ font-size:12px; color:var(--ice-dim); text-align:center; margin-bottom:10px; }
   .send-target b{ color:var(--panel-send); }
 
   #fileInput{ display:none; }
 
   .transfer{ display:flex; flex-direction:column; gap:8px; padding:14px 0; border-bottom:1px solid var(--card-border); }
   .transfer:last-child{ border-bottom:none; }
-  .transfer .meta{ display:flex; justify-content:space-between; font-size:12px; }
+  .transfer .meta{ display:flex; justify-content:space-between; font-size:13px; }
   .transfer .meta .name{ color:var(--ice); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; }
   .transfer .meta .size{ color:var(--ice-dim); }
   .bar-track{ width:100%; height:5px; background:#080B0F; border-radius:3px; overflow:hidden; }
@@ -382,15 +383,15 @@
   .transfer .dl-link{
     align-self:flex-start; max-width:100%;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    font-size:12px; color:var(--cyan); text-decoration:none;
+    font-size:13px; color:var(--cyan); text-decoration:none;
     border-bottom:1px solid var(--cyan-dim);
   }
   .transfer .dl-link:hover{ color:var(--ice); }
 
-  .empty-note{ font-size:12px; color:var(--ice-dim); text-align:center; padding:6px 0 2px; }
+  .empty-note{ font-size:13px; color:var(--ice-dim); text-align:center; padding:6px 0 2px; }
 
   footer{
-    margin-top:auto; padding-top:24px; font-size:10.5px;
+    margin-top:auto; padding-top:24px; font-size:11px;
     color:#3A4552; text-align:center;
   }
   footer span{ color:var(--ice-dim); }
@@ -411,10 +412,10 @@
     padding:22px;
   }
   .modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-  .modal-head h3{ font-family:'Fraunces', serif; font-weight:600; font-size:19px; color:var(--ice); margin:0; }
-  .modal-close{ background:transparent; border:none; color:var(--ice-dim); font-size:18px; cursor:pointer; padding:4px 8px; }
+  .modal-head h3{ font-family:'Fraunces', serif; font-weight:600; font-size:20px; color:var(--ice); margin:0; }
+  .modal-close{ background:transparent; border:none; color:var(--ice-dim); font-size:19px; cursor:pointer; padding:4px 8px; }
   .modal-close:hover{ color:var(--ice); }
-  .modal-body{ font-size:13px; line-height:1.65; color:var(--ice-dim); }
+  .modal-body{ font-size:14px; line-height:1.65; color:var(--ice-dim); }
   .modal-body b{ color:var(--ice); }
   .modal-body p{ margin:0 0 12px; }
   .modal-body p:last-child{ margin-bottom:0; }
@@ -508,7 +509,7 @@
   </div>
 
   <footer>
-    <span id="app-version">v2.1</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v2.2</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
