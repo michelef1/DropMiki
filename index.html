@@ -543,7 +543,7 @@
   </div>
 
   <footer>
-    <span id="app-version">v1.7</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v1.8</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
@@ -932,6 +932,7 @@
   }
 
   clearTransfersBtn.addEventListener('click', () => {
+    if(transfersList.children.length === 0) return; // registro già vuoto, nulla da confermare
     showConfirm('Cancellare tutto il registro trasferimenti?', () => {
       transfersList.innerHTML = '';
       transfersEmpty.style.display = 'block';
