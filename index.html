@@ -175,6 +175,12 @@
   .modal-body b{color:var(--ice);}
   .modal-body p{margin:0 0 12px;}
   .modal-body p:last-child{margin-bottom:0;}
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:20px;
+  }
 
   .panel{
     background:rgba(19,44,70,0.62);
@@ -518,7 +524,7 @@
   </div>
 
   <div class="panel panel--send">
-    <h2>SPEDIZIONE</h2>
+    <h2>INVIO FILES</h2>
     <div class="send-target" id="sendTarget">Tocca un dispositivo salvato e connesso per scegliere a chi inviare</div>
     <div class="dropzone disabled" id="dropzone">
       <div><strong>Trascina un file qui</strong></div>
@@ -537,7 +543,7 @@
   </div>
 
   <footer>
-    <span id="app-version">v1.6</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v1.7</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
@@ -548,6 +554,20 @@
       <button class="modal-close" id="modalClose" aria-label="Chiudi">✕</button>
     </div>
     <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Conferma</h3>
+      <button class="modal-close" id="confirmClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="modal-body" id="confirmBody"></div>
+    <div class="modal-actions">
+      <button class="ghost" id="confirmCancelBtn">Annulla</button>
+      <button class="primary" id="confirmOkBtn">Conferma</button>
+    </div>
   </div>
 </div>
 
@@ -682,7 +702,7 @@
       removeBtn.title = 'Rimuovi dispositivo';
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        removeDevice(d.code);
+        showConfirm('Rimuovere "' + d.name + '" dai dispositivi salvati?', () => removeDevice(d.code));
       });
 
       row.appendChild(dot);
@@ -912,8 +932,10 @@
   }
 
   clearTransfersBtn.addEventListener('click', () => {
-    transfersList.innerHTML = '';
-    transfersEmpty.style.display = 'block';
+    showConfirm('Cancellare tutto il registro trasferimenti?', () => {
+      transfersList.innerHTML = '';
+      transfersEmpty.style.display = 'block';
+    });
   });
 
   function escapeHtml(s){
@@ -1032,7 +1054,34 @@
   }
   modalClose.addEventListener('click', closeModal);
   modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
-  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape'){ closeModal(); closeConfirm(); }
+  });
+
+  // --- modale di conferma generico (rimozione dispositivo, cancella registro) ---
+  const confirmOverlay = document.getElementById('confirmOverlay');
+  const confirmBody = document.getElementById('confirmBody');
+  const confirmOkBtn = document.getElementById('confirmOkBtn');
+  const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+  const confirmClose = document.getElementById('confirmClose');
+  let confirmAction = null;
+
+  function showConfirm(message, action){
+    confirmBody.textContent = message;
+    confirmAction = action;
+    confirmOverlay.classList.add('open');
+  }
+  function closeConfirm(){
+    confirmOverlay.classList.remove('open');
+    confirmAction = null;
+  }
+  confirmOkBtn.addEventListener('click', () => {
+    if(confirmAction) confirmAction();
+    closeConfirm();
+  });
+  confirmCancelBtn.addEventListener('click', closeConfirm);
+  confirmClose.addEventListener('click', closeConfirm);
+  confirmOverlay.addEventListener('click', (e) => { if(e.target === confirmOverlay) closeConfirm(); });
 
   document.getElementById('menuGuida').addEventListener('click', () => {
     openModal('Guida', `
