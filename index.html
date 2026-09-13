@@ -6,7 +6,7 @@
 <title>DropMiki — Trasferimento file P2P</title>
 <meta name="description" content="Invia file tra i tuoi dispositivi in modo diretto, senza cloud">
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#0D1E32">
+<meta name="theme-color" content="#050709">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <link rel="icon" href="./icons/icon-192.png">
 
@@ -16,10 +16,9 @@
 
 <style>
   :root{
-    --navy-900:#081422;
-    --navy-800:#0D1E32;
-    --navy-700:#132C46;
-    --navy-600:#1E3F5E;
+    --bg:#050709;
+    --card:#0D1117;
+    --card-border:#1C2430;
     --cyan:#5FC7E8;
     --cyan-dim:#3A7C93;
     --coral:#E8834A;
@@ -32,14 +31,15 @@
     --amber:#EF9F27;
     --panel-send:#F0997B;
     --lavender:#AFA9EC;
-    --radius:2px;
+    --radius:16px;
   }
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:linear-gradient(160deg, #060F1C 0%, #0D2036 40%, #163A57 78%, #1B4869 100%);
-    background-attachment:fixed;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(95,199,232,0.07) 0%, transparent 46%),
+      var(--bg);
     color:var(--ice);
     font-family:'IBM Plex Mono', monospace;
     min-height:100vh;
@@ -47,7 +47,7 @@
     display:flex;
     flex-direction:column;
     align-items:center;
-    padding:32px 18px 48px;
+    padding:20px 18px 48px;
     -webkit-font-smoothing:antialiased;
   }
 
@@ -56,196 +56,193 @@
     max-width:480px;
   }
 
-  header.topline{
-    border-bottom:1px solid var(--navy-600);
-    padding-bottom:14px;
-    margin-bottom:28px;
-  }
-  .title-row{
-    position:relative;
+  /* ---------- header ---------- */
+  .top-header{
     display:flex;
     align-items:center;
     justify-content:space-between;
+    padding:6px 2px 18px;
   }
-  header.topline h1{
+  .brand{
     font-family:'Fraunces', serif;
     font-weight:600;
-    font-size:28px;
-    letter-spacing:0.2px;
-    margin:0;
+    font-size:20px;
     color:var(--ice);
   }
-  header.topline .tag{
-    display:block;
-    font-size:12px;
-    color:var(--ice-dim);
-    letter-spacing:0.3px;
-    margin-top:6px;
-  }
-  .menu-btn{
+  .header-icons{display:flex; gap:6px;}
+  .icon-btn{
+    width:34px; height:34px;
+    border-radius:50%;
     background:transparent;
-    border:none;
+    border:1px solid var(--card-border);
     color:var(--ice-dim);
-    font-size:22px;
-    line-height:1;
-    padding:6px 10px;
-    cursor:pointer;
-    border-radius:var(--radius);
-    flex-shrink:0;
-  }
-  .menu-btn:hover{color:var(--ice); background:rgba(95,199,232,0.08);}
-  .menu-dropdown{
-    position:absolute;
-    top:100%;
-    right:0;
-    margin-top:6px;
-    background:rgba(19,44,70,0.97);
-    border:1px solid var(--navy-600);
-    border-radius:var(--radius);
-    min-width:150px;
-    box-shadow:0 10px 28px rgba(0,0,0,0.4);
-    z-index:20;
-    display:none;
-    overflow:hidden;
-  }
-  .menu-dropdown.open{display:block;}
-  .menu-dropdown button{
-    display:block;
-    width:100%;
-    text-align:left;
-    background:transparent;
-    border:none;
-    border-bottom:1px solid var(--navy-600);
-    color:var(--ice);
     font-family:'IBM Plex Mono', monospace;
-    font-size:13px;
-    padding:13px 15px;
+    font-size:14px;
+    display:flex; align-items:center; justify-content:center;
     cursor:pointer;
   }
-  .menu-dropdown button:last-child{border-bottom:none;}
-  .menu-dropdown button:hover{background:rgba(95,199,232,0.12);}
+  .icon-btn:hover{color:var(--ice); border-color:var(--cyan-dim);}
 
-  .modal-overlay{
-    position:fixed; inset:0;
-    background:rgba(6,15,28,0.75);
-    display:none;
+  /* ---------- hero / radar ---------- */
+  .hero{
+    text-align:center;
+    padding:6px 6px 22px;
+  }
+  .hero-heading{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    line-height:1.3;
+    color:var(--cyan);
+    margin-bottom:6px;
+  }
+  .hero-sub{
+    font-size:11.5px;
+    color:var(--ice-dim);
+    margin-bottom:6px;
+  }
+
+  @keyframes radar-pulse{
+    0%   { transform:translate(-50%,-50%) scale(0.55); opacity:0.85; }
+    100% { transform:translate(-50%,-50%) scale(1.5); opacity:0; }
+  }
+  @keyframes radar-sweep{
+    from{ transform:rotate(0deg); }
+    to  { transform:rotate(360deg); }
+  }
+
+  .radar-wrap{
+    position:relative;
+    width:220px;
+    height:220px;
+    margin:14px auto 18px;
+  }
+  .radar-ring-static{
+    position:absolute; top:50%; left:50%;
+    border:1px solid var(--card-border);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+  }
+  .radar-ring-static.r1{ width:210px; height:210px; }
+  .radar-ring-static.r2{ width:150px; height:150px; overflow:hidden; }
+  .radar-sweep{
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    border-radius:50%;
+    background:conic-gradient(from 0deg, rgba(95,199,232,0.32), transparent 35%);
+    animation:radar-sweep 4.5s linear infinite;
+  }
+  .radar-pulse{
+    position:absolute; top:50%; left:50%;
+    width:95px; height:95px;
+    border:1px solid var(--cyan);
+    border-radius:50%;
+    animation:radar-pulse 3.2s ease-out infinite;
+  }
+  .radar-center{
+    position:absolute; top:50%; left:50%;
+    width:30px; height:30px;
+    background:var(--cyan);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    box-shadow:0 0 22px rgba(95,199,232,0.55);
+  }
+  .radar-avatars{ position:absolute; top:50%; left:50%; width:0; height:0; }
+  .radar-avatar{
+    position:absolute;
+    top:-14px; left:-14px;
+    width:28px; height:28px;
+    border-radius:50%;
+    background:var(--card);
+    border:2px solid var(--card-border);
+    color:var(--ice-dim);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:600;
+    cursor:pointer;
+  }
+  .radar-avatar.online{
+    background:rgba(93,202,165,0.22);
+    border-color:var(--teal);
+    color:var(--ice);
+  }
+  .radar-avatar.selected{
+    box-shadow:0 0 0 2px var(--cyan);
+  }
+
+  .my-name-row{
+    font-size:13px;
+    color:var(--ice-dim);
+    display:flex;
     align-items:center;
     justify-content:center;
-    z-index:50;
-    padding:20px;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:12px;
   }
-  .modal-overlay.open{display:flex;}
-  .modal-box{
-    background:var(--navy-700);
-    border:1px solid var(--navy-600);
+  .my-name-input{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    color:var(--ice);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    padding:6px 12px;
+    border-radius:14px;
+    text-align:center;
+    min-width:0;
+    max-width:170px;
+  }
+  .my-name-input:focus{ outline:none; border-color:var(--cyan-dim); }
+  .edit-hint{ color:var(--cyan); font-size:13px; }
+
+  .status-pills{
+    display:flex; justify-content:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;
+  }
+  .pill{
+    font-size:10.5px;
+    padding:5px 12px;
+    border-radius:14px;
+    background:rgba(95,199,232,0.14);
+    color:var(--cyan);
+  }
+  .pill.teal{ background:rgba(93,202,165,0.14); color:var(--teal); }
+  .pill.err{ background:rgba(226,104,92,0.14); color:var(--err); }
+
+  .my-code-line{
+    font-size:11px;
+    color:var(--ice-dim);
+  }
+  .my-code-line b{ color:var(--ice); letter-spacing:1px; }
+
+  /* ---------- pannelli ---------- */
+  .panel{
+    background:var(--card);
+    border:1px solid var(--card-border);
     border-radius:var(--radius);
-    max-width:420px;
-    width:100%;
-    max-height:80vh;
-    overflow-y:auto;
-    padding:22px;
-  }
-  .modal-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+    padding:20px;
     margin-bottom:14px;
   }
-  .modal-head h3{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:19px;
-    color:var(--ice);
-    margin:0;
-  }
-  .modal-close{
-    background:transparent;
-    border:none;
-    color:var(--ice-dim);
-    font-size:18px;
-    cursor:pointer;
-    padding:4px 8px;
-  }
-  .modal-close:hover{color:var(--ice);}
-  .modal-body{
-    font-size:13px;
-    line-height:1.65;
-    color:var(--ice-dim);
-  }
-  .modal-body b{color:var(--ice);}
-  .modal-body p{margin:0 0 12px;}
-  .modal-body p:last-child{margin-bottom:0;}
-  .modal-actions{
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
-    margin-top:20px;
-  }
-
-  .panel{
-    background:rgba(19,44,70,0.62);
-    backdrop-filter:blur(6px);
-    border:1px solid rgba(30,63,94,0.9);
-    border-radius:var(--radius);
-    padding:22px;
-    margin-bottom:18px;
-  }
-
   .panel-head{
     display:flex;
     align-items:center;
     justify-content:space-between;
     margin-bottom:14px;
   }
-  .panel h2, .panel-head h2{
+  .panel h2{
     font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
+    font-size:11.5px;
     font-weight:600;
-    color:var(--cyan);
-    margin:0;
-  }
-  .panel > h2{ margin-bottom:14px; }
-
-  .panel--code{ border-left:3px solid var(--cyan); background:rgba(95,199,232,0.08); }
-  .panel--code h2{ color:var(--cyan); }
-
-  .panel--devices{ border-left:3px solid var(--teal); background:rgba(93,202,165,0.08); }
-  .panel--devices h2{ color:var(--teal); }
-
-  .panel--add{ border-left:3px solid var(--amber); background:rgba(239,159,39,0.08); }
-  .panel--add h2{ color:var(--amber); }
-
-  .panel--send{ border-left:3px solid var(--panel-send); background:rgba(240,153,123,0.08); }
-  .panel--send h2{ color:var(--panel-send); }
-
-  .panel--log{ border-left:3px solid var(--lavender); background:rgba(175,169,236,0.08); }
-  .panel--log h2{ color:var(--lavender); }
-
-  .code-display{
-    display:flex;
-    gap:8px;
-    justify-content:center;
-    margin:6px 0 4px;
-  }
-  .code-display .digit{
-    background:var(--navy-900);
-    border:1px solid var(--navy-600);
-    color:var(--cyan);
-    font-size:30px;
-    font-weight:600;
-    width:38px;
-    height:52px;
+    letter-spacing:0.4px;
+    color:var(--ice-dim);
+    margin:0 0 14px 0;
     display:flex;
     align-items:center;
-    justify-content:center;
-    border-radius:var(--radius);
-    font-variant-numeric:tabular-nums;
   }
-  .code-hint{
-    text-align:center;
-    font-size:11px;
-    color:var(--ice-dim);
-    margin-top:10px;
+  .panel-head h2{ margin:0; }
+  .dot-mark{
+    display:inline-block;
+    width:6px; height:6px;
+    border-radius:50%;
+    margin-right:8px;
+    flex-shrink:0;
   }
 
   .row{display:flex; flex-wrap:wrap; gap:8px;}
@@ -257,28 +254,22 @@
   }
 
   input[type="text"]{
-    background:var(--navy-900);
-    border:1px solid var(--navy-600);
+    background:#080B0F;
+    border:1px solid var(--card-border);
     color:var(--ice);
     font-family:'IBM Plex Mono', monospace;
-    border-radius:var(--radius);
+    border-radius:12px;
   }
   .row input[type="text"]{
     flex:1;
-    font-size:18px;
+    font-size:16px;
     letter-spacing:3px;
     text-transform:uppercase;
     padding:12px 14px;
     text-align:center;
   }
-  input[type="text"]:focus{
-    outline:none;
-    border-color:var(--cyan-dim);
-  }
-  input[type="text"]::placeholder{
-    color:var(--ice-dim);
-    letter-spacing:2px;
-  }
+  input[type="text"]:focus{ outline:none; border-color:var(--cyan-dim); }
+  input[type="text"]::placeholder{ color:var(--ice-dim); letter-spacing:2px; }
 
   button{
     font-family:'IBM Plex Mono', monospace;
@@ -286,73 +277,41 @@
     font-weight:600;
     letter-spacing:0.3px;
     border:none;
-    border-radius:var(--radius);
-    padding:12px 18px;
+    border-radius:20px;
+    padding:12px 20px;
     cursor:pointer;
     transition:background .15s ease, border-color .15s ease, color .15s ease;
   }
-  button.primary{
-    background:var(--coral);
-    color:var(--ice);
-  }
-  button.primary:hover{background:var(--coral-hover);}
-  button.primary:disabled{
-    background:var(--navy-600);
-    color:var(--ice-dim);
-    cursor:not-allowed;
-  }
-  button.ghost{
-    background:transparent;
-    border:1px solid var(--navy-600);
-    color:var(--ice-dim);
-  }
-  button.ghost:hover{
-    color:var(--ice);
-    border-color:var(--cyan-dim);
-  }
-  button.small{
-    padding:6px 10px;
-    font-size:11px;
-  }
+  button.primary{ background:var(--coral); color:#2A1607; }
+  button.primary:hover{ background:var(--coral-hover); }
+  button.primary:disabled{ background:var(--card-border); color:var(--ice-dim); cursor:not-allowed; }
+  button.ghost{ background:transparent; border:1px solid var(--card-border); color:var(--ice-dim); border-radius:14px; }
+  button.ghost:hover{ color:var(--ice); border-color:var(--cyan-dim); }
+  button.small{ padding:6px 12px; font-size:11px; }
 
   .status-line{
-    display:flex;
-    align-items:center;
-    gap:9px;
-    font-size:12px;
-    color:var(--ice-dim);
+    display:flex; align-items:center; gap:9px;
+    font-size:12px; color:var(--ice-dim);
     margin-top:14px;
   }
-  .dot{
-    width:7px;height:7px;border-radius:50%;
-    background:var(--ice-dim);
-    flex-shrink:0;
-  }
-  .dot.connecting{background:var(--cyan); animation:pulse 1.2s infinite ease-in-out;}
-  .dot.connected{background:var(--ok);}
-  .dot.error{background:var(--err);}
-  @keyframes pulse{
-    0%,100%{opacity:1;}
-    50%{opacity:0.35;}
-  }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--ice-dim); flex-shrink:0; }
+  .dot.connecting{ background:var(--cyan); animation:pulse 1.2s infinite ease-in-out; }
+  .dot.connected{ background:var(--ok); }
+  .dot.error{ background:var(--err); }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
 
-  /* dispositivi salvati */
   .device-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:10px 6px;
-    border-bottom:1px solid var(--navy-600);
-    border-radius:var(--radius);
+    display:flex; align-items:center; gap:10px;
+    padding:10px 8px;
+    border-radius:12px;
     cursor:pointer;
   }
-  .device-row:last-child{border-bottom:none;}
-  .device-row:hover{background:rgba(93,202,165,0.06);}
+  .device-row:hover{ background:rgba(93,202,165,0.06); }
   .device-row.selected{
     background:rgba(93,202,165,0.12);
     box-shadow:inset 2px 0 0 var(--teal);
   }
-  .device-row .dot{flex-shrink:0;}
+  .device-row .dot{ flex-shrink:0; }
   .device-name-input{
     flex:1;
     background:transparent;
@@ -361,162 +320,144 @@
     font-family:'IBM Plex Mono', monospace;
     font-size:13px;
     padding:5px 6px;
-    border-radius:var(--radius);
+    border-radius:8px;
     min-width:0;
   }
-  .device-name-input:hover{border-color:var(--navy-600);}
-  .device-name-input:focus{
-    outline:none;
-    border-color:var(--cyan-dim);
-    background:var(--navy-900);
-  }
-  .device-code{
-    font-size:10.5px;
-    color:var(--ice-dim);
-    letter-spacing:1px;
-    flex-shrink:0;
-  }
+  .device-name-input:hover{ border-color:var(--card-border); }
+  .device-name-input:focus{ outline:none; border-color:var(--cyan-dim); background:#080B0F; }
+  .device-code{ font-size:10.5px; color:var(--ice-dim); letter-spacing:1px; flex-shrink:0; }
   .device-remove{
-    background:transparent;
-    border:none;
-    color:var(--ice-dim);
-    font-size:14px;
-    padding:4px 6px;
-    cursor:pointer;
-    flex-shrink:0;
+    background:transparent; border:none; color:var(--ice-dim);
+    font-size:14px; padding:4px 6px; cursor:pointer; flex-shrink:0;
   }
-  .device-remove:hover{color:var(--err);}
+  .device-remove:hover{ color:var(--err); }
 
   .dropzone{
-    border:1.5px dashed var(--navy-600);
-    border-radius:var(--radius);
-    padding:36px 18px;
+    border:1.5px dashed var(--card-border);
+    border-radius:14px;
+    padding:34px 18px;
     text-align:center;
     color:var(--ice-dim);
     font-size:13px;
     cursor:pointer;
     transition:border-color .15s ease, background .15s ease;
   }
-  .dropzone.hover{
-    border-color:var(--cyan);
-    background:rgba(217,165,68,0.06);
-  }
-  .dropzone.disabled{
-    opacity:0.4;
-    cursor:not-allowed;
-  }
-  .dropzone strong{color:var(--ice);}
+  .dropzone.hover{ border-color:var(--cyan); background:rgba(95,199,232,0.06); }
+  .dropzone.disabled{ opacity:0.4; cursor:not-allowed; }
+  .dropzone strong{ color:var(--ice); }
 
-  .send-target{
-    font-size:11px;
-    color:var(--ice-dim);
-    text-align:center;
-    margin-bottom:10px;
-  }
-  .send-target b{color:var(--panel-send);}
+  .send-target{ font-size:11px; color:var(--ice-dim); text-align:center; margin-bottom:10px; }
+  .send-target b{ color:var(--panel-send); }
 
-  #fileInput{display:none;}
+  #fileInput{ display:none; }
 
-  .transfer{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    padding:14px 0;
-    border-bottom:1px solid var(--navy-600);
-  }
-  .transfer:last-child{border-bottom:none;}
-  .transfer .meta{
-    display:flex;
-    justify-content:space-between;
-    font-size:12px;
-  }
-  .transfer .meta .name{color:var(--ice); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;}
-  .transfer .meta .size{color:var(--ice-dim);}
-  .bar-track{
-    width:100%;
-    height:5px;
-    background:var(--navy-900);
-    border-radius:3px;
-    overflow:hidden;
-  }
-  .bar-fill{
-    height:100%;
-    background:var(--cyan);
-    width:0%;
-    transition:width .12s linear;
-  }
-  .transfer.done .bar-fill{background:var(--ok);}
+  .transfer{ display:flex; flex-direction:column; gap:8px; padding:14px 0; border-bottom:1px solid var(--card-border); }
+  .transfer:last-child{ border-bottom:none; }
+  .transfer .meta{ display:flex; justify-content:space-between; font-size:12px; }
+  .transfer .meta .name{ color:var(--ice); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; }
+  .transfer .meta .size{ color:var(--ice-dim); }
+  .bar-track{ width:100%; height:5px; background:#080B0F; border-radius:3px; overflow:hidden; }
+  .bar-fill{ height:100%; background:var(--cyan); width:0%; transition:width .12s linear; }
+  .transfer.done .bar-fill{ background:var(--ok); }
   .transfer .dl-link{
-    align-self:flex-start;
-    max-width:100%;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    font-size:12px;
-    color:var(--cyan);
-    text-decoration:none;
+    align-self:flex-start; max-width:100%;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    font-size:12px; color:var(--cyan); text-decoration:none;
     border-bottom:1px solid var(--cyan-dim);
   }
-  .transfer .dl-link:hover{color:var(--ice);}
+  .transfer .dl-link:hover{ color:var(--ice); }
 
-  .empty-note{
-    font-size:12px;
-    color:var(--ice-dim);
-    text-align:center;
-    padding:6px 0 2px;
-  }
+  .empty-note{ font-size:12px; color:var(--ice-dim); text-align:center; padding:6px 0 2px; }
 
   footer{
-    margin-top:auto;
-    padding-top:28px;
-    font-size:10.5px;
-    color:var(--navy-600);
-    text-align:center;
+    margin-top:auto; padding-top:24px; font-size:10.5px;
+    color:#3A4552; text-align:center;
   }
-  footer span{color:var(--ice-dim);}
+  footer span{ color:var(--ice-dim); }
+
+  /* ---------- modali ---------- */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(3,5,7,0.78);
+    display:none; align-items:center; justify-content:center;
+    z-index:50; padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:18px;
+    max-width:420px; width:100%; max-height:80vh; overflow-y:auto;
+    padding:22px;
+  }
+  .modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .modal-head h3{ font-family:'Fraunces', serif; font-weight:600; font-size:19px; color:var(--ice); margin:0; }
+  .modal-close{ background:transparent; border:none; color:var(--ice-dim); font-size:18px; cursor:pointer; padding:4px 8px; }
+  .modal-close:hover{ color:var(--ice); }
+  .modal-body{ font-size:13px; line-height:1.65; color:var(--ice-dim); }
+  .modal-body b{ color:var(--ice); }
+  .modal-body p{ margin:0 0 12px; }
+  .modal-body p:last-child{ margin-bottom:0; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
 
   @media (max-width:380px){
-    .code-display .digit{width:32px; height:46px; font-size:24px;}
+    .radar-wrap{ width:190px; height:190px; }
+    .radar-ring-static.r1{ width:180px; height:180px; }
+    .radar-ring-static.r2{ width:128px; height:128px; }
+    .radar-pulse{ width:82px; height:82px; }
   }
 </style>
 </head>
 <body>
 
 <div class="board">
-  <header class="topline">
-    <div class="title-row">
-      <h1>DropMiki</h1>
-      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-haspopup="true" aria-expanded="false">⋮</button>
-      <div class="menu-dropdown" id="menuDropdown">
-        <button type="button" id="menuGuida">Guida</button>
-        <button type="button" id="menuInfo">Info</button>
-      </div>
+
+  <header class="top-header">
+    <span class="brand">DropMiki</span>
+    <div class="header-icons">
+      <button class="icon-btn" id="menuGuida" title="Guida">?</button>
+      <button class="icon-btn" id="menuInfo" title="Info">ⓘ</button>
     </div>
-    <span class="tag">App per scambio file</span>
   </header>
 
-  <div class="panel panel--code">
-    <h2>IL TUO CODICE</h2>
-    <div class="code-display" id="myCodeDisplay">
-      <div class="digit">·</div><div class="digit">·</div><div class="digit">·</div><div class="digit">·</div><div class="digit">·</div><div class="digit">·</div>
-    </div>
-    <div class="code-hint">Resta fisso su questo dispositivo: i dispositivi salvati ti ritroveranno da soli</div>
-    <div class="status-line">
-      <span class="dot" id="myStatusDot"></span>
-      <span id="myStatusText">Connessione alla stazione in corso…</span>
-    </div>
-  </div>
+  <section class="hero">
+    <div class="hero-heading" id="heroHeading">Apri DropMiki<br>su un altro dispositivo</div>
+    <div class="hero-sub" id="heroSub" style="display:none;">Tocca un dispositivo per collegarti</div>
 
-  <div class="panel panel--devices">
+    <div class="radar-wrap">
+      <div class="radar-ring-static r1"></div>
+      <div class="radar-ring-static r2"><div class="radar-sweep"></div></div>
+      <div class="radar-pulse" style="animation-delay:0s"></div>
+      <div class="radar-pulse" style="animation-delay:1.05s"></div>
+      <div class="radar-pulse" style="animation-delay:2.1s"></div>
+      <div class="radar-center"></div>
+      <div class="radar-avatars" id="radarAvatars"></div>
+    </div>
+
+    <div class="my-name-row">
+      Sei visibile come:
+      <input type="text" id="myNameInput" class="my-name-input" value="" maxlength="24">
+      <span class="edit-hint">✎</span>
+    </div>
+
+    <div class="status-pills">
+      <span class="pill" id="listeningPill">Connessione…</span>
+      <span class="pill teal" id="savedCountPill">0 salvati</span>
+    </div>
+
+    <div class="my-code-line">Codice: <b id="myCodeInline">······</b></div>
+  </section>
+
+  <div class="panel">
     <div class="panel-head">
-      <h2>DISPOSITIVI SALVATI</h2>
+      <h2><span class="dot-mark" style="background:var(--teal)"></span>DISPOSITIVI SALVATI</h2>
     </div>
     <div id="devicesList"></div>
     <div class="empty-note" id="devicesEmpty">Nessun dispositivo salvato — collegane uno qui sotto</div>
   </div>
 
-  <div class="panel panel--add">
-    <h2>AGGIUNGI UN DISPOSITIVO</h2>
+  <div class="panel">
+    <h2><span class="dot-mark" style="background:var(--amber)"></span>AGGIUNGI UN DISPOSITIVO</h2>
     <div class="row">
       <input type="text" id="peerCodeInput" placeholder="CODICE" maxlength="6" autocomplete="off" autocapitalize="characters">
       <button class="primary" id="connectBtn">Connetti</button>
@@ -527,8 +468,8 @@
     </div>
   </div>
 
-  <div class="panel panel--send">
-    <h2>INVIO FILES</h2>
+  <div class="panel">
+    <h2><span class="dot-mark" style="background:var(--panel-send)"></span>INVIO FILES</h2>
     <div class="send-target" id="sendTarget">Tocca un dispositivo salvato e connesso per scegliere a chi inviare</div>
     <div class="dropzone disabled" id="dropzone">
       <div><strong>Trascina un file qui</strong></div>
@@ -537,9 +478,9 @@
     <input type="file" id="fileInput">
   </div>
 
-  <div class="panel panel--log">
+  <div class="panel">
     <div class="panel-head">
-      <h2>REGISTRO TRASFERIMENTI</h2>
+      <h2><span class="dot-mark" style="background:var(--lavender)"></span>REGISTRO TRASFERIMENTI</h2>
       <button class="ghost small" id="clearTransfersBtn">Cancella</button>
     </div>
     <div id="transfersList"></div>
@@ -547,7 +488,7 @@
   </div>
 
   <footer>
-    <span id="app-version">v1.9</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v2.0</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
@@ -584,10 +525,16 @@
   const PEER_PREFIX = 'dropmiki-';
   const LS_MYCODE = 'dropmiki_mycode';
   const LS_DEVICES = 'dropmiki_devices';
+  const LS_MYNAME = 'dropmiki_myname';
 
-  const myCodeDisplay = document.getElementById('myCodeDisplay');
-  const myStatusDot = document.getElementById('myStatusDot');
-  const myStatusText = document.getElementById('myStatusText');
+  const myNameInput = document.getElementById('myNameInput');
+  const myCodeInline = document.getElementById('myCodeInline');
+  const listeningPill = document.getElementById('listeningPill');
+  const savedCountPill = document.getElementById('savedCountPill');
+  const heroHeading = document.getElementById('heroHeading');
+  const heroSub = document.getElementById('heroSub');
+  const radarAvatars = document.getElementById('radarAvatars');
+
   const peerCodeInput = document.getElementById('peerCodeInput');
   const connectBtn = document.getElementById('connectBtn');
   const peerStatusDot = document.getElementById('peerStatusDot');
@@ -603,12 +550,47 @@
 
   let peer = null;
   let myCode = '';
-  let savedDevices = [];       // [{code, name}]
+  let myName = '';
+  let savedDevices = [];       // [{code, name, customName}]
   let connections = {};        // code -> PeerJS DataConnection
-  let selectedTarget = null;   // code of device currently chosen to receive sends
-  let incoming = null;         // file in ricezione
+  let selectedTarget = null;
+  let incoming = null;
 
-  // ---------- persistenza locale ----------
+  // ---------- nome dispositivo ----------
+
+  function guessDeviceName(){
+    const ua = navigator.userAgent;
+    const androidMatch = ua.match(/Android [\d.]+;\s*([^;)]+)\)/);
+    if(androidMatch && androidMatch[1] && !/Build|wv/i.test(androidMatch[1])){
+      return androidMatch[1].trim();
+    }
+    if(/iPhone/.test(ua)) return 'iPhone';
+    if(/iPad/.test(ua)) return 'iPad';
+    if(/Macintosh/.test(ua)) return 'Mac';
+    if(/Windows/.test(ua)) return 'PC Windows';
+    if(/Linux/.test(ua)) return 'PC Linux';
+    return 'Dispositivo';
+  }
+
+  function broadcastName(){
+    Object.keys(connections).forEach((code) => {
+      const c = connections[code];
+      if(c && c.open) c.send({ type: 'hello', name: myName });
+    });
+  }
+
+  myNameInput.addEventListener('change', () => {
+    const val = myNameInput.value.trim();
+    if(val){
+      myName = val;
+      localStorage.setItem(LS_MYNAME, myName);
+      broadcastName();
+    } else {
+      myNameInput.value = myName;
+    }
+  });
+
+  // ---------- persistenza dispositivi ----------
 
   function loadDevices(){
     try{
@@ -619,16 +601,26 @@
   function persistDevices(){
     localStorage.setItem(LS_DEVICES, JSON.stringify(savedDevices));
   }
-  function upsertDevice(code, name){
+  function upsertDevice(code, name, isCustom){
     let d = savedDevices.find(x => x.code === code);
     if(d){
-      if(name) d.name = name;
+      if(name){ d.name = name; if(isCustom) d.customName = true; }
     } else {
-      d = { code, name: name || ('Dispositivo ' + code) };
+      d = { code, name: name || ('Dispositivo ' + code), customName: !!isCustom };
       savedDevices.push(d);
     }
     persistDevices();
     return d;
+  }
+  function handleHello(code, remoteName){
+    let d = savedDevices.find(x => x.code === code);
+    if(!d){
+      upsertDevice(code, remoteName, false);
+    } else if(!d.customName){
+      d.name = remoteName;
+      persistDevices();
+    }
+    renderDevicesList();
   }
   function removeDevice(code){
     savedDevices = savedDevices.filter(x => x.code !== code);
@@ -644,33 +636,18 @@
   // ---------- codice locale ----------
 
   function randomCode(){
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // niente O/0/I/1 ambigui
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let c = '';
     for(let i=0;i<6;i++) c += chars[Math.floor(Math.random()*chars.length)];
     return c;
   }
 
-  function renderMyCode(code){
-    myCodeDisplay.innerHTML = '';
-    for(const ch of code){
-      const d = document.createElement('div');
-      d.className = 'digit';
-      d.textContent = ch;
-      myCodeDisplay.appendChild(d);
-    }
-  }
-
   function setMyStatus(state, text){
-    myStatusDot.className = 'dot ' + state;
-    myStatusText.textContent = text;
+    listeningPill.className = 'pill' + (state === 'error' ? ' err' : '');
+    listeningPill.textContent = text;
   }
 
-  function setPeerStatus(state, text){
-    peerStatusDot.className = 'dot ' + state;
-    peerStatusText.textContent = text;
-  }
-
-  // ---------- lista dispositivi salvati ----------
+  // ---------- lista dispositivi + radar ----------
 
   function renderDevicesList(){
     devicesList.innerHTML = '';
@@ -692,7 +669,8 @@
       nameInput.value = d.name;
       nameInput.addEventListener('click', (e) => e.stopPropagation());
       nameInput.addEventListener('change', () => {
-        upsertDevice(d.code, nameInput.value.trim() || d.name);
+        const val = nameInput.value.trim();
+        if(val) upsertDevice(d.code, val, true);
         renderDevicesList();
       });
 
@@ -713,13 +691,38 @@
       row.appendChild(nameInput);
       row.appendChild(codeSpan);
       row.appendChild(removeBtn);
-
       row.addEventListener('click', () => onDeviceRowClick(d.code));
-
       devicesList.appendChild(row);
     });
 
     updateSendTargetLabel();
+    renderRadarAvatars();
+  }
+
+  function renderRadarAvatars(){
+    radarAvatars.innerHTML = '';
+    const n = savedDevices.length;
+    const radius = 75;
+
+    savedDevices.forEach((d, i) => {
+      const angle = (360 / n) * i - 90;
+      const rad = angle * Math.PI / 180;
+      const x = Math.cos(rad) * radius;
+      const y = Math.sin(rad) * radius;
+      const conn = connections[d.code];
+
+      const dot = document.createElement('div');
+      dot.className = 'radar-avatar' + (conn && conn.open ? ' online' : '') + (d.code === selectedTarget ? ' selected' : '');
+      dot.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+      dot.title = d.name;
+      dot.textContent = (d.name || '?').trim().charAt(0).toUpperCase();
+      dot.addEventListener('click', () => onDeviceRowClick(d.code));
+      radarAvatars.appendChild(dot);
+    });
+
+    heroHeading.style.display = n === 0 ? 'block' : 'none';
+    heroSub.style.display = n === 0 ? 'none' : 'block';
+    savedCountPill.textContent = n + (n === 1 ? ' salvato' : ' salvati');
   }
 
   function onDeviceRowClick(code){
@@ -772,31 +775,36 @@
       myCode = randomCode();
       localStorage.setItem(LS_MYCODE, myCode);
     }
-    renderMyCode(myCode);
-    setMyStatus('connecting', 'Connessione alla stazione in corso…');
+    myCodeInline.textContent = myCode;
+
+    myName = localStorage.getItem(LS_MYNAME);
+    if(!myName){
+      myName = guessDeviceName();
+      localStorage.setItem(LS_MYNAME, myName);
+    }
+    myNameInput.value = myName;
+
+    setMyStatus('connecting', 'Connessione…');
 
     peer = new Peer(PEER_PREFIX + myCode, { debug: 0 });
 
     peer.on('open', () => {
-      setMyStatus('connected', 'In ascolto — pronto a essere raggiunto');
-      // riconoscimento automatico: prova a ricollegarti a tutti i dispositivi salvati
+      setMyStatus('connected', 'In ascolto');
       savedDevices.forEach(d => attemptConnect(d.code, { silent: true }));
     });
 
     peer.on('error', (err) => {
       console.error(err);
       if(err.type === 'unavailable-id'){
-        // il codice risulta occupato sul broker (raro): libera lo storage e riprova
         localStorage.removeItem(LS_MYCODE);
         setTimeout(initPeer, 300);
         return;
       }
       if(err.type === 'peer-unavailable'){
-        // un tentativo di connessione (manuale o automatico) non ha trovato nessuno online
         setPeerStatus('error', 'Dispositivo non raggiungibile: verifica che sia online');
         return;
       }
-      setMyStatus('error', 'Errore di connessione alla stazione — ricarica la pagina');
+      setMyStatus('error', 'Errore');
     });
 
     peer.on('connection', (conn) => {
@@ -806,25 +814,27 @@
     });
 
     peer.on('disconnected', () => {
-      setMyStatus('error', 'Disconnesso dalla stazione — riconnessione…');
+      setMyStatus('error', 'Riconnessione…');
       peer.reconnect();
     });
+  }
+
+  function setPeerStatus(state, text){
+    peerStatusDot.className = 'dot ' + state;
+    peerStatusText.textContent = text;
   }
 
   function attemptConnect(code, opts){
     opts = opts || {};
     if(!peer || peer.disconnected){
-      if(!opts.silent) setPeerStatus('error', 'In attesa della connessione alla stazione…');
+      if(!opts.silent) setPeerStatus('error', 'In attesa della connessione…');
       return;
     }
-    if(connections[code] && (connections[code].open || !opts.silent)){
-      // già connesso, o già in corso un tentativo non silenzioso: non duplicare
-      if(connections[code].open){
-        selectedTarget = code;
-        renderDevicesList();
-        updateDropzoneState();
-        return;
-      }
+    if(connections[code] && connections[code].open){
+      selectedTarget = code;
+      renderDevicesList();
+      updateDropzoneState();
+      return;
     }
     if(!opts.silent) setPeerStatus('connecting', 'Connessione a ' + deviceName(code) + ' in corso…');
     const conn = peer.connect(PEER_PREFIX + code, { reliable: true });
@@ -839,6 +849,7 @@
       upsertDevice(code);
       if(!selectedTarget) selectedTarget = code;
       setPeerStatus('connected', 'Connesso a ' + deviceName(code));
+      conn.send({ type: 'hello', name: myName });
       renderDevicesList();
       updateDropzoneState();
     });
@@ -938,7 +949,7 @@
     if(downloadUrl){
       const a = document.createElement('a');
       a.href = downloadUrl;
-      a.download = filename; // il file salvato mantiene sempre il nome completo
+      a.download = filename;
       a.className = 'dl-link';
       a.title = filename;
       a.textContent = 'Scarica ' + truncateName(filename, 26);
@@ -947,7 +958,7 @@
   }
 
   clearTransfersBtn.addEventListener('click', () => {
-    if(transfersList.children.length === 0) return; // registro già vuoto, nulla da confermare
+    if(transfersList.children.length === 0) return;
     showConfirm('Cancellare tutto il registro trasferimenti?', () => {
       transfersList.innerHTML = '';
       transfersEmpty.style.display = 'block';
@@ -996,8 +1007,10 @@
     markDone(transferId, null, file.name);
   }
 
-  function handleIncomingData(msg){
-    if(msg.type === 'meta'){
+  function handleIncomingData(msg, code){
+    if(msg.type === 'hello'){
+      if(msg.name) handleHello(code, msg.name);
+    } else if(msg.type === 'meta'){
       incoming = {
         transferId: msg.transferId,
         name: msg.name,
@@ -1025,13 +1038,10 @@
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').then((reg) => {
-        // forza subito un controllo di aggiornamento, invece di aspettare i tempi del browser
         reg.update();
       }).catch(console.error);
     });
 
-    // quando un nuovo service worker prende il controllo (nuova versione attivata),
-    // ricarica la pagina per mostrare subito i file aggiornati
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if(refreshing) return;
@@ -1040,41 +1050,25 @@
     });
   }
 
-  // --- menu a tendina + modali Guida/Info ---
-  const menuBtn = document.getElementById('menuBtn');
-  const menuDropdown = document.getElementById('menuDropdown');
+  // --- modali Guida/Info ---
   const modalOverlay = document.getElementById('modalOverlay');
   const modalTitle = document.getElementById('modalTitle');
   const modalBody = document.getElementById('modalBody');
   const modalClose = document.getElementById('modalClose');
 
-  menuBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const open = menuDropdown.classList.toggle('open');
-    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-  document.addEventListener('click', () => {
-    menuDropdown.classList.remove('open');
-    menuBtn.setAttribute('aria-expanded', 'false');
-  });
-  menuDropdown.addEventListener('click', (e) => e.stopPropagation());
-
   function openModal(title, html){
     modalTitle.textContent = title;
     modalBody.innerHTML = html;
     modalOverlay.classList.add('open');
-    menuDropdown.classList.remove('open');
   }
-  function closeModal(){
-    modalOverlay.classList.remove('open');
-  }
+  function closeModal(){ modalOverlay.classList.remove('open'); }
   modalClose.addEventListener('click', closeModal);
   modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
   document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape'){ closeModal(); closeConfirm(); }
   });
 
-  // --- modale di conferma generico (rimozione dispositivo, cancella registro) ---
+  // --- modale di conferma generico ---
   const confirmOverlay = document.getElementById('confirmOverlay');
   const confirmBody = document.getElementById('confirmBody');
   const confirmOkBtn = document.getElementById('confirmOkBtn');
@@ -1102,10 +1096,11 @@
   document.getElementById('menuGuida').addEventListener('click', () => {
     openModal('Guida', `
       <p><b>Il tuo codice</b> è fisso su questo dispositivo: comunicalo all'altro dispositivo per farti trovare.</p>
+      <p>Il tuo nome ("Sei visibile come") viene mostrato automaticamente agli altri dispositivi quando ti colleghi: puoi cambiarlo toccandolo.</p>
       <p><b>Aggiungi un dispositivo</b> inserendo il suo codice a 6 caratteri e premendo Connetti.</p>
       <p>I dispositivi collegati vengono <b>salvati</b>: al prossimo avvio l'app prova a ricollegarsi da sola, se entrambi hanno la pagina aperta.</p>
       <p>Tocca il nome di un dispositivo salvato per rinominarlo, oppure ✕ per rimuoverlo.</p>
-      <p>Tocca un dispositivo <b>connesso</b> per selezionarlo come destinatario, poi trascina un file (o toccalo per sceglierlo dal telefono).</p>
+      <p>Tocca un dispositivo <b>connesso</b> (nella lista o sul radar) per selezionarlo come destinatario, poi trascina un file.</p>
       <p>I file viaggiano <b>direttamente</b> tra i due dispositivi: nessun file passa da un server.</p>
     `);
   });
@@ -1118,7 +1113,6 @@
       <p>Miki by Claude</p>
     `);
   });
-
 
   loadDevices();
   renderDevicesList();
