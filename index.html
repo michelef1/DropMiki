@@ -448,6 +448,10 @@
   .transfer.done .bar-fill{background:var(--ok);}
   .transfer .dl-link{
     align-self:flex-start;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
     font-size:12px;
     color:var(--cyan);
     text-decoration:none;
@@ -543,7 +547,7 @@
   </div>
 
   <footer>
-    <span id="app-version">v1.8</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
+    <span id="app-version">v1.9</span> · trasferimento diretto peer-to-peer, nessun file passa dal server
   </footer>
 </div>
 
@@ -917,6 +921,16 @@
     if(bar) bar.style.width = pct + '%';
   }
 
+  function truncateName(name, maxLen){
+    if(name.length <= maxLen) return name;
+    const dotIndex = name.lastIndexOf('.');
+    const hasExt = dotIndex > 0 && dotIndex > name.length - 8;
+    const ext = hasExt ? name.slice(dotIndex) : '';
+    const base = hasExt ? name.slice(0, dotIndex) : name;
+    const keep = Math.max(4, maxLen - ext.length - 1);
+    return base.slice(0, keep) + '…' + ext;
+  }
+
   function markDone(id, downloadUrl, filename){
     const row = document.getElementById('transfer-' + id);
     if(!row) return;
@@ -924,9 +938,10 @@
     if(downloadUrl){
       const a = document.createElement('a');
       a.href = downloadUrl;
-      a.download = filename;
+      a.download = filename; // il file salvato mantiene sempre il nome completo
       a.className = 'dl-link';
-      a.textContent = 'Scarica ' + filename;
+      a.title = filename;
+      a.textContent = 'Scarica ' + truncateName(filename, 26);
       row.appendChild(a);
     }
   }
