@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dropmiki-v15';
+const CACHE_NAME = 'dropmiki-v16';
 const ASSETS = [
   './',
   './index.html',
@@ -12,9 +12,6 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      // fetch con {cache:'reload'} ignora la cache HTTP del browser:
-      // senza questo, un file vecchio già in cache HTTP verrebbe
-      // "fotografato" di nuovo anche dentro la nuova cache del SW
       await Promise.all(
         ASSETS.map(async (url) => {
           const response = await fetch(url, { cache: 'reload' });
@@ -37,11 +34,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-
-  // Non cachare mai le chiamate al broker PeerJS o ad altri host: devono restare live
-  if (url.origin !== self.location.origin) {
-    return;
-  }
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
