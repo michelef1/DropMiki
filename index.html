@@ -82,6 +82,7 @@
     display:flex; align-items:center; justify-content:center;
     cursor:pointer;
     transition:border-color .15s, color .15s, background .15s;
+    position:relative;
   }
   .icon-btn:hover, .icon-btn:active{
     color:var(--cyan-soft);
@@ -95,7 +96,7 @@
     position:absolute;
     top:calc(100% + 8px);
     right:0;
-    min-width:170px;
+    min-width:180px;
     background:linear-gradient(180deg, #0D1B2E 0%, #0A1626 100%);
     border:1px solid var(--card-border-2);
     border-radius:14px;
@@ -104,7 +105,7 @@
     display:none;
     flex-direction:column;
     gap:2px;
-    z-index:60;
+    z-index:90;
   }
   .right-menu.open{ display:flex; }
   .right-menu-item{
@@ -234,6 +235,7 @@
     display:flex; align-items:center; justify-content:center;
     font-size:12px; font-weight:600;
     flex-shrink:0;
+    position:relative;
   }
   .radar-avatar.online{
     background:linear-gradient(180deg, #2ED47A 0%, #178F58 100%);
@@ -257,6 +259,20 @@
     text-overflow:ellipsis;
   }
   .radar-avatar-label.online{ color:var(--ice); font-weight:600; }
+
+  /* Notification dot indicator */
+  .notif-dot{
+    position:absolute;
+    top:-2px; right:-2px;
+    width:11px; height:11px;
+    background:var(--warn);
+    border:2px solid var(--bg);
+    border-radius:50%;
+    box-shadow:0 0 8px var(--warn);
+    animation:pulse-live 1.2s infinite ease-in-out;
+    display:none;
+  }
+  .has-notif .notif-dot{ display:block; }
 
   /* ---------- code pill ---------- */
   .code-label{
@@ -359,6 +375,7 @@
     margin-bottom:16px;
     cursor:pointer;
     transition:border-color .15s, transform .15s;
+    position:relative;
   }
   .nearby-card:hover{ border-color:var(--cyan-dim); }
   .nearby-card:active{ transform:scale(0.99); }
@@ -369,6 +386,7 @@
     display:flex; align-items:center; justify-content:center;
     flex-shrink:0;
     box-shadow:0 4px 14px rgba(47,127,224,0.4);
+    position:relative;
   }
   .nearby-icon svg{ width:24px; height:24px; color:#fff; }
   .nearby-text{ flex:1; min-width:0; }
@@ -445,6 +463,7 @@
     display:flex; align-items:center; justify-content:center;
     color:var(--cyan);
     transition:border-color .15s, background .15s;
+    position:relative;
   }
   .icon-row-btn:hover .circ{ border-color:var(--cyan); background:rgba(62,199,255,0.08); }
   .icon-row-btn svg{ width:20px; height:20px; }
@@ -550,6 +569,7 @@
     border-radius:12px;
     cursor:pointer;
     transition:background .15s;
+    position:relative;
   }
   .device-row:hover{ background:rgba(62,199,255,0.06); }
   .device-row.selected{
@@ -612,14 +632,14 @@
   .transfer .dl-link:hover{ color:var(--cyan-soft); }
   .empty-note{ font-size:12.5px; color:var(--ice-dim); text-align:center; padding:8px 0 2px; }
 
-  /* ---------- modal ---------- */
+  /* ---------- modals & z-index hierarchy ---------- */
   .modal-overlay{
     position:fixed; inset:0;
     background:rgba(2,6,12,0.85);
     backdrop-filter:blur(4px);
     -webkit-backdrop-filter:blur(4px);
     display:none; align-items:center; justify-content:center;
-    z-index:50; padding:16px;
+    z-index:100; padding:16px;
   }
   .modal-overlay.open{ display:flex; }
   .modal-box{
@@ -639,6 +659,11 @@
   .modal-body p{ margin:0 0 10px; }
   .modal-body p:last-child{ margin-bottom:0; }
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+
+  /* Confirm overlay with higher z-index to stay on top of devices/chat modals */
+  #confirmOverlay {
+    z-index: 200;
+  }
 
   /* ---------- chat ---------- */
   #chatModal .modal-box{
@@ -886,6 +911,7 @@
     border:1px solid transparent;
     cursor:pointer;
     transition:background .15s, border-color .15s;
+    position:relative;
   }
   .drawer-device:hover{ background:rgba(62,199,255,0.09); border-color:var(--card-border-2); }
   .drawer-device-avatar{
@@ -897,6 +923,7 @@
     color:var(--ice-dim);
     font-size:13px; font-weight:600;
     flex-shrink:0;
+    position:relative;
   }
   .drawer-device-avatar.online{
     background:linear-gradient(180deg, #2ED47A 0%, #178F58 100%);
@@ -959,6 +986,14 @@
       </button>
 
       <div class="right-menu" id="rightMenu">
+        <button class="right-menu-item" id="installAppBtn" style="display:none; color:var(--cyan);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Installa App
+        </button>
         <button class="right-menu-item" id="rmInfo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
             <circle cx="12" cy="12" r="9"></circle>
@@ -1022,11 +1057,12 @@
   </div>
 
   <div class="nearby-card" id="nearbyCard">
-    <div class="nearby-icon">
+    <div class="nearby-icon" id="nearbyIconWrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="4" width="14" height="11" rx="2"></rect>
         <rect x="16" y="10" width="6" height="10" rx="1.5"></rect>
       </svg>
+      <span class="notif-dot" id="globalNotifDot"></span>
     </div>
     <div class="nearby-text">
       <div class="nearby-title">Dispositivi vicini</div>
@@ -1044,7 +1080,7 @@
       </svg>
       Invia file
     </button>
-    <button class="action-btn chat" id="actionChat">
+    <button class="action-btn chat" id="actionChat" style="position:relative;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         <circle cx="8" cy="12" r="1" fill="currentColor"></circle>
@@ -1052,6 +1088,7 @@
         <circle cx="16" cy="12" r="1" fill="currentColor"></circle>
       </svg>
       Chat
+      <span class="notif-dot" id="chatActionNotif"></span>
     </button>
     <button class="action-btn link" id="actionLink">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1063,6 +1100,16 @@
   </div>
 
   <div class="icon-row">
+    <button class="icon-row-btn" id="installBtnBottom" style="display:none;">
+      <span class="circ" style="border-color:var(--cyan); background:rgba(62,199,255,0.08);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      </span>
+      Installa
+    </button>
     <button class="icon-row-btn" id="settingsBtn">
       <span class="circ">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1115,6 +1162,19 @@
   <div class="drawer-head">
     <span class="brand">DropMiki</span>
     <button class="icon-btn" id="drawerClose" aria-label="Chiudi">✕</button>
+  </div>
+
+  <div class="drawer-section" id="drawerInstallSection" style="display:none;">
+    <button class="drawer-btn" id="drawerInstallBtn" style="color:var(--cyan);">
+      <span class="drawer-btn-icon" style="border-color:var(--cyan); background:rgba(62,199,255,0.08);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      </span>
+      Installa App
+    </button>
   </div>
 
   <div class="drawer-section">
@@ -1307,6 +1367,8 @@
   const onlineText = $('onlineText');
   const nearbySub = $('nearbySub');
   const radarAvatars = $('radarAvatars');
+  const globalNotifDot = $('globalNotifDot');
+  const chatActionNotif = $('chatActionNotif');
 
   const peerCodeInput = $('peerCodeInput');
   const connectBtn = $('connectBtn');
@@ -1331,6 +1393,63 @@
 
   let chatPeerCode = null;
   let chatHistories = {};
+  let unreadNotifications = {}; // Traccia notifiche per device
+
+  // Gestione installazione PWA (deferred prompt)
+  let deferredPrompt = null;
+  const installAppBtn = $('installAppBtn');
+  const installBtnBottom = $('installBtnBottom');
+  const drawerInstallSection = $('drawerInstallSection');
+  const drawerInstallBtn = $('drawerInstallBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    showInstallButtons();
+  });
+
+  function showInstallButtons(){
+    if(installAppBtn) installAppBtn.style.display = 'flex';
+    if(installBtnBottom) installBtnBottom.style.display = 'flex';
+    if(drawerInstallSection) drawerInstallSection.style.display = 'block';
+  }
+
+  async function triggerInstall(){
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if(outcome === 'accepted'){
+      deferredPrompt = null;
+      hideInstallButtons();
+    }
+  }
+
+  function hideInstallButtons(){
+    if(installAppBtn) installAppBtn.style.display = 'none';
+    if(installBtnBottom) installBtnBottom.style.display = 'none';
+    if(drawerInstallSection) drawerInstallSection.style.display = 'none';
+  }
+
+  if(installAppBtn) installAppBtn.addEventListener('click', () => { rightMenu.classList.remove('open'); triggerInstall(); });
+  if(installBtnBottom) installBtnBottom.addEventListener('click', triggerInstall);
+  if(drawerInstallBtn) drawerInstallBtn.addEventListener('click', () => { closeDrawer(); triggerInstall(); });
+
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    hideInstallButtons();
+  });
+
+  // ---------- notifiche globali ----------
+  function checkAnyUnread(){
+    const hasAny = Object.values(unreadNotifications).some(v => v === true);
+    if(hasAny){
+      globalNotifDot.style.display = 'block';
+      chatActionNotif.style.display = 'block';
+    } else {
+      globalNotifDot.style.display = 'none';
+      chatActionNotif.style.display = 'none';
+    }
+  }
 
   // ---------- nome ----------
   function guessDeviceName(){
@@ -1406,6 +1525,8 @@
       connections[code].close();
       delete connections[code];
     }
+    delete unreadNotifications[code];
+    checkAnyUnread();
     if(selectedTarget === code) chooseFallbackTarget();
     renderDevicesList();
     renderRadarAvatars();
@@ -1490,6 +1611,7 @@
       const y = Math.sin(rad) * radius;
       const isOnline = !!(connections[d.code] && connections[d.code].open);
       const isSelected = d.code === selectedTarget;
+      const hasUnread = !!unreadNotifications[d.code];
 
       const wrap = document.createElement('div');
       wrap.className = 'radar-avatar-wrap' + (y < 0 ? ' label-above' : '');
@@ -1500,8 +1622,12 @@
       wrap.addEventListener('click', () => onDeviceRowClick(d.code));
 
       const dot = document.createElement('div');
-      dot.className = 'radar-avatar' + (isOnline ? ' online' : '') + (isSelected ? ' selected' : '');
+      dot.className = 'radar-avatar' + (isOnline ? ' online' : '') + (isSelected ? ' selected' : '') + (hasUnread ? ' has-notif' : '');
       dot.textContent = (d.name || '?').trim().charAt(0).toUpperCase();
+
+      const notifBadge = document.createElement('span');
+      notifBadge.className = 'notif-dot';
+      dot.appendChild(notifBadge);
 
       const label = document.createElement('div');
       label.className = 'radar-avatar-label' + (isOnline ? ' online' : '');
@@ -1526,6 +1652,7 @@
       const conn = connections[d.code];
       const online = !!(conn && conn.open);
       if(online) onlineCount++;
+      const hasUnread = !!unreadNotifications[d.code];
 
       const item = document.createElement('div');
       item.className = 'drawer-device';
@@ -1535,8 +1662,12 @@
       });
 
       const avatar = document.createElement('div');
-      avatar.className = 'drawer-device-avatar' + (online ? ' online' : '');
+      avatar.className = 'drawer-device-avatar' + (online ? ' online' : '') + (hasUnread ? ' has-notif' : '');
       avatar.textContent = (d.name || '?').trim().charAt(0).toUpperCase();
+
+      const notifBadge = document.createElement('span');
+      notifBadge.className = 'notif-dot';
+      avatar.appendChild(notifBadge);
 
       const info = document.createElement('div');
       info.className = 'drawer-device-info';
@@ -1568,6 +1699,11 @@
   }
 
   function onDeviceRowClick(code){
+    unreadNotifications[code] = false;
+    checkAnyUnread();
+    renderRadarAvatars();
+    renderDrawerDevices();
+
     const conn = connections[code];
     if(conn && conn.open){
       selectedTarget = code;
@@ -1810,7 +1946,10 @@
   function closeDevices(){ devicesOverlay.classList.remove('open'); }
   $('devicesClose').addEventListener('click', closeDevices);
   devicesOverlay.addEventListener('click', (e) => { if(e.target === devicesOverlay) closeDevices(); });
-  $('nearbyCard').addEventListener('click', openDevices);
+  $('nearbyCard').addEventListener('click', () => {
+    globalNotifDot.style.display = 'none';
+    openDevices();
+  });
   $('actionLink').addEventListener('click', openDevices);
 
   // ---------- send overlay ----------
@@ -1955,6 +2094,11 @@
     } else if(msg.type === 'chat'){
       receiveChatMessage(code, msg.text, msg.ts);
     } else if(msg.type === 'meta'){
+      unreadNotifications[code] = true;
+      checkAnyUnread();
+      renderRadarAvatars();
+      renderDrawerDevices();
+
       incoming = {
         transferId: msg.transferId,
         name: msg.name,
@@ -2013,6 +2157,11 @@
       }
     }
     chatPeerCode = code;
+    unreadNotifications[code] = false;
+    checkAnyUnread();
+    renderRadarAvatars();
+    renderDrawerDevices();
+
     chatModal.classList.add('open');
     updateChatHeader();
     renderChatMessages();
@@ -2072,6 +2221,12 @@
 
   function receiveChatMessage(code, text, ts){
     pushChatMessage(code, text, ts || Date.now(), 'in');
+    if(chatPeerCode !== code){
+      unreadNotifications[code] = true;
+      checkAnyUnread();
+      renderRadarAvatars();
+      renderDrawerDevices();
+    }
   }
 
   function sendChatMessage(){
@@ -2105,7 +2260,10 @@
     });
   });
 
-  $('actionChat').addEventListener('click', () => openChat(null));
+  $('actionChat').addEventListener('click', () => {
+    chatActionNotif.style.display = 'none';
+    openChat(null);
+  });
 
   // ---------- menu a tendina in alto a destra ----------
   const rightMenu = $('rightMenu');
@@ -2166,7 +2324,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.0</p>
+        <p>Versione 3.1</p>
         <p style="margin-top:14px;">Miki by Claude ❤</p>
       </div>
     `);
@@ -2188,6 +2346,8 @@
           savedDevices = [];
           persistDevices();
           chatHistories = {};
+          unreadNotifications = {};
+          checkAnyUnread();
           Object.keys(localStorage).forEach(k => {
             if(k.startsWith(LS_CHAT)) localStorage.removeItem(k);
           });
