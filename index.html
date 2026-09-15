@@ -308,21 +308,25 @@
   }
   .code-pill .copy-btn:hover{ color:var(--cyan-soft); background:rgba(62,199,255,0.1); }
 
-  /* NEW: pulsante mostra QR sotto il codice */
-  .show-qr-btn{
+  /* NEW: pulsante copia codice grande */
+  .copy-code-btn{
     display:flex; align-items:center; justify-content:center; gap:8px;
-    margin:0 auto 12px;
+    margin:0 auto 14px;
     background:linear-gradient(180deg, #2F7FE0 0%, #1E5FB5 100%);
     border:none; border-radius:12px;
     color:#fff; font-family:'Inter',sans-serif;
     font-size:13px; font-weight:600;
-    padding:10px 18px;
+    padding:11px 20px;
     cursor:pointer;
     box-shadow:0 4px 14px rgba(47,127,224,0.4);
-    transition:transform .12s;
+    transition:transform .12s, background .2s;
   }
-  .show-qr-btn:active{ transform:scale(0.96); }
-  .show-qr-btn svg{ width:16px; height:16px; }
+  .copy-code-btn:active{ transform:scale(0.96); }
+  .copy-code-btn.copied{
+    background:linear-gradient(180deg, #2ED47A 0%, #178F58 100%);
+    box-shadow:0 4px 14px rgba(46,212,122,0.5);
+  }
+  .copy-code-btn svg{ width:17px; height:17px; }
 
   .online-badge{
     display:flex; align-items:center; justify-content:center; gap:6px;
@@ -484,7 +488,6 @@
     text-transform:uppercase;
     padding:12px 14px; text-align:center;
     font-family:'IBM Plex Mono',monospace; font-weight:600;
-    min-width:0;
   }
   input[type="text"]:focus{ outline:none; border-color:var(--cyan-dim); }
   input[type="text"]::placeholder{ color:var(--ice-dim); letter-spacing:2px; }
@@ -584,8 +587,6 @@
   #chatModal{ z-index:200; }
   #sendOverlay{ z-index:70; }
   #devicesOverlay{ z-index:70; }
-  #qrShowOverlay{ z-index:250; }
-  #qrScanOverlay{ z-index:260; }
 
   .modal-box{
     background:linear-gradient(180deg, #0D1B2E 0%, #0A1626 100%);
@@ -608,87 +609,6 @@
   .modal-body p{ margin:0 0 10px; }
   .modal-body p:last-child{ margin-bottom:0; }
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
-
-  /* QR show modal */
-  .qr-show-wrap{
-    display:flex; flex-direction:column; align-items:center; gap:14px;
-    padding:8px 0;
-  }
-  .qr-canvas-box{
-    background:#FFFFFF;
-    border-radius:16px;
-    padding:16px;
-    box-shadow:0 0 30px rgba(62,199,255,0.4);
-    display:flex; align-items:center; justify-content:center;
-    width:min(280px, 78vw);
-    height:min(280px, 78vw);
-  }
-  .qr-canvas-box canvas,
-  .qr-canvas-box img{
-    width:100% !important;
-    height:100% !important;
-    image-rendering:pixelated;
-    display:block;
-  }
-  .qr-code-text{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:26px;
-    font-weight:600;
-    letter-spacing:5px;
-    color:#FFFFFF;
-    background:linear-gradient(180deg, #0D1B2E 0%, #0A1626 100%);
-    border:1.5px solid var(--cyan-dim);
-    border-radius:12px;
-    padding:10px 22px;
-    box-shadow:0 0 20px rgba(62,199,255,0.2);
-  }
-  .qr-hint{
-    font-size:12px; color:var(--ice-dim);
-    text-align:center; max-width:280px; line-height:1.5;
-  }
-
-  /* QR scan modal */
-  #qrScanOverlay .modal-box{ max-width:420px; }
-  .qr-scan-wrap{
-    position:relative;
-    width:100%;
-    aspect-ratio:1;
-    border-radius:16px;
-    overflow:hidden;
-    background:#000;
-    border:1.5px solid var(--cyan-dim);
-  }
-  .qr-scan-wrap video{
-    width:100%; height:100%;
-    object-fit:cover;
-    display:block;
-  }
-  .qr-scan-frame{
-    position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-    pointer-events:none;
-  }
-  .qr-scan-frame::before{
-    content:'';
-    width:62%; aspect-ratio:1;
-    border:3px solid var(--cyan);
-    border-radius:16px;
-    box-shadow:0 0 24px rgba(62,199,255,0.7), inset 0 0 24px rgba(62,199,255,0.2);
-    animation:qr-frame-pulse 1.8s ease-in-out infinite;
-  }
-  @keyframes qr-frame-pulse{
-    0%,100%{ opacity:0.85; transform:scale(1); }
-    50%{ opacity:1; transform:scale(1.04); }
-  }
-  .qr-scan-status{
-    font-size:12.5px; color:var(--cyan-soft);
-    text-align:center; margin-top:12px;
-    min-height:18px;
-  }
-  .qr-scan-actions{
-    display:flex; gap:10px; margin-top:14px;
-  }
-  .qr-scan-actions button{ flex:1; }
 
   #chatModal .modal-box{
     display:flex; flex-direction:column;
@@ -1012,8 +932,6 @@
     border-top-left-radius:24px;
     border-top-right-radius:24px;
     border-top:1.5px solid var(--card-border-2);
-    border-left:1.5px solid transparent;
-    border-right:1.5px solid transparent;
     box-shadow:0 -12px 40px rgba(0,0,0,0.7);
     transition:transform .3s cubic-bezier(.2,.7,.3,1);
     z-index:601;
@@ -1336,19 +1254,13 @@
     </button>
   </div>
 
-  <!-- NEW: pulsante mostra QR -->
-  <button class="show-qr-btn" id="showQrBtn">
+  <!-- NEW: pulsante copia codice grande e visibile -->
+  <button class="copy-code-btn" id="copyCodeBtnBig">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="7" height="7"></rect>
-      <rect x="14" y="3" width="7" height="7"></rect>
-      <rect x="3" y="14" width="7" height="7"></rect>
-      <path d="M14 14h3v3h-3z"></path>
-      <path d="M20 14h1v1h-1z"></path>
-      <path d="M14 20h1v1h-1z"></path>
-      <path d="M20 20h1v1h-1z"></path>
-      <path d="M18 18h1v1h-1z"></path>
+      <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
     </svg>
-    Mostra QR
+    <span id="copyCodeLabel">Copia codice</span>
   </button>
 
   <div class="online-badge" id="onlineBadge">
@@ -1358,7 +1270,7 @@
 
   <div class="my-name-row">
     Sei visibile come:
-    <input type="text" id="myNameInput" class="my-name-input" value="" maxlength="24">
+    <input type="text" id="myNameInput" class="my-name-input" value="" maxlength="24" name="myName">
   </div>
 
   <div class="nearby-card" id="nearbyCard">
@@ -1470,20 +1382,6 @@
       </span>
       Installa app
     </button>
-    <button class="drawer-btn" id="drawerQr">
-      <span class="drawer-btn-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-          <path d="M14 14h3v3h-3z"></path>
-          <path d="M20 14h1v1h-1z"></path>
-          <path d="M14 20h1v1h-1z"></path>
-          <path d="M20 20h1v1h-1z"></path>
-        </svg>
-      </span>
-      Mostra QR
-    </button>
     <button class="drawer-btn" id="drawerSettings">
       <span class="drawer-btn-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
@@ -1568,17 +1466,9 @@
     <div class="panel" style="margin-bottom:12px;">
       <h2><span class="dot-mark" style="background:var(--cyan)"></span>AGGIUNGI UN DISPOSITIVO</h2>
       <div class="row">
-        <input type="text" id="peerCodeInput" placeholder="CODICE" maxlength="6" autocomplete="off" autocapitalize="characters">
+        <input type="text" id="peerCodeInput" placeholder="CODICE" maxlength="6" autocomplete="off" autocapitalize="characters" name="peerCode">
         <button class="primary" id="connectBtn">Connetti</button>
       </div>
-      <!-- NEW: pulsante scansiona QR -->
-      <button class="ghost" id="scanQrBtn" style="width:100%; margin-top:8px; display:flex; align-items:center; justify-content:center; gap:8px; padding:11px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-          <circle cx="12" cy="13" r="4"></circle>
-        </svg>
-        Scansiona QR con fotocamera
-      </button>
       <div class="status-line">
         <span class="dot" id="peerStatusDot"></span>
         <span id="peerStatusText">Inserisci il codice mostrato sull'altro dispositivo</span>
@@ -1615,39 +1505,6 @@
   </div>
 </div>
 
-<!-- NEW: QR SHOW MODAL -->
-<div class="modal-overlay" id="qrShowOverlay">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3>Il tuo QR code</h3>
-      <button class="modal-close" id="qrShowClose" aria-label="Chiudi">✕</button>
-    </div>
-    <div class="qr-show-wrap">
-      <div class="qr-canvas-box" id="qrCanvasBox"></div>
-      <div class="qr-code-text" id="qrCodeText">······</div>
-      <div class="qr-hint">Fai scansionare questo QR dall'altro dispositivo<br>per collegarvi senza digitare il codice</div>
-    </div>
-  </div>
-</div>
-
-<!-- NEW: QR SCAN MODAL -->
-<div class="modal-overlay" id="qrScanOverlay">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3>Scansiona QR</h3>
-      <button class="modal-close" id="qrScanClose" aria-label="Chiudi">✕</button>
-    </div>
-    <div class="qr-scan-wrap" id="qrScanWrap">
-      <video id="qrVideo" playsinline muted autoplay></video>
-      <div class="qr-scan-frame"></div>
-    </div>
-    <div class="qr-scan-status" id="qrScanStatus">Inquadra il QR dell'altro dispositivo</div>
-    <div class="qr-scan-actions">
-      <button class="ghost" id="qrScanCancel">Annulla</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="chatModal" data-chat-theme="1">
   <div class="modal-box">
     <div class="chat-header">
@@ -1680,7 +1537,7 @@
       </div>
     </div>
     <div class="chat-input-row">
-      <input type="text" id="chatInput" placeholder="Scrivi un messaggio…" maxlength="2000" autocomplete="off">
+      <input type="text" id="chatInput" placeholder="Scrivi un messaggio…" maxlength="2000" autocomplete="off" name="chatMessage">
       <button class="chat-send" id="chatSend" aria-label="Invia">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -1762,8 +1619,6 @@
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 (function(){
   'use strict';
@@ -1818,10 +1673,6 @@
   let chatHistories = {};
   let unreadCounts = {};
   let pendingFileCount = 0;
-
-  // ===== QR scan state =====
-  let qrStream = null;
-  let qrRAF = null;
 
   // ---------- tema / font ----------
   function applyTheme(theme){
@@ -2303,151 +2154,39 @@
   });
   peerCodeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') connectBtn.click(); });
 
-  $('copyCodeBtn').addEventListener('click', async () => {
+  // ---------- copia codice ----------
+  async function copyMyCode(btnEl, labelEl){
     try{
       await navigator.clipboard.writeText(myCode);
-      const btn = $('copyCodeBtn');
-      const orig = btn.innerHTML;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#2ED47A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-      setTimeout(() => { btn.innerHTML = orig; }, 1200);
-    }catch(e){}
-  });
-
-  // ===================== QR CODE =====================
-  function showQrModal(){
-    if(!myCode) return;
-    const box = $('qrCanvasBox');
-    box.innerHTML = '';
-    $('qrCodeText').textContent = myCode;
-
-    if(typeof QRCode === 'undefined'){
-      box.innerHTML = '<div style="color:#666;font-size:12px;text-align:center;padding:20px;">Errore caricamento QR. Verifica la connessione.</div>';
-      $('qrShowOverlay').classList.add('open');
-      return;
-    }
-
-    // genero canvas con QRCode.js
-    const canvas = document.createElement('canvas');
-    box.appendChild(canvas);
-    QRCode.toCanvas(canvas, myCode, {
-      width: 240,
-      margin: 1,
-      color: { dark: '#000000', light: '#FFFFFF' },
-      errorCorrectionLevel: 'M'
-    }, (err) => {
-      if(err){
-        box.innerHTML = '<div style="color:#666;font-size:12px;text-align:center;padding:20px;">Errore generazione QR.</div>';
+      if(btnEl){
+        btnEl.classList.add('copied');
+        const origLabel = labelEl ? labelEl.textContent : null;
+        if(labelEl) labelEl.textContent = 'Copiato!';
+        setTimeout(() => {
+          btnEl.classList.remove('copied');
+          if(labelEl && origLabel) labelEl.textContent = origLabel;
+        }, 1400);
       }
-    });
-
-    $('qrShowOverlay').classList.add('open');
-  }
-
-  function closeQrModal(){
-    $('qrShowOverlay').classList.remove('open');
-  }
-
-  function openQrScanner(){
-    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-      setPeerStatus('error', 'Fotocamera non supportata dal browser');
-      return;
-    }
-    if(typeof jsQR === 'undefined'){
-      setPeerStatus('error', 'Decoder QR non disponibile. Verifica la connessione.');
-      return;
-    }
-    $('qrScanOverlay').classList.add('open');
-    $('qrScanStatus').textContent = 'Richiedo accesso alla fotocamera…';
-    startQrCamera();
-  }
-
-  async function startQrCamera(){
-    try{
-      qrStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false
-      });
-      const video = $('qrVideo');
-      video.srcObject = qrStream;
-      await video.play();
-      $('qrScanStatus').textContent = 'Inquadra il QR dell\'altro dispositivo';
-      scanQrFrame();
-    }catch(err){
-      console.error(err);
-      let msg = 'Impossibile accedere alla fotocamera';
-      if(err.name === 'NotAllowedError') msg = 'Permesso fotocamera negato';
-      else if(err.name === 'NotFoundError') msg = 'Nessuna fotocamera trovata';
-      else if(err.name === 'NotReadableError') msg = 'Fotocamera occupata da un\'altra app';
-      $('qrScanStatus').textContent = msg + ' — puoi digitare il codice a mano';
-    }
-  }
-
-  function scanQrFrame(){
-    const video = $('qrVideo');
-    if(!video.videoWidth){
-      qrRAF = requestAnimationFrame(scanQrFrame);
-      return;
-    }
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-      inversionAttempts: 'dontInvert'
-    });
-    if(code && code.data){
-      const detected = code.data.trim().toUpperCase();
-      // validazione: 6 caratteri alfanumerici
-      if(/^[A-Z0-9]{6}$/.test(detected)){
-        onQrDetected(detected);
-        return;
-      } else {
-        $('qrScanStatus').textContent = 'QR non valido — serve un codice DropMiki';
+    }catch(e){
+      // fallback: selezione manuale
+      const ta = document.createElement('textarea');
+      ta.value = myCode;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch(err){}
+      document.body.removeChild(ta);
+      if(btnEl){
+        btnEl.classList.add('copied');
+        if(labelEl) labelEl.textContent = 'Copiato!';
+        setTimeout(() => {
+          btnEl.classList.remove('copied');
+          if(labelEl) labelEl.textContent = 'Copia codice';
+        }, 1400);
       }
     }
-    qrRAF = requestAnimationFrame(scanQrFrame);
   }
-
-  function onQrDetected(code){
-    stopQrCamera();
-    closeQrScanner();
-    peerCodeInput.value = code;
-    setPeerStatus('connected', 'QR letto: ' + code);
-    // auto-connessione
-    upsertDevice(code);
-    attemptConnect(code);
-    renderDevicesList();
-    renderRadarAvatars();
-    renderDrawerDevices();
-  }
-
-  function stopQrCamera(){
-    if(qrRAF){ cancelAnimationFrame(qrRAF); qrRAF = null; }
-    if(qrStream){
-      qrStream.getTracks().forEach(t => t.stop());
-      qrStream = null;
-    }
-    const video = $('qrVideo');
-    if(video) video.srcObject = null;
-  }
-
-  function closeQrScanner(){
-    stopQrCamera();
-    $('qrScanOverlay').classList.remove('open');
-    $('qrScanStatus').textContent = 'Inquadra il QR dell\'altro dispositivo';
-  }
-
-  $('showQrBtn').addEventListener('click', showQrModal);
-  $('drawerQr').addEventListener('click', () => { closeDrawer(); showQrModal(); });
-  $('qrShowClose').addEventListener('click', closeQrModal);
-  $('qrShowOverlay').addEventListener('click', (e) => { if(e.target === $('qrShowOverlay')) closeQrModal(); });
-
-  $('scanQrBtn').addEventListener('click', openQrScanner);
-  $('qrScanClose').addEventListener('click', closeQrScanner);
-  $('qrScanCancel').addEventListener('click', closeQrScanner);
-  $('qrScanOverlay').addEventListener('click', (e) => { if(e.target === $('qrScanOverlay')) closeQrScanner(); });
+  $('copyCodeBtn').addEventListener('click', () => copyMyCode(null, null));
+  $('copyCodeBtnBig').addEventListener('click', () => copyMyCode($('copyCodeBtnBig'), $('copyCodeLabel')));
 
   // ---------- modali ----------
   const modalOverlay = $('modalOverlay');
@@ -2490,15 +2229,12 @@
     if(e.key === 'Escape'){
       if(confirmOverlay.classList.contains('open')){ closeConfirm(); return; }
       if(modalOverlay.classList.contains('open')){ closeModal(); return; }
-      if($('qrScanOverlay').classList.contains('open')){ closeQrScanner(); return; }
-      if($('qrShowOverlay').classList.contains('open')){ closeQrModal(); return; }
       if($('settingsSheet').classList.contains('open')){ closeSettings(); return; }
       closeDevices(); closeSend(); closeChat(); closeDrawer();
       rightMenu.classList.remove('open');
     }
   });
 
-  // ---------- devices overlay ----------
   const devicesOverlay = $('devicesOverlay');
   function openDevices(){ devicesOverlay.classList.add('open'); }
   function closeDevices(){ devicesOverlay.classList.remove('open'); }
@@ -2507,7 +2243,6 @@
   $('nearbyCard').addEventListener('click', openDevices);
   $('actionLink').addEventListener('click', openDevices);
 
-  // ---------- send overlay ----------
   const sendOverlay = $('sendOverlay');
   function openSend(){
     sendOverlay.classList.add('open');
@@ -2526,7 +2261,6 @@
     openSend();
   });
 
-  // ---------- file ----------
   dropzone.addEventListener('click', () => {
     if(dropzone.classList.contains('disabled')) return;
     fileInput.click();
@@ -2656,7 +2390,6 @@
     }
   }
 
-  // ---------- chat ----------
   const chatMessages = $('chatMessages');
   const chatEmpty = $('chatEmpty');
   const chatInput = $('chatInput');
@@ -2859,9 +2592,8 @@
   function showGuida(){
     openModal('Guida', `
       <p><b>Il tuo codice</b> è fisso su questo dispositivo: comunicalo all'altro dispositivo per farti trovare.</p>
-      <p>Puoi anche mostrarlo come <b>QR code</b> (pulsante "Mostra QR"): l'altro dispositivo lo inquadra con la fotocamera e si collega automaticamente.</p>
       <p>Il tuo nome ("Sei visibile come") viene mostrato automaticamente agli altri dispositivi quando ti colleghi.</p>
-      <p>Tocca <b>Collega device</b> e inserisci il codice a 6 caratteri, oppure scansiona il QR.</p>
+      <p>Tocca <b>Collega device</b> e inserisci il codice a 6 caratteri dell'altro dispositivo.</p>
       <p>I dispositivi collegati vengono <b>salvati</b>: al prossimo avvio l'app prova a ricollegarsi da sola.</p>
       <p>Tocca un dispositivo <b>connesso</b> per selezionarlo come destinatario, poi <b>Invia file</b> o <b>Chat</b>.</p>
       <p>I file e i messaggi viaggiano <b>direttamente</b> tra i due dispositivi: nessun dato passa da un server.</p>
@@ -2871,7 +2603,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.3 — step 1</p>
+        <p>Versione 3.2.1</p>
         <p style="margin-top:14px;">Miki by Claude</p>
       </div>
     `);
