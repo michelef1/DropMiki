@@ -729,6 +729,30 @@
   .chat-send:disabled{ opacity:0.4; cursor:not-allowed; box-shadow:none; }
   .chat-send svg{ width:20px; height:20px; }
 
+  .chat-attach{
+    width:40px; height:40px; border-radius:50%; border:1px solid var(--card-border);
+    background:transparent; color:var(--ice-dim);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex-shrink:0;
+  }
+  .chat-attach:hover{ color:var(--ice); border-color:var(--cyan-dim); }
+  .chat-attach:disabled{ opacity:0.4; cursor:not-allowed; }
+  .chat-attach svg{ width:18px; height:18px; }
+
+  .file-chip{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(255,255,255,0.06);
+    border-radius:12px;
+    padding:9px 12px;
+    margin-bottom:4px;
+  }
+  .file-chip svg{ width:22px; height:22px; flex-shrink:0; opacity:0.85; }
+  .file-chip-info{ min-width:0; }
+  .file-chip-name{ font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:170px; }
+  .file-chip-size{ font-size:11px; opacity:0.75; }
+  .file-chip-dl{ display:inline-block; margin-top:2px; font-size:12px; color:inherit; text-decoration:underline; }
+  .file-chip-expired{ display:inline-block; margin-top:2px; font-size:11px; opacity:0.65; font-style:italic; }
+
   .drawer-overlay{
     position:fixed; inset:0;
     background:rgba(2,6,12,0.55);
@@ -1444,12 +1468,44 @@
         <span class="dot" id="peerStatusDot"></span>
         <span id="peerStatusText">Inserisci il codice mostrato sull'altro dispositivo</span>
       </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="ghost" id="showMyQrBtn" style="flex:1;">Mostra il mio QR</button>
+        <button class="ghost" id="scanQrBtn" style="flex:1;">Scansiona QR</button>
+      </div>
     </div>
     <div class="panel" style="margin-bottom:0;">
       <h2><span class="dot-mark" style="background:var(--ok)"></span>SALVATI</h2>
       <div id="devicesList"></div>
       <div class="empty-note" id="devicesEmpty">Nessun dispositivo salvato</div>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="qrShowOverlay">
+  <div class="modal-box" style="text-align:center;">
+    <div class="modal-head">
+      <h3>Il mio codice</h3>
+      <button class="modal-close" id="qrShowClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div style="background:#fff; border-radius:14px; padding:16px; display:inline-block;">
+      <canvas id="qrShowCanvas"></canvas>
+    </div>
+    <div style="margin-top:14px; font-size:13px; color:var(--ice-dim);">Fai inquadrare questo QR dall'altro dispositivo</div>
+    <div class="my-code-line" style="margin-top:8px;">Codice: <b id="qrShowCodeText">······</b></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="qrScanOverlay">
+  <div class="modal-box" style="text-align:center;">
+    <div class="modal-head">
+      <h3>Scansiona QR</h3>
+      <button class="modal-close" id="qrScanClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div style="position:relative; border-radius:14px; overflow:hidden; background:#000;">
+      <video id="qrScanVideo" playsinline autoplay muted style="width:100%; display:block;"></video>
+      <div style="position:absolute; inset:0; border:2px solid rgba(95,199,232,0.6); border-radius:14px; pointer-events:none; margin:14%;"></div>
+    </div>
+    <div id="qrScanStatus" style="margin-top:14px; font-size:12.5px; color:var(--ice-dim);">Inquadra il QR dell'altro dispositivo…</div>
   </div>
 </div>
 
@@ -1508,6 +1564,12 @@
       </div>
     </div>
     <div class="chat-input-row">
+      <button class="chat-attach" id="chatAttachBtn" aria-label="Allega file" title="Allega file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+        </svg>
+      </button>
+      <input type="file" id="chatFileInput" style="display:none;">
       <input type="text" id="chatInput" placeholder="Scrivi un messaggio…" maxlength="2000" autocomplete="off" name="chatMessage">
       <button class="chat-send" id="chatSend" aria-label="Invia">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1590,6 +1652,8 @@
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script>
 (function(){
   'use strict';
@@ -2170,6 +2234,8 @@
       if(confirmOverlay.classList.contains('open')){ closeConfirm(); return; }
       if(modalOverlay.classList.contains('open')){ closeModal(); return; }
       if($('settingsSheet').classList.contains('open')){ closeSettings(); return; }
+      if(qrShowOverlay.classList.contains('open')){ qrShowOverlay.classList.remove('open'); return; }
+      if(qrScanOverlay.classList.contains('open')){ closeQrScan(); return; }
       closeDevices(); closeSend(); closeChat(); closeDrawer();
       rightMenu.classList.remove('open');
     }
@@ -2180,6 +2246,109 @@
   function closeDevices(){ devicesOverlay.classList.remove('open'); }
   $('devicesClose').addEventListener('click', closeDevices);
   devicesOverlay.addEventListener('click', (e) => { if(e.target === devicesOverlay) closeDevices(); });
+
+  // ---------- QR: mostra il mio codice ----------
+  const qrShowOverlay = $('qrShowOverlay');
+  $('showMyQrBtn').addEventListener('click', () => {
+    qrShowOverlay.classList.add('open');
+    $('qrShowCodeText').textContent = myCode || '——';
+    const canvas = $('qrShowCanvas');
+    const ctx2d = canvas.getContext('2d');
+    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+    if(!myCode){
+      qrScanStatusFallback(canvas, 'Codice non ancora pronto, riprova tra un istante');
+      return;
+    }
+    if(!window.QRCode){
+      qrScanStatusFallback(canvas, 'Libreria QR non disponibile (controlla la connessione)');
+      return;
+    }
+    QRCode.toCanvas(canvas, myCode, { width: 220, margin: 1 }, (err) => {
+      if(err){
+        console.error(err);
+        qrScanStatusFallback(canvas, 'Impossibile generare il QR');
+      }
+    });
+  });
+  function qrScanStatusFallback(canvas, text){
+    canvas.width = 220; canvas.height = 220;
+    const ctx2d = canvas.getContext('2d');
+    ctx2d.fillStyle = '#f2f2f2';
+    ctx2d.fillRect(0, 0, 220, 220);
+    ctx2d.fillStyle = '#555';
+    ctx2d.font = '13px sans-serif';
+    ctx2d.textAlign = 'center';
+    wrapCanvasText(ctx2d, text, 110, 105, 190, 18);
+  }
+  function wrapCanvasText(ctx2d, text, x, y, maxWidth, lineHeight){
+    const words = text.split(' ');
+    let line = '';
+    let lines = [];
+    words.forEach(w => {
+      const test = line ? line + ' ' + w : w;
+      if(ctx2d.measureText(test).width > maxWidth && line){ lines.push(line); line = w; }
+      else line = test;
+    });
+    if(line) lines.push(line);
+    const startY = y - ((lines.length - 1) * lineHeight) / 2;
+    lines.forEach((l, i) => ctx2d.fillText(l, x, startY + i * lineHeight));
+  }
+  $('qrShowClose').addEventListener('click', () => qrShowOverlay.classList.remove('open'));
+  qrShowOverlay.addEventListener('click', (e) => { if(e.target === qrShowOverlay) qrShowOverlay.classList.remove('open'); });
+
+  // ---------- QR: scansiona un codice ----------
+  const qrScanOverlay = $('qrScanOverlay');
+  const qrScanVideo = $('qrScanVideo');
+  const qrScanStatus = $('qrScanStatus');
+  let qrScanStream = null;
+  let qrScanRAF = null;
+  const qrScanCanvas = document.createElement('canvas');
+  const qrScanCtx = qrScanCanvas.getContext('2d');
+
+  function stopQrScan(){
+    if(qrScanRAF){ cancelAnimationFrame(qrScanRAF); qrScanRAF = null; }
+    if(qrScanStream){ qrScanStream.getTracks().forEach(t => t.stop()); qrScanStream = null; }
+    qrScanVideo.srcObject = null;
+  }
+  function closeQrScan(){
+    stopQrScan();
+    qrScanOverlay.classList.remove('open');
+  }
+  function qrScanTick(){
+    if(qrScanVideo.readyState === qrScanVideo.HAVE_ENOUGH_DATA && window.jsQR){
+      qrScanCanvas.width = qrScanVideo.videoWidth;
+      qrScanCanvas.height = qrScanVideo.videoHeight;
+      qrScanCtx.drawImage(qrScanVideo, 0, 0, qrScanCanvas.width, qrScanCanvas.height);
+      const imageData = qrScanCtx.getImageData(0, 0, qrScanCanvas.width, qrScanCanvas.height);
+      const result = jsQR(imageData.data, imageData.width, imageData.height);
+      if(result && result.data){
+        const code = result.data.trim().toUpperCase();
+        if(/^[A-Z0-9]{6}$/.test(code)){
+          qrScanStatus.textContent = 'Codice trovato: ' + code;
+          closeQrScan();
+          peerCodeInput.value = code;
+          connectBtn.click();
+          return;
+        }
+      }
+    }
+    qrScanRAF = requestAnimationFrame(qrScanTick);
+  }
+  $('scanQrBtn').addEventListener('click', async () => {
+    qrScanOverlay.classList.add('open');
+    qrScanStatus.textContent = 'Inquadra il QR dell\'altro dispositivo…';
+    try{
+      qrScanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      qrScanVideo.srcObject = qrScanStream;
+      await qrScanVideo.play();
+      qrScanRAF = requestAnimationFrame(qrScanTick);
+    }catch(e){
+      console.error(e);
+      qrScanStatus.textContent = 'Impossibile accedere alla fotocamera: verifica i permessi.';
+    }
+  });
+  $('qrScanClose').addEventListener('click', closeQrScan);
+  qrScanOverlay.addEventListener('click', (e) => { if(e.target === qrScanOverlay) closeQrScan(); });
   $('nearbyCard').addEventListener('click', openDevices);
   $('actionLink').addEventListener('click', openDevices);
 
@@ -2310,11 +2479,13 @@
       pendingFileCount++;
       updateBadges();
       const senderName = deviceName(code);
-      showToast('file', 'File in arrivo da ' + senderName, msg.name + ' · ' + formatBytes(msg.size), () => {
-        if(selectedTarget === null) selectedTarget = code;
-        openSend();
-      });
-      incoming = { transferId: msg.transferId, name: msg.name, size: msg.size, mime: msg.mime, chunks: [], received: 0 };
+      if(!msg.viaChat){
+        showToast('file', 'File in arrivo da ' + senderName, msg.name + ' · ' + formatBytes(msg.size), () => {
+          if(selectedTarget === null) selectedTarget = code;
+          openSend();
+        });
+      }
+      incoming = { transferId: msg.transferId, name: msg.name, size: msg.size, mime: msg.mime, chunks: [], received: 0, viaChat: !!msg.viaChat, fromCode: code };
       addTransferRow(msg.transferId, msg.name, msg.size, 'down');
     } else if(msg.type === 'chunk'){
       if(!incoming || incoming.transferId !== msg.transferId) return;
@@ -2326,6 +2497,15 @@
       const blob = new Blob(incoming.chunks, { type: incoming.mime });
       const url = URL.createObjectURL(blob);
       markDone(msg.transferId, url, incoming.name);
+      if(incoming.viaChat){
+        pushChatFileMessage(incoming.fromCode, 'in', incoming.name, incoming.size, url);
+        if(chatPeerCode !== incoming.fromCode){
+          incrementUnread(incoming.fromCode);
+          renderRadarAvatars();
+          renderDrawerDevices();
+          showToast('chat', 'File ricevuto da ' + deviceName(incoming.fromCode), incoming.name, () => openChat(incoming.fromCode));
+        }
+      }
       incoming = null;
     }
   }
@@ -2379,6 +2559,7 @@
     chatPeerStatusText.textContent = online ? 'online' : 'offline';
     chatSend.disabled = !online;
     chatInput.disabled = !online;
+    $('chatAttachBtn').disabled = !online;
   }
   function renderChatMessages(){
     if(!chatPeerCode) return;
@@ -2386,17 +2567,33 @@
     Array.from(chatMessages.querySelectorAll('.msg')).forEach(n => n.remove());
     if(history.length === 0){ chatEmpty.style.display = 'flex'; return; }
     chatEmpty.style.display = 'none';
-    history.forEach(m => appendMessageEl(m.text, m.ts, m.dir));
+    history.forEach(m => appendMessageEl(m));
     scrollChatToBottom();
   }
-  function appendMessageEl(text, ts, dir){
+  function appendMessageEl(m){
     const el = document.createElement('div');
-    el.className = 'msg ' + (dir === 'out' ? 'out' : (dir === 'in' ? 'in' : 'system'));
-    const d = new Date(ts || Date.now());
+    el.className = 'msg ' + (m.dir === 'out' ? 'out' : (m.dir === 'in' ? 'in' : 'system'));
+    const d = new Date(m.ts || Date.now());
     const hh = String(d.getHours()).padStart(2, '0');
     const mm = String(d.getMinutes()).padStart(2, '0');
-    el.innerHTML = escapeHtml(text).replace(/\n/g, '<br>') +
-      '<span class="time">' + hh + ':' + mm + '</span>';
+    if(m.kind === 'file'){
+      const dlHtml = m.downloadUrl
+        ? '<a class="file-chip-dl" href="' + m.downloadUrl + '" download="' + escapeHtml(m.fileName) + '">Scarica</a>'
+        : '<span class="file-chip-expired">non più disponibile</span>';
+      el.innerHTML =
+        '<div class="file-chip">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' +
+          '<div class="file-chip-info">' +
+            '<div class="file-chip-name">' + escapeHtml(m.fileName) + '</div>' +
+            '<div class="file-chip-size">' + formatBytes(m.fileSize) + '</div>' +
+            dlHtml +
+          '</div>' +
+        '</div>' +
+        '<span class="time">' + hh + ':' + mm + '</span>';
+    } else {
+      el.innerHTML = escapeHtml(m.text).replace(/\n/g, '<br>') +
+        '<span class="time">' + hh + ':' + mm + '</span>';
+    }
     chatMessages.appendChild(el);
     return el;
   }
@@ -2429,6 +2626,42 @@
     chatInput.value = '';
     chatInput.focus();
   }
+  function pushChatFileMessage(code, dir, fileName, fileSize, downloadUrl){
+    const history = loadChatHistory(code);
+    history.push({ kind: 'file', dir, ts: Date.now(), fileName, fileSize, downloadUrl: downloadUrl || null });
+    persistChatHistory(code);
+    if(chatPeerCode === code) renderChatMessages();
+  }
+
+  async function sendFileViaChat(file){
+    const code = chatPeerCode;
+    const conn = code ? connections[code] : null;
+    if(!conn || !conn.open) return;
+    const transferId = 't' + Date.now();
+    conn.send({ type: 'meta', transferId, name: file.name, size: file.size, mime: file.type || 'application/octet-stream', viaChat: true });
+    let offset = 0;
+    while(offset < file.size){
+      const slice = file.slice(offset, offset + CHUNK_SIZE);
+      const buffer = await slice.arrayBuffer();
+      conn.send({ type: 'chunk', transferId, data: buffer });
+      offset += buffer.byteLength;
+      await new Promise(r => setTimeout(r, 0));
+    }
+    conn.send({ type: 'end', transferId });
+    const localUrl = URL.createObjectURL(file);
+    pushChatFileMessage(code, 'out', file.name, file.size, localUrl);
+  }
+
+  $('chatAttachBtn').addEventListener('click', () => {
+    if(!chatPeerCode) return;
+    $('chatFileInput').click();
+  });
+  $('chatFileInput').addEventListener('change', () => {
+    const f = $('chatFileInput').files[0];
+    if(f) sendFileViaChat(f);
+    $('chatFileInput').value = '';
+  });
+
   chatSend.addEventListener('click', sendChatMessage);
   chatInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChatMessage(); }
@@ -2543,7 +2776,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.2.1</p>
+        <p>Versione 3.3.1</p>
         <p style="margin-top:14px;">Miki by Claude</p>
       </div>
     `);
