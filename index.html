@@ -563,7 +563,7 @@
     z-index:50; padding:16px;
   }
   .modal-overlay.open{ display:flex; }
-  #confirmOverlay{ z-index:400; }
+  #confirmOverlay{ z-index:1000; }
   #chatModal{ z-index:200; }
   #sendOverlay{ z-index:70; }
   #devicesOverlay{ z-index:70; }
@@ -1488,7 +1488,7 @@
       <button class="modal-close" id="qrShowClose" aria-label="Chiudi">✕</button>
     </div>
     <div style="background:#fff; border-radius:14px; padding:16px; display:inline-block;">
-      <canvas id="qrShowCanvas"></canvas>
+      <div id="qrShowCanvas" style="width:220px; height:220px; display:flex; align-items:center; justify-content:center;"></div>
     </div>
     <div style="margin-top:14px; font-size:13px; color:var(--ice-dim);">Fai inquadrare questo QR dall'altro dispositivo</div>
     <div class="my-code-line" style="margin-top:8px;">Codice: <b id="qrShowCodeText">······</b></div>
@@ -1652,8 +1652,8 @@
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
 <script>
 (function(){
   'use strict';
@@ -2252,47 +2252,27 @@
   $('showMyQrBtn').addEventListener('click', () => {
     qrShowOverlay.classList.add('open');
     $('qrShowCodeText').textContent = myCode || '——';
-    const canvas = $('qrShowCanvas');
-    const ctx2d = canvas.getContext('2d');
-    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+    const container = $('qrShowCanvas');
+    container.innerHTML = '';
+    container.style.color = '#555';
+    container.style.fontSize = '13px';
+    container.style.textAlign = 'center';
+    container.style.padding = '10px';
     if(!myCode){
-      qrScanStatusFallback(canvas, 'Codice non ancora pronto, riprova tra un istante');
+      container.textContent = 'Codice non ancora pronto, riprova tra un istante';
       return;
     }
     if(!window.QRCode){
-      qrScanStatusFallback(canvas, 'Libreria QR non disponibile (controlla la connessione)');
+      container.textContent = 'Libreria QR non disponibile (controlla la connessione)';
       return;
     }
-    QRCode.toCanvas(canvas, myCode, { width: 220, margin: 1 }, (err) => {
-      if(err){
-        console.error(err);
-        qrScanStatusFallback(canvas, 'Impossibile generare il QR');
-      }
+    new QRCode(container, {
+      text: myCode,
+      width: 220,
+      height: 220,
+      correctLevel: QRCode.CorrectLevel.M
     });
   });
-  function qrScanStatusFallback(canvas, text){
-    canvas.width = 220; canvas.height = 220;
-    const ctx2d = canvas.getContext('2d');
-    ctx2d.fillStyle = '#f2f2f2';
-    ctx2d.fillRect(0, 0, 220, 220);
-    ctx2d.fillStyle = '#555';
-    ctx2d.font = '13px sans-serif';
-    ctx2d.textAlign = 'center';
-    wrapCanvasText(ctx2d, text, 110, 105, 190, 18);
-  }
-  function wrapCanvasText(ctx2d, text, x, y, maxWidth, lineHeight){
-    const words = text.split(' ');
-    let line = '';
-    let lines = [];
-    words.forEach(w => {
-      const test = line ? line + ' ' + w : w;
-      if(ctx2d.measureText(test).width > maxWidth && line){ lines.push(line); line = w; }
-      else line = test;
-    });
-    if(line) lines.push(line);
-    const startY = y - ((lines.length - 1) * lineHeight) / 2;
-    lines.forEach((l, i) => ctx2d.fillText(l, x, startY + i * lineHeight));
-  }
   $('qrShowClose').addEventListener('click', () => qrShowOverlay.classList.remove('open'));
   qrShowOverlay.addEventListener('click', (e) => { if(e.target === qrShowOverlay) qrShowOverlay.classList.remove('open'); });
 
@@ -2776,7 +2756,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.3.1</p>
+        <p>Versione 3.3.2</p>
         <p style="margin-top:14px;">Miki by Claude</p>
       </div>
     `);
