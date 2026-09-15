@@ -292,7 +292,7 @@
     border:1.5px solid var(--cyan-dim);
     border-radius:16px;
     padding:11px 16px;
-    max-width:300px; margin:0 auto 10px;
+    max-width:300px; margin:0 auto 16px;
     box-shadow:0 0 24px rgba(62,199,255,0.15), inset 0 0 20px rgba(62,199,255,0.05);
   }
   .code-pill b{
@@ -307,26 +307,6 @@
     display:flex; align-items:center; justify-content:center;
   }
   .code-pill .copy-btn:hover{ color:var(--cyan-soft); background:rgba(62,199,255,0.1); }
-
-  /* NEW: pulsante copia codice grande */
-  .copy-code-btn{
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    margin:0 auto 14px;
-    background:linear-gradient(180deg, #2F7FE0 0%, #1E5FB5 100%);
-    border:none; border-radius:12px;
-    color:#fff; font-family:'Inter',sans-serif;
-    font-size:13px; font-weight:600;
-    padding:11px 20px;
-    cursor:pointer;
-    box-shadow:0 4px 14px rgba(47,127,224,0.4);
-    transition:transform .12s, background .2s;
-  }
-  .copy-code-btn:active{ transform:scale(0.96); }
-  .copy-code-btn.copied{
-    background:linear-gradient(180deg, #2ED47A 0%, #178F58 100%);
-    box-shadow:0 4px 14px rgba(46,212,122,0.5);
-  }
-  .copy-code-btn svg{ width:17px; height:17px; }
 
   .online-badge{
     display:flex; align-items:center; justify-content:center; gap:6px;
@@ -1254,15 +1234,6 @@
     </button>
   </div>
 
-  <!-- NEW: pulsante copia codice grande e visibile -->
-  <button class="copy-code-btn" id="copyCodeBtnBig">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="9" y="9" width="13" height="13" rx="2"></rect>
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-    </svg>
-    <span id="copyCodeLabel">Copia codice</span>
-  </button>
-
   <div class="online-badge" id="onlineBadge">
     <span class="dot-live"></span>
     <span id="onlineText">Connessione…</span>
@@ -1674,7 +1645,6 @@
   let unreadCounts = {};
   let pendingFileCount = 0;
 
-  // ---------- tema / font ----------
   function applyTheme(theme){
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem(LS_THEME, theme);
@@ -1702,7 +1672,6 @@
     applyChatTheme(localStorage.getItem(LS_CHAT_THEME) || '1');
   }
 
-  // ---------- nome ----------
   function guessDeviceName(){
     const ua = navigator.userAgent;
     const m = ua.match(/Android [\d.]+;\s*([^;)]+)\)/);
@@ -1731,7 +1700,6 @@
     }
   });
 
-  // ---------- storage ----------
   function loadDevices(){
     try{
       const raw = localStorage.getItem(LS_DEVICES);
@@ -1838,7 +1806,6 @@
     updateBadges();
   }
 
-  // ---------- render ----------
   function renderDevicesList(){
     devicesList.innerHTML = '';
     devicesEmpty.style.display = savedDevices.length ? 'none' : 'block';
@@ -2032,7 +1999,6 @@
     if(cntEl) cntEl.textContent = savedDevices.length;
   }
 
-  // ---------- toast ----------
   function showToast(type, title, sub, onClick){
     const container = $('toastContainer');
     const el = document.createElement('div');
@@ -2058,7 +2024,6 @@
     setTimeout(() => { if(el.parentNode) el.parentNode.removeChild(el); }, 260);
   }
 
-  // ---------- peer ----------
   function initPeer(){
     myCode = localStorage.getItem(LS_MYCODE);
     if(!myCode){ myCode = randomCode(); localStorage.setItem(LS_MYCODE, myCode); }
@@ -2154,41 +2119,16 @@
   });
   peerCodeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') connectBtn.click(); });
 
-  // ---------- copia codice ----------
-  async function copyMyCode(btnEl, labelEl){
+  $('copyCodeBtn').addEventListener('click', async () => {
     try{
       await navigator.clipboard.writeText(myCode);
-      if(btnEl){
-        btnEl.classList.add('copied');
-        const origLabel = labelEl ? labelEl.textContent : null;
-        if(labelEl) labelEl.textContent = 'Copiato!';
-        setTimeout(() => {
-          btnEl.classList.remove('copied');
-          if(labelEl && origLabel) labelEl.textContent = origLabel;
-        }, 1400);
-      }
-    }catch(e){
-      // fallback: selezione manuale
-      const ta = document.createElement('textarea');
-      ta.value = myCode;
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); } catch(err){}
-      document.body.removeChild(ta);
-      if(btnEl){
-        btnEl.classList.add('copied');
-        if(labelEl) labelEl.textContent = 'Copiato!';
-        setTimeout(() => {
-          btnEl.classList.remove('copied');
-          if(labelEl) labelEl.textContent = 'Copia codice';
-        }, 1400);
-      }
-    }
-  }
-  $('copyCodeBtn').addEventListener('click', () => copyMyCode(null, null));
-  $('copyCodeBtnBig').addEventListener('click', () => copyMyCode($('copyCodeBtnBig'), $('copyCodeLabel')));
+      const btn = $('copyCodeBtn');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#2ED47A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      setTimeout(() => { btn.innerHTML = orig; }, 1200);
+    }catch(e){}
+  });
 
-  // ---------- modali ----------
   const modalOverlay = $('modalOverlay');
   const modalTitle = $('modalTitle');
   const modalBody = $('modalBody');
