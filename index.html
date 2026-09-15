@@ -2298,19 +2298,24 @@
   }
   function qrScanTick(){
     if(qrScanVideo.readyState === qrScanVideo.HAVE_ENOUGH_DATA && window.jsQR){
-      qrScanCanvas.width = qrScanVideo.videoWidth;
-      qrScanCanvas.height = qrScanVideo.videoHeight;
-      qrScanCtx.drawImage(qrScanVideo, 0, 0, qrScanCanvas.width, qrScanCanvas.height);
-      const imageData = qrScanCtx.getImageData(0, 0, qrScanCanvas.width, qrScanCanvas.height);
-      const result = jsQR(imageData.data, imageData.width, imageData.height);
-      if(result && result.data){
-        const code = result.data.trim().toUpperCase();
-        if(/^[A-Z0-9]{6}$/.test(code)){
-          qrScanStatus.textContent = 'Codice trovato: ' + code;
-          closeQrScan();
-          peerCodeInput.value = code;
-          connectBtn.click();
-          return;
+      const vw = qrScanVideo.videoWidth, vh = qrScanVideo.videoHeight;
+      if(vw && vh){
+        const scale = Math.min(1, 480 / vw);
+        qrScanCanvas.width = Math.round(vw * scale);
+        qrScanCanvas.height = Math.round(vh * scale);
+        qrScanCtx.drawImage(qrScanVideo, 0, 0, qrScanCanvas.width, qrScanCanvas.height);
+        const imageData = qrScanCtx.getImageData(0, 0, qrScanCanvas.width, qrScanCanvas.height);
+        const result = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+        if(result && result.data){
+          const code = result.data.trim().toUpperCase();
+          if(/^[A-Z0-9]{6}$/.test(code)){
+            qrScanStatus.textContent = 'Codice trovato: ' + code;
+            closeQrScan();
+            closeDevices();
+            peerCodeInput.value = code;
+            connectBtn.click();
+            return;
+          }
         }
       }
     }
@@ -2762,7 +2767,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.3.4</p>
+        <p>Versione 3.3.5</p>
         <p style="margin-top:14px;">Miki by Claude</p>
       </div>
     `);
