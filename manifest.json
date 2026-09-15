@@ -1,7 +1,7 @@
 {
-  "name": "DropMiki — Condividi · Chatta · Collega",
+  "name": "DropMiki — Trasferisci files tra dispositivi",
   "short_name": "DropMiki",
-  "description": "Invia file e chatta tra i tuoi dispositivi in modo diretto, senza cloud",
+  "description": "Il modo più semplice per trasferire files tra dispositivi",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

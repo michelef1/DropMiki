@@ -3,21 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>DropMiki — Condividi · Chatta · Collega</title>
-<meta name="description" content="Invia file e chatta tra i tuoi dispositivi in modo diretto, senza cloud">
+<title>DropMiki — Trasferisci files tra dispositivi</title>
+<meta name="description" content="Il modo più semplice per trasferire files tra dispositivi">
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#0A1626">
+<meta name="theme-color" content="#050B14">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <link rel="icon" href="./icons/icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --bg:#050B14;
-    --bg-2:#0A1626;
     --card:#0D1B2E;
     --card-2:#12233C;
     --card-border:#1E3454;
@@ -26,29 +24,38 @@
     --cyan-soft:#5FD4FF;
     --cyan-dim:#2A6A8E;
     --blue:#2F7FE0;
-    --blue-2:#1E5FB5;
     --green:#1FBF75;
-    --green-2:#178F58;
     --purple:#7C5CE0;
-    --purple-2:#5F44B8;
     --ice:#E8F4FF;
     --ice-dim:#8FA9C9;
     --ok:#2ED47A;
     --err:#FF5B5B;
-    --warn:#F5A623;
     --radius:20px;
-    --radius-sm:14px;
   }
+
+  html[data-theme="blue"]{ --bg:#050B14; --bg-glow1:rgba(62,199,255,0.18); --bg-glow2:rgba(124,92,224,0.10); }
+  html[data-theme="black"]{ --bg:#000000; --bg-glow1:rgba(62,199,255,0.10); --bg-glow2:rgba(124,92,224,0.06); }
+  html[data-theme="violet"]{ --bg:#0F0524; --bg-glow1:rgba(168,85,247,0.20); --bg-glow2:rgba(255,120,200,0.08); }
+  html[data-theme="forest"]{ --bg:#05140B; --bg-glow1:rgba(46,212,122,0.16); --bg-glow2:rgba(62,199,255,0.08); }
+  html[data-theme="wine"]{ --bg:#14050A; --bg-glow1:rgba(255,91,91,0.18); --bg-glow2:rgba(124,92,224,0.10); }
+  html[data-theme="amber"]{ --bg:#140D05; --bg-glow1:rgba(245,166,35,0.18); --bg-glow2:rgba(255,91,91,0.08); }
+  html[data-theme="cyan"]{ --bg:#05121A; --bg-glow1:rgba(62,199,255,0.28); --bg-glow2:rgba(93,202,165,0.12); }
+  html[data-theme="graphite"]{ --bg:#0E0E12; --bg-glow1:rgba(143,169,201,0.14); --bg-glow2:rgba(124,92,224,0.08); }
+
+  html[data-font="small"]{ --fs-base:12.5px; --fs-brand:28px; --fs-hero:11.5px; --fs-body:12px; }
+  html[data-font="medium"]{ --fs-base:14px; --fs-brand:32px; --fs-hero:12.5px; --fs-body:13.5px; }
+  html[data-font="large"]{ --fs-base:16px; --fs-brand:36px; --fs-hero:14px; --fs-body:15px; }
 
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(ellipse at 50% -10%, rgba(62,199,255,0.18) 0%, transparent 55%),
-      radial-gradient(ellipse at 50% 100%, rgba(124,92,224,0.10) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% -10%, var(--bg-glow1) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 100%, var(--bg-glow2) 0%, transparent 55%),
       var(--bg);
     color:var(--ice);
     font-family:'Inter','IBM Plex Mono',system-ui,sans-serif;
+    font-size:var(--fs-base);
     min-height:100vh;
     min-height:100dvh;
     display:flex;
@@ -56,21 +63,15 @@
     align-items:center;
     padding:14px 16px 32px;
     -webkit-font-smoothing:antialiased;
+    transition:background .3s ease, font-size .2s ease;
   }
+  body.no-scroll{ overflow:hidden; }
 
-  .board{
-    width:100%;
-    max-width:460px;
-  }
+  .board{width:100%;max-width:460px;}
 
-  /* ---------- header ---------- */
   .top-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:4px 0 10px;
-    min-height:40px;
-    position:relative;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:4px 0 10px; min-height:40px;
   }
   .icon-btn{
     width:38px; height:38px;
@@ -82,6 +83,7 @@
     display:flex; align-items:center; justify-content:center;
     cursor:pointer;
     transition:border-color .15s, color .15s, background .15s;
+    position:relative;
   }
   .icon-btn:hover, .icon-btn:active{
     color:var(--cyan-soft);
@@ -89,7 +91,35 @@
     background:rgba(62,199,255,0.08);
   }
 
-  /* ---------- top right menu ---------- */
+  .install-banner{
+    display:none;
+    align-items:center; gap:12px;
+    background:linear-gradient(135deg, #7C5CE0 0%, #5F44B8 100%);
+    border-radius:16px;
+    padding:12px 16px;
+    margin-bottom:14px;
+    box-shadow:0 6px 18px rgba(124,92,224,0.42);
+    cursor:pointer;
+  }
+  .install-banner.show{ display:flex; }
+  .install-banner:active{ transform:scale(0.98); }
+  .install-banner-icon{
+    width:40px; height:40px; border-radius:12px;
+    background:rgba(255,255,255,0.18);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; color:#fff;
+  }
+  .install-banner-icon svg{ width:22px; height:22px; }
+  .install-banner-text{ flex:1; min-width:0; }
+  .install-banner-title{ font-size:14px; font-weight:600; color:#fff; }
+  .install-banner-sub{ font-size:11.5px; color:rgba(255,255,255,0.8); margin-top:2px; }
+  .install-banner-close{
+    background:transparent; border:none;
+    color:rgba(255,255,255,0.7);
+    font-size:16px; cursor:pointer; padding:4px 8px;
+    border-radius:8px;
+  }
+
   .top-right-wrap{ position:relative; }
   .right-menu{
     position:absolute;
@@ -108,30 +138,26 @@
   }
   .right-menu.open{ display:flex; }
   .right-menu-item{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    background:transparent;
-    border:none;
+    display:flex; align-items:center; gap:10px;
+    background:transparent; border:none;
     color:var(--ice);
     font-family:'Inter',sans-serif;
-    font-size:13.5px;
-    font-weight:500;
+    font-size:13.5px; font-weight:500;
     padding:10px 12px;
     border-radius:10px;
     cursor:pointer;
     text-align:left;
   }
   .right-menu-item:hover{ background:rgba(62,199,255,0.08); color:var(--cyan-soft); }
-
-  /* ---------- brand ---------- */
-  .brand-block{
-    text-align:center;
-    padding:2px 0 18px;
+  .right-menu-item.install-item{
+    color:#fff;
+    background:linear-gradient(135deg, #7C5CE0 0%, #5F44B8 100%);
+    margin-bottom:4px;
   }
+
+  .brand-block{ text-align:center; padding:2px 0 18px; }
   .brand-wifi{
-    display:block;
-    margin:0 auto 4px;
+    display:block; margin:0 auto 4px;
     width:52px; height:32px;
     color:var(--cyan);
     filter:drop-shadow(0 0 10px rgba(62,199,255,0.65));
@@ -139,7 +165,7 @@
   .brand{
     font-family:'Inter',sans-serif;
     font-weight:700;
-    font-size:34px;
+    font-size:var(--fs-brand);
     line-height:1;
     letter-spacing:-0.5px;
     background:linear-gradient(180deg, #FFFFFF 0%, #8FD3FF 100%);
@@ -147,35 +173,37 @@
     background-clip:text;
     color:transparent;
     margin:0;
+    transition:font-size .2s ease;
   }
-  .brand-tag{
-    font-size:12.5px;
+  .brand-hero{
+    font-size:var(--fs-hero);
     color:var(--cyan-soft);
-    margin-top:6px;
-    letter-spacing:0.6px;
+    margin-top:8px;
     font-weight:500;
+    line-height:1.45;
+    letter-spacing:0.2px;
+    padding:0 4px;
+    max-width:340px;
+    margin-left:auto;
+    margin-right:auto;
+    transition:font-size .2s ease;
   }
-  .brand-tag .sep{ color:var(--cyan-dim); margin:0 6px; }
+  .brand-hero b{ color:var(--cyan); font-weight:600; }
 
-  /* ---------- radar ---------- */
-  @keyframes radar-sweep{
-    from{ transform:rotate(0deg); }
-    to  { transform:rotate(360deg); }
-  }
+  @keyframes radar-sweep{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
   @keyframes radar-pulse{
-    0%   { transform:translate(-50%,-50%) scale(0.55); opacity:0.85; }
-    100% { transform:translate(-50%,-50%) scale(1.45); opacity:0; }
+    0%{ transform:translate(-50%,-50%) scale(0.55); opacity:0.85; }
+    100%{ transform:translate(-50%,-50%) scale(1.45); opacity:0; }
   }
   @keyframes center-glow{
     0%,100%{ box-shadow:0 0 22px rgba(62,199,255,0.7), 0 0 45px rgba(62,199,255,0.35); }
-    50%    { box-shadow:0 0 30px rgba(62,199,255,0.95), 0 0 60px rgba(62,199,255,0.5); }
+    50%{ box-shadow:0 0 30px rgba(62,199,255,0.95), 0 0 60px rgba(62,199,255,0.5); }
   }
-
   .radar-wrap{
     position:relative;
-    width:260px;
-    height:260px;
-    margin:0 auto 12px;
+    width:min(220px, 62vw);
+    height:min(220px, 62vw);
+    margin:6px auto 12px;
   }
   .radar-ring-static{
     position:absolute; top:50%; left:50%;
@@ -188,7 +216,6 @@
   .radar-ring-static.r2{ width:78%; height:78%; border-color:rgba(62,199,255,0.30); }
   .radar-ring-static.r3{ width:52%; height:52%; border-color:rgba(62,199,255,0.38); overflow:hidden; }
   .radar-ring-static.r4{ width:26%; height:26%; border-color:rgba(62,199,255,0.5); }
-
   .radar-sweep{
     position:absolute; top:0; left:0; width:100%; height:100%;
     border-radius:50%;
@@ -206,7 +233,7 @@
   }
   .radar-center{
     position:absolute; top:50%; left:50%;
-    width:38px; height:38px;
+    width:34px; height:34px;
     background:radial-gradient(circle at 35% 35%, #B0E8FF 0%, var(--cyan) 45%, #1478A8 100%);
     border-radius:50%;
     transform:translate(-50%,-50%);
@@ -214,26 +241,23 @@
   }
   .radar-avatars{ position:absolute; top:50%; left:50%; width:0; height:0; }
   .radar-avatar-wrap{
-    position:absolute;
-    top:0; left:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:4px;
+    position:absolute; top:0; left:0;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
     cursor:pointer;
     transition:transform .2s;
   }
   .radar-avatar-wrap:active{ transform:translate(calc(-50% + var(--x,0px)), calc(-50% + var(--y,0px))) scale(0.92); }
   .radar-avatar-wrap.label-above{ flex-direction:column-reverse; }
   .radar-avatar{
-    width:32px; height:32px;
+    width:30px; height:30px;
     border-radius:50%;
     background:var(--card-2);
     border:2px solid var(--card-border);
     color:var(--ice-dim);
     display:flex; align-items:center; justify-content:center;
-    font-size:12px; font-weight:600;
+    font-size:11px; font-weight:600;
     flex-shrink:0;
+    position:relative;
   }
   .radar-avatar.online{
     background:linear-gradient(180deg, #2ED47A 0%, #178F58 100%);
@@ -241,79 +265,73 @@
     color:#fff;
     box-shadow:0 0 12px rgba(46,212,122,0.55);
   }
-  .radar-avatar.selected{
-    box-shadow:0 0 0 2px #050B14, 0 0 0 4px var(--cyan);
+  .radar-avatar.selected{ box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--cyan); }
+  .radar-avatar .unread-dot{
+    position:absolute; top:-3px; right:-3px;
+    width:12px; height:12px; border-radius:50%;
+    background:var(--err);
+    border:2px solid var(--bg);
+    box-shadow:0 0 8px rgba(255,91,91,0.8);
+    display:none;
   }
+  .radar-avatar .unread-dot.show{ display:block; }
   .radar-avatar-label{
-    font-size:10.5px;
-    font-weight:500;
+    font-size:10.5px; font-weight:500;
     color:rgba(143,169,201,0.65);
     background:rgba(5,11,20,0.85);
-    padding:2px 7px;
-    border-radius:8px;
-    white-space:nowrap;
-    max-width:96px;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    padding:2px 7px; border-radius:8px;
+    white-space:nowrap; max-width:96px;
+    overflow:hidden; text-overflow:ellipsis;
   }
   .radar-avatar-label.online{ color:var(--ice); font-weight:600; }
 
-  /* ---------- code pill ---------- */
-  .code-label{
-    text-align:center;
-    font-size:14px;
-    color:var(--cyan-soft);
-    font-weight:500;
-    margin-bottom:8px;
-  }
+  .code-label{ text-align:center; font-size:13px; color:var(--cyan-soft); font-weight:500; margin-bottom:8px; }
   .code-pill{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
     background:linear-gradient(180deg, #0D1B2E 0%, #0A1626 100%);
     border:1.5px solid var(--cyan-dim);
     border-radius:16px;
-    padding:12px 16px;
-    max-width:320px;
-    margin:0 auto 10px;
+    padding:11px 16px;
+    max-width:300px; margin:0 auto 10px;
     box-shadow:0 0 24px rgba(62,199,255,0.15), inset 0 0 20px rgba(62,199,255,0.05);
   }
   .code-pill b{
     font-family:'IBM Plex Mono',monospace;
-    font-size:22px;
-    font-weight:600;
-    letter-spacing:3px;
-    color:#FFFFFF;
+    font-size:21px; font-weight:600;
+    letter-spacing:3px; color:#FFFFFF;
   }
   .code-pill .copy-btn{
-    background:transparent;
-    border:none;
-    color:var(--cyan);
-    cursor:pointer;
-    padding:6px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:8px;
+    background:transparent; border:none;
+    color:var(--cyan); cursor:pointer;
+    padding:6px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
   }
   .code-pill .copy-btn:hover{ color:var(--cyan-soft); background:rgba(62,199,255,0.1); }
 
+  /* NEW: pulsante mostra QR sotto il codice */
+  .show-qr-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin:0 auto 12px;
+    background:linear-gradient(180deg, #2F7FE0 0%, #1E5FB5 100%);
+    border:none; border-radius:12px;
+    color:#fff; font-family:'Inter',sans-serif;
+    font-size:13px; font-weight:600;
+    padding:10px 18px;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(47,127,224,0.4);
+    transition:transform .12s;
+  }
+  .show-qr-btn:active{ transform:scale(0.96); }
+  .show-qr-btn svg{ width:16px; height:16px; }
+
   .online-badge{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    font-size:13px;
-    color:var(--ok);
-    font-weight:500;
-    margin-bottom:18px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    font-size:12.5px; color:var(--ok); font-weight:500;
+    margin-bottom:16px;
   }
   .online-badge .dot-live{
-    width:9px; height:9px;
-    border-radius:50%;
-    background:var(--ok);
-    box-shadow:0 0 10px var(--ok);
+    width:9px; height:9px; border-radius:50%;
+    background:var(--ok); box-shadow:0 0 10px var(--ok);
     animation:pulse-live 1.8s infinite ease-in-out;
   }
   .online-badge.offline{ color:var(--err); }
@@ -322,14 +340,9 @@
   .online-badge.connecting .dot-live{ background:var(--cyan); box-shadow:0 0 10px var(--cyan); }
   @keyframes pulse-live{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
 
-  /* ---------- name row ---------- */
   .my-name-row{
-    font-size:13px;
-    color:var(--ice-dim);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
+    font-size:12.5px; color:var(--ice-dim);
+    display:flex; align-items:center; justify-content:center; gap:8px;
     flex-wrap:wrap;
     margin-bottom:16px;
   }
@@ -347,15 +360,12 @@
   }
   .my-name-input:focus{ outline:none; border-color:var(--cyan-dim); }
 
-  /* ---------- nearby card ---------- */
   .nearby-card{
-    display:flex;
-    align-items:center;
-    gap:14px;
+    display:flex; align-items:center; gap:14px;
     background:linear-gradient(135deg, #0D1B2E 0%, #12233C 100%);
     border:1.5px solid var(--card-border-2);
     border-radius:var(--radius);
-    padding:16px 18px;
+    padding:14px 16px;
     margin-bottom:16px;
     cursor:pointer;
     transition:border-color .15s, transform .15s;
@@ -363,142 +373,102 @@
   .nearby-card:hover{ border-color:var(--cyan-dim); }
   .nearby-card:active{ transform:scale(0.99); }
   .nearby-icon{
-    width:44px; height:44px;
-    border-radius:12px;
+    width:42px; height:42px; border-radius:12px;
     background:linear-gradient(135deg, #2F7FE0 0%, #1E5FB5 100%);
     display:flex; align-items:center; justify-content:center;
-    flex-shrink:0;
+    flex-shrink:0; color:#fff;
     box-shadow:0 4px 14px rgba(47,127,224,0.4);
   }
-  .nearby-icon svg{ width:24px; height:24px; color:#fff; }
+  .nearby-icon svg{ width:22px; height:22px; }
   .nearby-text{ flex:1; min-width:0; }
-  .nearby-title{ font-size:16px; font-weight:600; color:var(--ice); }
-  .nearby-sub{ font-size:12.5px; color:var(--cyan-soft); margin-top:2px; }
+  .nearby-title{ font-size:15px; font-weight:600; color:var(--ice); }
+  .nearby-sub{ font-size:12px; color:var(--cyan-soft); margin-top:2px; }
   .nearby-arrow{ color:var(--cyan); flex-shrink:0; }
 
-  /* ---------- action buttons ---------- */
   .actions-row{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    gap:10px;
-    margin-bottom:18px;
+    display:grid; grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    margin-bottom:16px;
   }
   .action-btn{
-    border:none;
-    border-radius:16px;
-    padding:14px 6px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
+    border:none; border-radius:16px;
+    padding:12px 4px;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:6px;
     cursor:pointer;
     font-family:'Inter',sans-serif;
-    font-size:12.5px;
-    font-weight:600;
+    font-size:11.5px; font-weight:600;
     color:#fff;
     transition:transform .12s, box-shadow .15s, opacity .15s;
     position:relative;
-    overflow:hidden;
   }
   .action-btn:active{ transform:scale(0.96); }
-  .action-btn svg{ width:24px; height:24px; }
-  .unread-dot{
-    position:absolute;
-    top:8px; right:8px;
-    width:10px; height:10px;
-    border-radius:50%;
-    background:var(--err);
-    box-shadow:0 0 0 2px rgba(0,0,0,0.35), 0 0 8px rgba(255,91,91,0.7);
-    display:none;
-  }
-  .unread-dot.show{ display:block; }
-  .action-btn.file{
-    background:linear-gradient(180deg, #2F7FE0 0%, #1E5FB5 100%);
-    box-shadow:0 6px 18px rgba(47,127,224,0.42);
-  }
-  .action-btn.chat{
-    background:linear-gradient(180deg, #1FBF75 0%, #178F58 100%);
-    box-shadow:0 6px 18px rgba(31,191,117,0.42);
-  }
-  .action-btn.link{
-    background:linear-gradient(180deg, #7C5CE0 0%, #5F44B8 100%);
-    box-shadow:0 6px 18px rgba(124,92,224,0.42);
-  }
+  .action-btn svg{ width:22px; height:22px; }
+  .action-btn.file{ background:linear-gradient(180deg, #2F7FE0 0%, #1E5FB5 100%); box-shadow:0 6px 18px rgba(47,127,224,0.42); }
+  .action-btn.chat{ background:linear-gradient(180deg, #1FBF75 0%, #178F58 100%); box-shadow:0 6px 18px rgba(31,191,117,0.42); }
+  .action-btn.link{ background:linear-gradient(180deg, #7C5CE0 0%, #5F44B8 100%); box-shadow:0 6px 18px rgba(124,92,224,0.42); }
   .action-btn:disabled{ opacity:0.45; cursor:not-allowed; box-shadow:none; }
+  .action-btn .badge{
+    position:absolute; top:4px; right:8px;
+    min-width:18px; height:18px; border-radius:9px;
+    background:var(--err); color:#fff;
+    font-size:10.5px; font-weight:700;
+    display:none; align-items:center; justify-content:center;
+    padding:0 5px;
+    border:2px solid var(--bg);
+    box-shadow:0 0 10px rgba(255,91,91,0.7);
+    animation:badge-pulse 1.6s infinite;
+  }
+  .action-btn .badge.show{ display:flex; }
+  @keyframes badge-pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.12); } }
 
-  /* ---------- icon row ---------- */
   .icon-row{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:8px;
-    margin-bottom:18px;
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:6px; margin-bottom:16px;
   }
   .icon-row-btn{
-    background:transparent;
-    border:none;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:6px;
-    cursor:pointer;
-    padding:8px 4px;
+    background:transparent; border:none;
+    display:flex; flex-direction:column;
+    align-items:center; gap:6px;
+    cursor:pointer; padding:6px 2px;
     font-family:'Inter',sans-serif;
-    font-size:11.5px;
-    font-weight:500;
+    font-size:11px; font-weight:500;
     color:var(--ice-dim);
   }
   .icon-row-btn .circ{
-    width:44px; height:44px;
-    border-radius:50%;
+    width:42px; height:42px; border-radius:50%;
     border:1.5px solid var(--cyan-dim);
     display:flex; align-items:center; justify-content:center;
     color:var(--cyan);
     transition:border-color .15s, background .15s;
   }
   .icon-row-btn:hover .circ{ border-color:var(--cyan); background:rgba(62,199,255,0.08); }
-  .icon-row-btn svg{ width:20px; height:20px; }
+  .icon-row-btn svg{ width:19px; height:19px; }
 
-  /* ---------- footer ---------- */
   footer{
-    margin-top:auto;
-    padding:18px 0 0;
-    font-size:12px;
-    color:var(--ice-dim);
+    margin-top:auto; padding:16px 0 0;
+    font-size:11.5px; color:var(--ice-dim);
     text-align:center;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
   }
-  footer .heart{ color:#FF5B8A; }
   footer b{ color:var(--cyan); font-weight:600; }
 
-  /* ---------- pannelli ---------- */
   .panel{
     background:var(--card);
     border:1px solid var(--card-border);
     border-radius:var(--radius);
-    padding:18px;
-    margin-bottom:12px;
+    padding:18px; margin-bottom:12px;
   }
   .panel h2{
     font-family:'Inter',sans-serif;
-    font-size:12px;
-    font-weight:600;
-    letter-spacing:0.6px;
-    color:var(--ice-dim);
-    margin:0 0 12px 0;
-    text-transform:uppercase;
-    display:flex;
-    align-items:center;
+    font-size:12px; font-weight:600;
+    letter-spacing:0.6px; color:var(--ice-dim);
+    margin:0 0 12px 0; text-transform:uppercase;
+    display:flex; align-items:center;
   }
   .dot-mark{
     display:inline-block;
-    width:7px; height:7px;
-    border-radius:50%;
-    margin-right:8px;
-    flex-shrink:0;
+    width:7px; height:7px; border-radius:50%;
+    margin-right:8px; flex-shrink:0;
   }
 
   input[type="text"]{
@@ -510,14 +480,11 @@
   }
   .row{display:flex; flex-wrap:wrap; gap:8px;}
   .row input[type="text"]{
-    flex:1;
-    font-size:16px;
-    letter-spacing:3px;
+    flex:1; font-size:16px; letter-spacing:3px;
     text-transform:uppercase;
-    padding:12px 14px;
-    text-align:center;
-    font-family:'IBM Plex Mono',monospace;
-    font-weight:600;
+    padding:12px 14px; text-align:center;
+    font-family:'IBM Plex Mono',monospace; font-weight:600;
+    min-width:0;
   }
   input[type="text"]:focus{ outline:none; border-color:var(--cyan-dim); }
   input[type="text"]::placeholder{ color:var(--ice-dim); letter-spacing:2px; }
@@ -525,11 +492,8 @@
   button{ font-family:'Inter',sans-serif; cursor:pointer; }
   button.primary{
     background:linear-gradient(180deg, #3EC7FF 0%, #2A9CD1 100%);
-    color:#052033;
-    border:none;
-    border-radius:12px;
-    font-size:14px;
-    font-weight:600;
+    color:#052033; border:none; border-radius:12px;
+    font-size:14px; font-weight:600;
     padding:12px 20px;
   }
   button.ghost{
@@ -538,8 +502,7 @@
     color:var(--ice-dim);
     border-radius:12px;
     padding:10px 16px;
-    font-size:13px;
-    font-weight:500;
+    font-size:13px; font-weight:500;
   }
   button.ghost:hover{ color:var(--ice); border-color:var(--cyan-dim); }
   button.small{ padding:6px 12px; font-size:12px; }
@@ -556,25 +519,16 @@
 
   .device-row{
     display:flex; align-items:center; gap:10px;
-    padding:10px 10px;
-    border-radius:12px;
-    cursor:pointer;
-    transition:background .15s;
+    padding:10px 10px; border-radius:12px;
+    cursor:pointer; transition:background .15s;
   }
   .device-row:hover{ background:rgba(62,199,255,0.06); }
-  .device-row.selected{
-    background:rgba(62,199,255,0.12);
-    box-shadow:inset 3px 0 0 var(--cyan);
-  }
+  .device-row.selected{ background:rgba(62,199,255,0.12); box-shadow:inset 3px 0 0 var(--cyan); }
   .device-name-input{
-    flex:1;
-    background:transparent;
+    flex:1; background:transparent;
     border:1px solid transparent;
-    color:var(--ice);
-    font-family:'Inter',sans-serif;
-    font-size:14px;
-    padding:5px 6px;
-    border-radius:8px;
+    color:var(--ice); font-family:'Inter',sans-serif;
+    font-size:14px; padding:5px 6px; border-radius:8px;
     min-width:0;
   }
   .device-name-input:hover{ border-color:var(--card-border); }
@@ -586,15 +540,11 @@
   }
   .device-remove:hover{ color:var(--err); }
 
-  /* ---------- dropzone ---------- */
   .dropzone{
     border:1.5px dashed var(--card-border-2);
-    border-radius:14px;
-    padding:28px 18px;
-    text-align:center;
-    color:var(--ice-dim);
-    font-size:13px;
-    cursor:pointer;
+    border-radius:14px; padding:28px 18px;
+    text-align:center; color:var(--ice-dim);
+    font-size:13px; cursor:pointer;
     transition:border-color .15s, background .15s;
   }
   .dropzone.hover{ border-color:var(--cyan); background:rgba(62,199,255,0.06); }
@@ -619,10 +569,8 @@
     font-size:13px; color:var(--cyan); text-decoration:none;
     border-bottom:1px solid var(--cyan-dim);
   }
-  .transfer .dl-link:hover{ color:var(--cyan-soft); }
   .empty-note{ font-size:12.5px; color:var(--ice-dim); text-align:center; padding:8px 0 2px; }
 
-  /* ---------- modal ---------- */
   .modal-overlay{
     position:fixed; inset:0;
     background:rgba(2,6,12,0.85);
@@ -631,8 +579,14 @@
     display:none; align-items:center; justify-content:center;
     z-index:50; padding:16px;
   }
-  #confirmOverlay{ z-index:100; }
   .modal-overlay.open{ display:flex; }
+  #confirmOverlay{ z-index:400; }
+  #chatModal{ z-index:200; }
+  #sendOverlay{ z-index:70; }
+  #devicesOverlay{ z-index:70; }
+  #qrShowOverlay{ z-index:250; }
+  #qrScanOverlay{ z-index:260; }
+
   .modal-box{
     background:linear-gradient(180deg, #0D1B2E 0%, #0A1626 100%);
     border:1px solid var(--card-border-2);
@@ -643,27 +597,106 @@
   }
   .modal-head{ position:relative; display:flex; justify-content:center; align-items:center; margin-bottom:14px; }
   .modal-head h3{ font-family:'Inter',sans-serif; font-weight:700; font-size:19px; color:var(--ice); margin:0; text-align:center; }
-  .modal-close{ position:absolute; right:0; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--ice-dim); font-size:18px; cursor:pointer; padding:4px 8px; }
+  .modal-close{
+    position:absolute; right:0; top:50%; transform:translateY(-50%);
+    background:transparent; border:none; color:var(--ice-dim);
+    font-size:18px; cursor:pointer; padding:4px 8px;
+  }
   .modal-close:hover{ color:var(--ice); }
-  .modal-body{ font-size:13.5px; line-height:1.65; color:var(--ice-dim); }
+  .modal-body{ font-size:var(--fs-body); line-height:1.65; color:var(--ice-dim); }
   .modal-body b{ color:var(--ice); }
   .modal-body p{ margin:0 0 10px; }
   .modal-body p:last-child{ margin-bottom:0; }
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
 
-  /* ---------- chat ---------- */
-  #chatModal .modal-box{
-    display:flex;
-    flex-direction:column;
-    height:85vh;
-    max-height:640px;
-    padding:0;
+  /* QR show modal */
+  .qr-show-wrap{
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    padding:8px 0;
+  }
+  .qr-canvas-box{
+    background:#FFFFFF;
+    border-radius:16px;
+    padding:16px;
+    box-shadow:0 0 30px rgba(62,199,255,0.4);
+    display:flex; align-items:center; justify-content:center;
+    width:min(280px, 78vw);
+    height:min(280px, 78vw);
+  }
+  .qr-canvas-box canvas,
+  .qr-canvas-box img{
+    width:100% !important;
+    height:100% !important;
+    image-rendering:pixelated;
+    display:block;
+  }
+  .qr-code-text{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:26px;
+    font-weight:600;
+    letter-spacing:5px;
+    color:#FFFFFF;
+    background:linear-gradient(180deg, #0D1B2E 0%, #0A1626 100%);
+    border:1.5px solid var(--cyan-dim);
+    border-radius:12px;
+    padding:10px 22px;
+    box-shadow:0 0 20px rgba(62,199,255,0.2);
+  }
+  .qr-hint{
+    font-size:12px; color:var(--ice-dim);
+    text-align:center; max-width:280px; line-height:1.5;
+  }
+
+  /* QR scan modal */
+  #qrScanOverlay .modal-box{ max-width:420px; }
+  .qr-scan-wrap{
+    position:relative;
+    width:100%;
+    aspect-ratio:1;
+    border-radius:16px;
     overflow:hidden;
+    background:#000;
+    border:1.5px solid var(--cyan-dim);
+  }
+  .qr-scan-wrap video{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .qr-scan-frame{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none;
+  }
+  .qr-scan-frame::before{
+    content:'';
+    width:62%; aspect-ratio:1;
+    border:3px solid var(--cyan);
+    border-radius:16px;
+    box-shadow:0 0 24px rgba(62,199,255,0.7), inset 0 0 24px rgba(62,199,255,0.2);
+    animation:qr-frame-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes qr-frame-pulse{
+    0%,100%{ opacity:0.85; transform:scale(1); }
+    50%{ opacity:1; transform:scale(1.04); }
+  }
+  .qr-scan-status{
+    font-size:12.5px; color:var(--cyan-soft);
+    text-align:center; margin-top:12px;
+    min-height:18px;
+  }
+  .qr-scan-actions{
+    display:flex; gap:10px; margin-top:14px;
+  }
+  .qr-scan-actions button{ flex:1; }
+
+  #chatModal .modal-box{
+    display:flex; flex-direction:column;
+    height:85vh; max-height:640px;
+    padding:0; overflow:hidden;
   }
   .chat-header{
-    display:flex;
-    align-items:center;
-    gap:12px;
+    display:flex; align-items:center; gap:12px;
     padding:14px 16px;
     border-bottom:1px solid var(--card-border);
     background:linear-gradient(180deg, #12233C 0%, #0D1B2E 100%);
@@ -693,29 +726,47 @@
   }
   .chat-clear:hover{ color:var(--err); background:rgba(255,91,91,0.08); }
 
-  .chat-messages{
-    flex:1;
-    overflow-y:auto;
-    padding:16px 14px;
+  #chatModal[data-chat-theme="1"] .chat-messages{ background:#050B14; }
+  #chatModal[data-chat-theme="2"] .chat-messages{
     background:
-      radial-gradient(circle at 20% 20%, rgba(62,199,255,0.04) 0%, transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(124,92,224,0.04) 0%, transparent 40%),
+      radial-gradient(circle at 20% 20%, rgba(62,199,255,0.08) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(62,199,255,0.05) 0%, transparent 45%),
       #050B14;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
+  }
+  #chatModal[data-chat-theme="3"] .chat-messages{
+    background:
+      radial-gradient(circle at 20% 20%, rgba(168,85,247,0.12) 0%, transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(255,120,200,0.07) 0%, transparent 45%),
+      #0F0524;
+  }
+  #chatModal[data-chat-theme="4"] .chat-messages{
+    background:
+      radial-gradient(circle at 50% 50%, rgba(46,212,122,0.08) 0%, transparent 60%),
+      #05140B;
+  }
+  #chatModal[data-chat-theme="5"] .chat-messages{
+    background:
+      linear-gradient(0deg, transparent 24%, rgba(62,199,255,0.05) 25%, rgba(62,199,255,0.05) 26%, transparent 27%, transparent 74%, rgba(62,199,255,0.05) 75%, rgba(62,199,255,0.05) 76%, transparent 77%),
+      linear-gradient(90deg, transparent 24%, rgba(62,199,255,0.05) 25%, rgba(62,199,255,0.05) 26%, transparent 27%, transparent 74%, rgba(62,199,255,0.05) 75%, rgba(62,199,255,0.05) 76%, transparent 77%),
+      #050B14;
+    background-size:24px 24px;
+  }
+  #chatModal[data-chat-theme="6"] .chat-messages{ background:#E8F0F8; }
+  #chatModal[data-chat-theme="6"] .msg.in{ background:#FFFFFF; border-color:#C8D4E0; color:#1A2636; }
+  #chatModal[data-chat-theme="6"] .msg.out{ background:linear-gradient(180deg, #1FBF75 0%, #178F58 100%); color:#fff; }
+  #chatModal[data-chat-theme="6"] .chat-empty{ color:#5A6B80; }
+
+  .chat-messages{
+    flex:1; overflow-y:auto;
+    padding:16px 14px;
+    display:flex; flex-direction:column; gap:6px;
+    transition:background .3s ease;
   }
   .chat-empty{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    color:var(--ice-dim);
-    font-size:13px;
-    text-align:center;
-    padding:20px;
-    gap:8px;
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    color:var(--ice-dim); font-size:13px; text-align:center;
+    padding:20px; gap:8px;
   }
   .chat-empty svg{ width:44px; height:44px; opacity:0.35; color:var(--cyan); }
 
@@ -723,11 +774,9 @@
     max-width:78%;
     padding:8px 12px;
     border-radius:14px;
-    font-size:13.5px;
+    font-size:var(--fs-body);
     line-height:1.4;
-    word-wrap:break-word;
-    overflow-wrap:break-word;
-    position:relative;
+    word-wrap:break-word; overflow-wrap:break-word;
     animation:msg-in .18s ease-out;
   }
   @keyframes msg-in{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
@@ -745,16 +794,13 @@
     border-bottom-left-radius:4px;
   }
   .msg .time{
-    display:block;
-    font-size:10px;
-    opacity:0.65;
-    margin-top:3px;
+    display:block; font-size:10px;
+    opacity:0.65; margin-top:3px;
     text-align:right;
   }
 
   .chat-input-row{
-    display:flex;
-    gap:8px;
+    display:flex; gap:8px;
     padding:12px 12px;
     border-top:1px solid var(--card-border);
     background:linear-gradient(180deg, #0A1626 0%, #0D1B2E 100%);
@@ -769,42 +815,33 @@
     font-size:14px;
     padding:12px 14px;
     border-radius:22px;
-    letter-spacing:0;
-    text-transform:none;
-    text-align:left;
+    letter-spacing:0; text-transform:none; text-align:left;
   }
   .chat-input-row input:focus{ outline:none; border-color:var(--cyan-dim); }
   .chat-send{
-    width:44px; height:44px;
-    border-radius:50%;
-    border:none;
+    width:44px; height:44px; border-radius:50%; border:none;
     background:linear-gradient(180deg, #1FBF75 0%, #178F58 100%);
-    color:#fff;
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer;
-    flex-shrink:0;
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex-shrink:0;
     box-shadow:0 4px 12px rgba(31,191,117,0.4);
   }
   .chat-send:active{ transform:scale(0.94); }
   .chat-send:disabled{ opacity:0.4; cursor:not-allowed; box-shadow:none; }
   .chat-send svg{ width:20px; height:20px; }
 
-  /* ---------- drawer sinistro ---------- */
   .drawer-overlay{
     position:fixed; inset:0;
     background:rgba(2,6,12,0.55);
     backdrop-filter:blur(2px);
     -webkit-backdrop-filter:blur(2px);
-    opacity:0;
-    pointer-events:none;
+    opacity:0; pointer-events:none;
     transition:opacity .22s ease;
     z-index:80;
   }
   .drawer-overlay.open{ opacity:1; pointer-events:auto; }
 
   .drawer{
-    position:fixed;
-    top:0; left:0;
+    position:fixed; top:0; left:0;
     height:100dvh;
     width:min(320px, 86vw);
     background:linear-gradient(180deg, #0D1B2E 0%, #08111E 100%);
@@ -813,86 +850,66 @@
     transform:translateX(-102%);
     transition:transform .26s cubic-bezier(.2,.7,.3,1);
     z-index:81;
-    display:flex;
-    flex-direction:column;
+    display:flex; flex-direction:column;
     padding:18px 16px 24px;
     overflow-y:auto;
   }
   .drawer.open{ transform:translateX(0); }
-
   .drawer-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:20px;
-    padding-bottom:14px;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:20px; padding-bottom:14px;
     border-bottom:1px solid var(--card-border);
   }
   .drawer-head .brand{
     background:linear-gradient(180deg, #FFFFFF 0%, #8FD3FF 100%);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
     font-size:22px;
   }
   .drawer-head .icon-btn{ width:32px; height:32px; font-size:14px; }
-
   .drawer-section{ margin-bottom:22px; }
   .drawer-section-title{
-    font-size:11px;
-    font-weight:600;
-    letter-spacing:0.8px;
-    color:var(--ice-dim);
-    margin-bottom:10px;
-    display:flex;
-    align-items:center;
-    gap:8px;
+    font-size:11px; font-weight:600;
+    letter-spacing:0.8px; color:var(--ice-dim);
+    margin-bottom:10px; display:flex;
+    align-items:center; gap:8px;
     text-transform:uppercase;
   }
   .drawer-badge{
-    background:var(--green);
-    color:#04220F;
-    font-size:10.5px;
-    font-weight:700;
-    padding:1px 7px;
-    border-radius:9px;
+    background:var(--green); color:#04220F;
+    font-size:10.5px; font-weight:700;
+    padding:1px 7px; border-radius:9px;
     margin-left:auto;
   }
-
   .drawer-btn{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    width:100%;
-    background:transparent;
-    border:none;
-    color:var(--ice);
+    display:flex; align-items:center; gap:12px;
+    width:100%; background:transparent;
+    border:none; color:var(--ice);
     font-family:'Inter',sans-serif;
-    font-size:14px;
-    font-weight:500;
-    padding:11px 10px;
-    border-radius:12px;
-    cursor:pointer;
-    text-align:left;
+    font-size:14px; font-weight:500;
+    padding:11px 10px; border-radius:12px;
+    cursor:pointer; text-align:left;
     transition:background .15s, color .15s;
   }
   .drawer-btn:hover{ background:rgba(62,199,255,0.08); color:var(--cyan-soft); }
   .drawer-btn-icon{
-    width:32px; height:32px;
-    border-radius:50%;
+    width:32px; height:32px; border-radius:50%;
     border:1.5px solid var(--cyan-dim);
     display:flex; align-items:center; justify-content:center;
-    color:var(--cyan);
-    flex-shrink:0;
+    color:var(--cyan); flex-shrink:0;
   }
-
+  .drawer-btn.install-btn{
+    background:linear-gradient(135deg, #7C5CE0 0%, #5F44B8 100%);
+    color:#fff; margin-bottom:6px;
+  }
+  .drawer-btn.install-btn .drawer-btn-icon{
+    border-color:rgba(255,255,255,0.35);
+    color:#fff;
+    background:rgba(255,255,255,0.15);
+  }
   .drawer-devices{ display:flex; flex-direction:column; gap:6px; }
   .drawer-device{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:9px 10px;
-    border-radius:12px;
+    display:flex; align-items:center; gap:10px;
+    padding:9px 10px; border-radius:12px;
     background:rgba(62,199,255,0.04);
     border:1px solid transparent;
     cursor:pointer;
@@ -900,54 +917,328 @@
   }
   .drawer-device:hover{ background:rgba(62,199,255,0.09); border-color:var(--card-border-2); }
   .drawer-device-avatar{
-    width:34px; height:34px;
-    border-radius:50%;
-    background:var(--card-2);
-    border:2px solid var(--card-border);
+    width:34px; height:34px; border-radius:50%;
+    background:var(--card-2); border:2px solid var(--card-border);
     display:flex; align-items:center; justify-content:center;
-    color:var(--ice-dim);
-    font-size:13px; font-weight:600;
-    flex-shrink:0;
+    color:var(--ice-dim); font-size:13px; font-weight:600;
+    flex-shrink:0; position:relative;
   }
   .drawer-device-avatar.online{
     background:linear-gradient(180deg, #2ED47A 0%, #178F58 100%);
-    border-color:#5CE89C;
-    color:#fff;
+    border-color:#5CE89C; color:#fff;
     box-shadow:0 0 10px rgba(46,212,122,0.5);
   }
+  .drawer-device-avatar .unread-dot{
+    position:absolute; top:-3px; right:-3px;
+    width:11px; height:11px; border-radius:50%;
+    background:var(--err); border:2px solid var(--bg);
+    box-shadow:0 0 8px rgba(255,91,91,0.8);
+    display:none;
+  }
+  .drawer-device-avatar .unread-dot.show{ display:block; }
   .drawer-device-info{ flex:1; min-width:0; }
   .drawer-device-name{
-    font-size:13.5px;
-    font-weight:600;
-    color:var(--ice);
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    font-size:13.5px; font-weight:600; color:var(--ice);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .drawer-device-status{
-    font-size:11px;
-    color:var(--ice-dim);
-    margin-top:2px;
-  }
+  .drawer-device-status{ font-size:11px; color:var(--ice-dim); margin-top:2px; }
   .drawer-device-status.online{ color:var(--ok); }
+  .drawer-device-status.unread{ color:var(--err); font-weight:600; }
   .drawer-device-dot{
-    width:8px; height:8px;
-    border-radius:50%;
-    background:var(--ice-dim);
-    flex-shrink:0;
+    width:8px; height:8px; border-radius:50%;
+    background:var(--ice-dim); flex-shrink:0;
   }
   .drawer-device-dot.online{ background:var(--ok); box-shadow:0 0 8px var(--ok); }
 
-  @media (max-width:400px){
-    .brand{ font-size:30px; }
-    .radar-wrap{ width:230px; height:230px; }
-    .action-btn{ font-size:11.5px; padding:12px 4px; }
-    .action-btn svg{ width:22px; height:22px; }
-    .nearby-title{ font-size:15px; }
+  .toast-container{
+    position:fixed; top:14px; left:50%;
+    transform:translateX(-50%);
+    z-index:500;
+    display:flex; flex-direction:column; gap:8px;
+    max-width:min(440px, 92vw); width:100%;
+    pointer-events:none;
+    padding:0 12px;
+  }
+  .toast{
+    display:flex; align-items:center; gap:12px;
+    background:linear-gradient(135deg, #12233C 0%, #0D1B2E 100%);
+    border:1.5px solid var(--cyan-dim);
+    border-radius:14px;
+    padding:12px 14px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.55);
+    animation:toast-in .25s ease-out;
+    pointer-events:auto; cursor:pointer;
+  }
+  .toast.file{ border-color:var(--green); }
+  .toast.chat{ border-color:var(--cyan); }
+  @keyframes toast-in{
+    from{ opacity:0; transform:translateY(-14px) scale(0.96); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  .toast.out{ animation:toast-out .25s ease-in forwards; }
+  @keyframes toast-out{ to{ opacity:0; transform:translateY(-14px) scale(0.96); } }
+  .toast-icon{
+    width:36px; height:36px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; color:#fff;
+  }
+  .toast.file .toast-icon{ background:linear-gradient(180deg, #1FBF75 0%, #178F58 100%); }
+  .toast.chat .toast-icon{ background:linear-gradient(180deg, #3EC7FF 0%, #2A9CD1 100%); }
+  .toast-icon svg{ width:18px; height:18px; }
+  .toast-body{ flex:1; min-width:0; }
+  .toast-title{ font-size:13px; font-weight:600; color:var(--ice); }
+  .toast-sub{ font-size:11.5px; color:var(--ice-dim); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .sheet-overlay{
+    position:fixed; inset:0;
+    background:rgba(2,6,12,0.6);
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+    opacity:0; pointer-events:none;
+    transition:opacity .25s;
+    z-index:600;
+  }
+  .sheet-overlay.open{ opacity:1; pointer-events:auto; }
+
+  .sheet{
+    position:fixed;
+    left:50%;
+    right:auto;
+    bottom:0;
+    transform:translateX(-50%) translateY(100%);
+    width:100%;
+    max-width:520px;
+    background:linear-gradient(180deg, #0D1B2E 0%, #050B14 100%);
+    border-top-left-radius:24px;
+    border-top-right-radius:24px;
+    border-top:1.5px solid var(--card-border-2);
+    border-left:1.5px solid transparent;
+    border-right:1.5px solid transparent;
+    box-shadow:0 -12px 40px rgba(0,0,0,0.7);
+    transition:transform .3s cubic-bezier(.2,.7,.3,1);
+    z-index:601;
+    max-height:85vh;
+    overflow-y:auto;
+    padding:8px 16px 24px;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  .sheet.open{ transform:translateX(-50%) translateY(0); }
+
+  @media (min-width: 620px){
+    .sheet{
+      bottom:20px;
+      border-radius:24px;
+      border:1.5px solid var(--card-border-2);
+      max-height:80vh;
+      padding-bottom:24px;
+    }
+  }
+
+  .sheet-handle{
+    width:44px; height:5px;
+    background:var(--card-border-2);
+    border-radius:3px;
+    margin:6px auto 14px;
+  }
+  .sheet-header{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:20px;
+    min-height:32px;
+  }
+  .sheet-title{
+    font-size:17px;
+    font-weight:700;
+    color:var(--ice);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin:0;
+  }
+  .sheet-title .emoji{
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(135deg, #7C5CE0 0%, #5F44B8 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+  }
+  .sheet-close{
+    position:absolute;
+    right:0;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:transparent;
+    border:1.5px solid var(--card-border);
+    color:var(--ice-dim);
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:border-color .15s, color .15s, background .15s;
+  }
+  .sheet-close:hover, .sheet-close:active{
+    color:var(--ice);
+    border-color:var(--err);
+    background:rgba(255,91,91,0.1);
+  }
+
+  .sheet-section{
+    margin-bottom:22px;
+    background:rgba(62,199,255,0.03);
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    padding:14px;
+  }
+  .sheet-section-title{
+    font-size:11px; font-weight:600;
+    color:var(--cyan-soft);
+    letter-spacing:0.7px;
+    text-transform:uppercase;
+    margin-bottom:12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .sheet-section-title .icon-circle{
+    width:22px; height:22px; border-radius:50%;
+    background:rgba(62,199,255,0.14);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px;
+  }
+
+  .swatch-row{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
+  .swatch-item{
+    display:flex; flex-direction:column;
+    align-items:center; gap:5px;
+    cursor:pointer;
+  }
+  .swatch{
+    width:100%; aspect-ratio:1;
+    max-width:60px;
+    border-radius:50%;
+    border:2.5px solid transparent;
+    transition:transform .15s, border-color .2s, box-shadow .2s;
+    position:relative;
+  }
+  .swatch-item:active .swatch{ transform:scale(0.94); }
+  .swatch.active{
+    border-color:#fff;
+    box-shadow:0 0 0 3px rgba(255,255,255,0.22), 0 0 16px rgba(62,199,255,0.5);
+  }
+  .swatch.active::after{
+    content:'✓';
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    color:#fff; font-size:18px; font-weight:700;
+    text-shadow:0 1px 4px rgba(0,0,0,0.6);
+  }
+  .swatch-label{ font-size:10.5px; color:var(--ice-dim); text-align:center; line-height:1.2; }
+
+  .chat-th-row{
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .chat-th-item{
+    display:flex; flex-direction:column;
+    align-items:center; gap:5px;
+    cursor:pointer;
+  }
+  .chat-th{
+    width:100%; aspect-ratio:5/3;
+    border-radius:12px;
+    border:2px solid transparent;
+    position:relative; overflow:hidden;
+    transition:transform .15s, border-color .2s, box-shadow .2s;
+  }
+  .chat-th-item:active .chat-th{ transform:scale(0.96); }
+  .chat-th.active{
+    border-color:#fff;
+    box-shadow:0 0 0 3px rgba(255,255,255,0.22), 0 0 16px rgba(62,199,255,0.5);
+  }
+  .chat-th-label{ font-size:10.5px; color:var(--ice-dim); text-align:center; }
+
+  .chat-th.t1{ background:#050B14; }
+  .chat-th.t2{ background:radial-gradient(circle at 20% 20%, rgba(62,199,255,0.22) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(62,199,255,0.12) 0%, transparent 50%), #050B14; }
+  .chat-th.t3{ background:radial-gradient(circle at 20% 20%, rgba(168,85,247,0.28) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,120,200,0.15) 0%, transparent 50%), #0F0524; }
+  .chat-th.t4{ background:radial-gradient(circle at 50% 50%, rgba(46,212,122,0.18) 0%, transparent 60%), #05140B; }
+  .chat-th.t5{ background:
+    linear-gradient(0deg, transparent 24%, rgba(62,199,255,0.14) 25%, rgba(62,199,255,0.14) 26%, transparent 27%, transparent 74%, rgba(62,199,255,0.14) 75%, rgba(62,199,255,0.14) 76%, transparent 77%),
+    linear-gradient(90deg, transparent 24%, rgba(62,199,255,0.14) 25%, rgba(62,199,255,0.14) 26%, transparent 27%, transparent 74%, rgba(62,199,255,0.14) 75%, rgba(62,199,255,0.14) 76%, transparent 77%),
+    #050B14;
+    background-size:16px 16px;}
+  .chat-th.t6{ background:#E8F0F8; }
+
+  .font-row{
+    display:grid; grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+  }
+  .font-btn{
+    background:#0D1B2E;
+    border:1.5px solid var(--card-border);
+    color:var(--ice-dim);
+    padding:12px 6px;
+    border-radius:12px;
+    cursor:pointer;
+    font-family:'Inter'; font-size:12px; font-weight:600;
+    transition:border-color .15s, color .15s, background .15s;
+  }
+  .font-btn.active{
+    border-color:var(--cyan);
+    color:var(--cyan);
+    background:rgba(62,199,255,0.1);
+    box-shadow:0 0 12px rgba(62,199,255,0.25);
+  }
+  .font-btn .preview{
+    display:block;
+    font-weight:700;
+    color:var(--ice);
+    margin-bottom:3px;
+  }
+  .font-btn[data-font="small"] .preview{ font-size:12px; }
+  .font-btn[data-font="medium"] .preview{ font-size:15px; }
+  .font-btn[data-font="large"] .preview{ font-size:19px; }
+
+  .info-list{
+    list-style:none; padding:0; margin:0;
+    font-size:12.5px; color:var(--ice-dim);
+  }
+  .info-list li{
+    display:flex; justify-content:space-between;
+    padding:6px 0;
+    border-bottom:1px solid var(--card-border);
+  }
+  .info-list li:last-child{ border-bottom:none; }
+  .info-list li b{ color:var(--ice); font-family:'IBM Plex Mono',monospace; }
+
+  .sheet-danger-btn{
+    width:100%;
+    background:transparent;
+    border:1.5px solid rgba(255,91,91,0.4);
+    color:#FF8080;
+    padding:11px;
+    border-radius:12px;
+    font-family:'Inter'; font-size:13px; font-weight:600;
+    cursor:pointer;
+    transition:background .15s, border-color .15s;
+  }
+  .sheet-danger-btn:hover{ background:rgba(255,91,91,0.08); border-color:var(--err); }
+
+  .sheet-hint{
+    font-size:10.5px; color:var(--ice-dim);
+    text-align:center; margin-top:6px;
+    font-style:italic; opacity:0.7;
   }
 </style>
 </head>
-<body>
+<body data-theme="blue" data-font="medium">
 
 <div class="board">
 
@@ -970,6 +1261,14 @@
       </button>
 
       <div class="right-menu" id="rightMenu">
+        <button class="right-menu-item install-item" id="rmInstall" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <path d="M12 3v14"></path>
+            <polyline points="6 13 12 19 18 13"></polyline>
+            <line x1="5" y1="21" x2="19" y2="21"></line>
+          </svg>
+          Installa app
+        </button>
         <button class="right-menu-item" id="rmInfo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
             <circle cx="12" cy="12" r="9"></circle>
@@ -989,6 +1288,21 @@
     </div>
   </header>
 
+  <div class="install-banner" id="installBanner">
+    <div class="install-banner-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v14"></path>
+        <polyline points="6 13 12 19 18 13"></polyline>
+        <line x1="5" y1="21" x2="19" y2="21"></line>
+      </svg>
+    </div>
+    <div class="install-banner-text">
+      <div class="install-banner-title">Installa DropMiki</div>
+      <div class="install-banner-sub">Aggiungi alla schermata home</div>
+    </div>
+    <button class="install-banner-close" id="installBannerClose" aria-label="Chiudi">✕</button>
+  </div>
+
   <div class="brand-block">
     <svg class="brand-wifi" viewBox="0 0 60 40" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round">
       <path d="M6 16 Q30 -2 54 16"></path>
@@ -996,7 +1310,7 @@
       <path d="M24 33 Q30 27 36 33"></path>
     </svg>
     <h1 class="brand">DropMiki</h1>
-    <div class="brand-tag">Condividi <span class="sep">·</span> Chatta <span class="sep">·</span> Collega</div>
+    <div class="brand-hero">Il modo più semplice per <b>trasferire files</b> tra dispositivi</div>
   </div>
 
   <div class="radar-wrap">
@@ -1021,6 +1335,21 @@
       </svg>
     </button>
   </div>
+
+  <!-- NEW: pulsante mostra QR -->
+  <button class="show-qr-btn" id="showQrBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7"></rect>
+      <rect x="14" y="3" width="7" height="7"></rect>
+      <rect x="3" y="14" width="7" height="7"></rect>
+      <path d="M14 14h3v3h-3z"></path>
+      <path d="M20 14h1v1h-1z"></path>
+      <path d="M14 20h1v1h-1z"></path>
+      <path d="M20 20h1v1h-1z"></path>
+      <path d="M18 18h1v1h-1z"></path>
+    </svg>
+    Mostra QR
+  </button>
 
   <div class="online-badge" id="onlineBadge">
     <span class="dot-live"></span>
@@ -1050,14 +1379,13 @@
 
   <div class="actions-row">
     <button class="action-btn file" id="actionFile">
-      <span class="unread-dot" id="fileUnreadDot"></span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
       </svg>
       Invia file
+      <span class="badge" id="fileBadge"></span>
     </button>
     <button class="action-btn chat" id="actionChat">
-      <span class="unread-dot" id="chatUnreadDot"></span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         <circle cx="8" cy="12" r="1" fill="currentColor"></circle>
@@ -1065,6 +1393,7 @@
         <circle cx="16" cy="12" r="1" fill="currentColor"></circle>
       </svg>
       Chat
+      <span class="badge" id="chatBadge"></span>
     </button>
     <button class="action-btn link" id="actionLink">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1117,12 +1446,11 @@
     </button>
   </div>
 
-  <footer>
-    App creata da <b>Miki</b> <span class="heart">❤</span>
-  </footer>
+  <footer>App creata da <b>Miki</b></footer>
 </div>
 
-<!-- ============ DRAWER SINISTRO ============ -->
+<div class="toast-container" id="toastContainer"></div>
+
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-head">
@@ -1132,6 +1460,30 @@
 
   <div class="drawer-section">
     <div class="drawer-section-title">MENU</div>
+    <button class="drawer-btn install-btn" id="drawerInstall" style="display:none;">
+      <span class="drawer-btn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <path d="M12 3v14"></path>
+          <polyline points="6 13 12 19 18 13"></polyline>
+          <line x1="5" y1="21" x2="19" y2="21"></line>
+        </svg>
+      </span>
+      Installa app
+    </button>
+    <button class="drawer-btn" id="drawerQr">
+      <span class="drawer-btn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+          <path d="M14 14h3v3h-3z"></path>
+          <path d="M20 14h1v1h-1z"></path>
+          <path d="M14 20h1v1h-1z"></path>
+          <path d="M20 20h1v1h-1z"></path>
+        </svg>
+      </span>
+      Mostra QR
+    </button>
     <button class="drawer-btn" id="drawerSettings">
       <span class="drawer-btn-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
@@ -1183,8 +1535,6 @@
   </div>
 </aside>
 
-<!-- ============ MODALI ============ -->
-
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
     <div class="modal-head">
@@ -1198,7 +1548,7 @@
 <div class="modal-overlay" id="confirmOverlay">
   <div class="modal-box">
     <div class="modal-head">
-      <h3>Conferma</h3>
+      <h3 id="confirmTitle">Conferma</h3>
       <button class="modal-close" id="confirmClose" aria-label="Chiudi">✕</button>
     </div>
     <div class="modal-body" id="confirmBody"></div>
@@ -1221,6 +1571,14 @@
         <input type="text" id="peerCodeInput" placeholder="CODICE" maxlength="6" autocomplete="off" autocapitalize="characters">
         <button class="primary" id="connectBtn">Connetti</button>
       </div>
+      <!-- NEW: pulsante scansiona QR -->
+      <button class="ghost" id="scanQrBtn" style="width:100%; margin-top:8px; display:flex; align-items:center; justify-content:center; gap:8px; padding:11px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        Scansiona QR con fotocamera
+      </button>
       <div class="status-line">
         <span class="dot" id="peerStatusDot"></span>
         <span id="peerStatusText">Inserisci il codice mostrato sull'altro dispositivo</span>
@@ -1257,7 +1615,40 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="chatModal">
+<!-- NEW: QR SHOW MODAL -->
+<div class="modal-overlay" id="qrShowOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Il tuo QR code</h3>
+      <button class="modal-close" id="qrShowClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="qr-show-wrap">
+      <div class="qr-canvas-box" id="qrCanvasBox"></div>
+      <div class="qr-code-text" id="qrCodeText">······</div>
+      <div class="qr-hint">Fai scansionare questo QR dall'altro dispositivo<br>per collegarvi senza digitare il codice</div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW: QR SCAN MODAL -->
+<div class="modal-overlay" id="qrScanOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Scansiona QR</h3>
+      <button class="modal-close" id="qrScanClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="qr-scan-wrap" id="qrScanWrap">
+      <video id="qrVideo" playsinline muted autoplay></video>
+      <div class="qr-scan-frame"></div>
+    </div>
+    <div class="qr-scan-status" id="qrScanStatus">Inquadra il QR dell'altro dispositivo</div>
+    <div class="qr-scan-actions">
+      <button class="ghost" id="qrScanCancel">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="chatModal" data-chat-theme="1">
   <div class="modal-box">
     <div class="chat-header">
       <button class="chat-back" id="chatBack" aria-label="Indietro">
@@ -1300,7 +1691,79 @@
   </div>
 </div>
 
+<div class="sheet-overlay" id="settingsOverlay"></div>
+<div class="sheet" id="settingsSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title">
+      <span class="emoji">🎨</span>
+      Personalizza
+    </div>
+    <button class="sheet-close" id="settingsClose" aria-label="Chiudi">✕</button>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-section-title">
+      <span class="icon-circle">🎨</span>
+      Colore sfondo home
+    </div>
+    <div class="swatch-row" id="themeSwatches">
+      <div class="swatch-item"><div class="swatch active" data-theme="blue" style="background:linear-gradient(135deg,#050B14,#0A1626);"></div><div class="swatch-label">Blu</div></div>
+      <div class="swatch-item"><div class="swatch" data-theme="black" style="background:linear-gradient(135deg,#000,#0a0a0a);"></div><div class="swatch-label">Nero</div></div>
+      <div class="swatch-item"><div class="swatch" data-theme="violet" style="background:linear-gradient(135deg,#0F0524,#1a0a3a);"></div><div class="swatch-label">Viola</div></div>
+      <div class="swatch-item"><div class="swatch" data-theme="forest" style="background:linear-gradient(135deg,#05140B,#0a2416);"></div><div class="swatch-label">Foresta</div></div>
+      <div class="swatch-item"><div class="swatch" data-theme="wine" style="background:linear-gradient(135deg,#14050A,#2a0a14);"></div><div class="swatch-label">Vino</div></div>
+      <div class="swatch-item"><div class="swatch" data-theme="amber" style="background:linear-gradient(135deg,#140D05,#2a1a0a);"></div><div class="swatch-label">Ambra</div></div>
+      <div class="swatch-item"><div class="swatch" data-theme="cyan" style="background:linear-gradient(135deg,#05121A,#0a2233);"></div><div class="swatch-label">Ciano</div></div>
+      <div class="swatch-item"><div class="swatch" data-theme="graphite" style="background:linear-gradient(135deg,#0E0E12,#1a1a20);"></div><div class="swatch-label">Grafite</div></div>
+    </div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-section-title">
+      <span class="icon-circle">💬</span>
+      Sfondo chat
+    </div>
+    <div class="chat-th-row" id="chatThemes">
+      <div class="chat-th-item"><div class="chat-th t1 active" data-chat="1"></div><div class="chat-th-label">Scuro</div></div>
+      <div class="chat-th-item"><div class="chat-th t2" data-chat="2"></div><div class="chat-th-label">Nebulosa</div></div>
+      <div class="chat-th-item"><div class="chat-th t3" data-chat="3"></div><div class="chat-th-label">Galassia</div></div>
+      <div class="chat-th-item"><div class="chat-th t4" data-chat="4"></div><div class="chat-th-label">Muschio</div></div>
+      <div class="chat-th-item"><div class="chat-th t5" data-chat="5"></div><div class="chat-th-label">Griglia</div></div>
+      <div class="chat-th-item"><div class="chat-th t6" data-chat="6"></div><div class="chat-th-label">Chiaro</div></div>
+    </div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-section-title">
+      <span class="icon-circle">🔤</span>
+      Dimensione carattere
+    </div>
+    <div class="font-row" id="fontSizes">
+      <button class="font-btn" data-font="small"><span class="preview">Aa</span>Piccolo</button>
+      <button class="font-btn active" data-font="medium"><span class="preview">Aa</span>Medio</button>
+      <button class="font-btn" data-font="large"><span class="preview">Aa</span>Grande</button>
+    </div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-section-title">
+      <span class="icon-circle">📱</span>
+      Info dispositivo
+    </div>
+    <ul class="info-list">
+      <li><span>Codice</span><b id="settingsMyCode">······</b></li>
+      <li><span>Dispositivi salvati</span><b id="settingsDevicesCount">0</b></li>
+    </ul>
+    <button class="sheet-danger-btn" id="resetAllBtn" style="margin-top:12px;">Rimuovi tutti i dispositivi e le chat</button>
+  </div>
+
+  <div class="sheet-hint">Le impostazioni vengono salvate automaticamente</div>
+</div>
+
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 (function(){
   'use strict';
@@ -1311,6 +1774,11 @@
   const LS_DEVICES = 'dropmiki_devices';
   const LS_MYNAME = 'dropmiki_myname';
   const LS_CHAT = 'dropmiki_chat_';
+  const LS_UNREAD = 'dropmiki_unread_';
+  const LS_INSTALL_DISMISSED = 'dropmiki_install_dismissed';
+  const LS_THEME = 'dropmiki_theme';
+  const LS_CHAT_THEME = 'dropmiki_chat_theme';
+  const LS_FONT = 'dropmiki_font';
 
   const $ = (id) => document.getElementById(id);
 
@@ -1334,6 +1802,10 @@
   const devicesList = $('devicesList');
   const devicesEmpty = $('devicesEmpty');
 
+  const chatBadge = $('chatBadge');
+  const fileBadge = $('fileBadge');
+  const chatModal = $('chatModal');
+
   let peer = null;
   let myCode = '';
   let myName = '';
@@ -1344,12 +1816,46 @@
 
   let chatPeerCode = null;
   let chatHistories = {};
+  let unreadCounts = {};
+  let pendingFileCount = 0;
+
+  // ===== QR scan state =====
+  let qrStream = null;
+  let qrRAF = null;
+
+  // ---------- tema / font ----------
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(LS_THEME, theme);
+    document.querySelectorAll('#themeSwatches .swatch').forEach(s => {
+      s.classList.toggle('active', s.dataset.theme === theme);
+    });
+  }
+  function applyFont(font){
+    document.documentElement.setAttribute('data-font', font);
+    localStorage.setItem(LS_FONT, font);
+    document.querySelectorAll('#fontSizes .font-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.font === font);
+    });
+  }
+  function applyChatTheme(theme){
+    chatModal.setAttribute('data-chat-theme', theme);
+    localStorage.setItem(LS_CHAT_THEME, theme);
+    document.querySelectorAll('#chatThemes .chat-th').forEach(c => {
+      c.classList.toggle('active', c.dataset.chat === theme);
+    });
+  }
+  function loadPreferences(){
+    applyTheme(localStorage.getItem(LS_THEME) || 'blue');
+    applyFont(localStorage.getItem(LS_FONT) || 'medium');
+    applyChatTheme(localStorage.getItem(LS_CHAT_THEME) || '1');
+  }
 
   // ---------- nome ----------
   function guessDeviceName(){
     const ua = navigator.userAgent;
-    const androidMatch = ua.match(/Android [\d.]+;\s*([^;)]+)\)/);
-    if(androidMatch && androidMatch[1] && !/Build|wv/i.test(androidMatch[1])) return androidMatch[1].trim();
+    const m = ua.match(/Android [\d.]+;\s*([^;)]+)\)/);
+    if(m && m[1] && !/Build|wv/i.test(m[1])) return m[1].trim();
     if(/iPhone/.test(ua)) return 'iPhone';
     if(/iPad/.test(ua)) return 'iPad';
     if(/Macintosh/.test(ua)) return 'Mac';
@@ -1357,14 +1863,12 @@
     if(/Linux/.test(ua)) return 'PC Linux';
     return 'Dispositivo';
   }
-
   function broadcastName(){
     Object.keys(connections).forEach((code) => {
       const c = connections[code];
       if(c && c.open) c.send({ type: 'hello', name: myName });
     });
   }
-
   myNameInput.addEventListener('change', () => {
     const val = myNameInput.value.trim();
     if(val){
@@ -1376,7 +1880,7 @@
     }
   });
 
-  // ---------- persistenza ----------
+  // ---------- storage ----------
   function loadDevices(){
     try{
       const raw = localStorage.getItem(LS_DEVICES);
@@ -1384,6 +1888,35 @@
     }catch(e){ savedDevices = []; }
   }
   function persistDevices(){ localStorage.setItem(LS_DEVICES, JSON.stringify(savedDevices)); }
+
+  function loadUnread(){
+    unreadCounts = {};
+    Object.keys(localStorage).forEach(k => {
+      if(k.startsWith(LS_UNREAD)){
+        const code = k.slice(LS_UNREAD.length);
+        const v = parseInt(localStorage.getItem(k) || '0', 10);
+        if(v > 0) unreadCounts[code] = v;
+      }
+    });
+  }
+  function persistUnread(code){
+    if(unreadCounts[code] > 0) localStorage.setItem(LS_UNREAD + code, String(unreadCounts[code]));
+    else localStorage.removeItem(LS_UNREAD + code);
+  }
+  function incrementUnread(code){
+    unreadCounts[code] = (unreadCounts[code] || 0) + 1;
+    persistUnread(code);
+    updateBadges();
+  }
+  function clearUnread(code){
+    if(!unreadCounts[code]) return;
+    delete unreadCounts[code];
+    persistUnread(code);
+    updateBadges();
+  }
+  function totalUnread(){
+    return Object.values(unreadCounts).reduce((a,b) => a + b, 0);
+  }
 
   function upsertDevice(code, name, isCustom){
     let d = savedDevices.find(x => x.code === code);
@@ -1399,31 +1932,27 @@
 
   function handleHello(code, remoteName){
     let d = savedDevices.find(x => x.code === code);
-    if(!d){
-      upsertDevice(code, remoteName, false);
-    } else if(!d.customName){
-      d.name = remoteName;
-      persistDevices();
-    }
+    if(!d) upsertDevice(code, remoteName, false);
+    else if(!d.customName){ d.name = remoteName; persistDevices(); }
     renderDevicesList();
     renderRadarAvatars();
     updateNearbySub();
     renderDrawerDevices();
     updateChatHeader();
+    updateSettingsInfo();
   }
 
   function removeDevice(code){
     savedDevices = savedDevices.filter(x => x.code !== code);
     persistDevices();
-    if(connections[code]){
-      connections[code].close();
-      delete connections[code];
-    }
+    if(connections[code]){ connections[code].close(); delete connections[code]; }
     if(selectedTarget === code) chooseFallbackTarget();
+    clearUnread(code);
     renderDevicesList();
     renderRadarAvatars();
     updateNearbySub();
     renderDrawerDevices();
+    updateSettingsInfo();
   }
 
   function randomCode(){
@@ -1438,11 +1967,30 @@
     onlineText.textContent = text;
   }
 
+  function updateBadges(){
+    const total = totalUnread();
+    if(total > 0){
+      chatBadge.textContent = total > 99 ? '99+' : String(total);
+      chatBadge.classList.add('show');
+    } else {
+      chatBadge.classList.remove('show');
+    }
+    if(pendingFileCount > 0){
+      fileBadge.textContent = pendingFileCount > 9 ? '9+' : String(pendingFileCount);
+      fileBadge.classList.add('show');
+    } else {
+      fileBadge.classList.remove('show');
+    }
+  }
+  function resetFileNotifications(){
+    pendingFileCount = 0;
+    updateBadges();
+  }
+
   // ---------- render ----------
   function renderDevicesList(){
     devicesList.innerHTML = '';
     devicesEmpty.style.display = savedDevices.length ? 'none' : 'block';
-
     savedDevices.forEach((d) => {
       const row = document.createElement('div');
       row.className = 'device-row';
@@ -1477,7 +2025,10 @@
       removeBtn.title = 'Rimuovi dispositivo';
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        showConfirm('Rimuovere "' + d.name + '" dai dispositivi salvati?', () => removeDevice(d.code));
+        e.preventDefault();
+        showConfirm('Rimuovere "' + d.name + '" dai dispositivi salvati?', () => {
+          removeDevice(d.code);
+        });
       });
 
       row.appendChild(dot);
@@ -1487,7 +2038,6 @@
       row.addEventListener('click', () => onDeviceRowClick(d.code));
       devicesList.appendChild(row);
     });
-
     updateSendTargetLabel();
   }
 
@@ -1495,7 +2045,6 @@
     radarAvatars.innerHTML = '';
     const n = savedDevices.length;
     const radius = 92;
-
     savedDevices.forEach((d, i) => {
       const angle = (360 / n) * i - 90;
       const rad = angle * Math.PI / 180;
@@ -1503,6 +2052,7 @@
       const y = Math.sin(rad) * radius;
       const isOnline = !!(connections[d.code] && connections[d.code].open);
       const isSelected = d.code === selectedTarget;
+      const hasUnread = (unreadCounts[d.code] || 0) > 0;
 
       const wrap = document.createElement('div');
       wrap.className = 'radar-avatar-wrap' + (y < 0 ? ' label-above' : '');
@@ -1515,6 +2065,10 @@
       const dot = document.createElement('div');
       dot.className = 'radar-avatar' + (isOnline ? ' online' : '') + (isSelected ? ' selected' : '');
       dot.textContent = (d.name || '?').trim().charAt(0).toUpperCase();
+
+      const unreadDot = document.createElement('span');
+      unreadDot.className = 'unread-dot' + (hasUnread ? ' show' : '');
+      dot.appendChild(unreadDot);
 
       const label = document.createElement('div');
       label.className = 'radar-avatar-label' + (isOnline ? ' online' : '');
@@ -1531,25 +2085,26 @@
     const empty = $('drawerDevicesEmpty');
     const badge = $('drawerOnlineCount');
     if(!list) return;
-
     list.innerHTML = '';
     let onlineCount = 0;
-
     savedDevices.forEach(d => {
       const conn = connections[d.code];
       const online = !!(conn && conn.open);
       if(online) onlineCount++;
+      const unread = unreadCounts[d.code] || 0;
 
       const item = document.createElement('div');
       item.className = 'drawer-device';
-      item.addEventListener('click', () => {
-        closeDrawer();
-        onDeviceRowClick(d.code);
-      });
+      item.addEventListener('click', () => { closeDrawer(); onDeviceRowClick(d.code); });
 
       const avatar = document.createElement('div');
       avatar.className = 'drawer-device-avatar' + (online ? ' online' : '');
       avatar.textContent = (d.name || '?').trim().charAt(0).toUpperCase();
+      if(unread > 0){
+        const dotUnread = document.createElement('span');
+        dotUnread.className = 'unread-dot show';
+        avatar.appendChild(dotUnread);
+      }
 
       const info = document.createElement('div');
       info.className = 'drawer-device-info';
@@ -1557,8 +2112,10 @@
       nm.className = 'drawer-device-name';
       nm.textContent = d.name;
       const st = document.createElement('div');
-      st.className = 'drawer-device-status' + (online ? ' online' : '');
-      st.textContent = online ? 'Online · ' + d.code : 'Offline · ' + d.code;
+      st.className = 'drawer-device-status' + (unread > 0 ? ' unread' : (online ? ' online' : ''));
+      st.textContent = unread > 0
+        ? unread + (unread === 1 ? ' nuovo messaggio' : ' nuovi messaggi')
+        : (online ? 'Online · ' + d.code : 'Offline · ' + d.code);
       info.appendChild(nm);
       info.appendChild(st);
 
@@ -1570,7 +2127,6 @@
       item.appendChild(dot);
       list.appendChild(item);
     });
-
     empty.style.display = savedDevices.length ? 'none' : 'block';
     badge.textContent = onlineCount;
   }
@@ -1615,27 +2171,51 @@
 
   function updateDropzoneState(){
     const enabled = !!(selectedTarget && connections[selectedTarget] && connections[selectedTarget].open);
-    if(enabled){
-      dropzone.classList.remove('disabled');
-    } else {
-      dropzone.classList.add('disabled');
-    }
+    dropzone.classList.toggle('disabled', !enabled);
+  }
+
+  function updateSettingsInfo(){
+    const codeEl = $('settingsMyCode');
+    const cntEl = $('settingsDevicesCount');
+    if(codeEl) codeEl.textContent = myCode || '······';
+    if(cntEl) cntEl.textContent = savedDevices.length;
+  }
+
+  // ---------- toast ----------
+  function showToast(type, title, sub, onClick){
+    const container = $('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.innerHTML =
+      '<div class="toast-icon">' +
+        (type === 'file'
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>'
+        ) +
+      '</div>' +
+      '<div class="toast-body">' +
+        '<div class="toast-title">' + escapeHtml(title) + '</div>' +
+        '<div class="toast-sub">' + escapeHtml(sub) + '</div>' +
+      '</div>';
+    el.addEventListener('click', () => { dismissToast(el); if(onClick) onClick(); });
+    container.appendChild(el);
+    setTimeout(() => dismissToast(el), 5000);
+  }
+  function dismissToast(el){
+    if(!el || !el.parentNode) return;
+    el.classList.add('out');
+    setTimeout(() => { if(el.parentNode) el.parentNode.removeChild(el); }, 260);
   }
 
   // ---------- peer ----------
   function initPeer(){
     myCode = localStorage.getItem(LS_MYCODE);
-    if(!myCode){
-      myCode = randomCode();
-      localStorage.setItem(LS_MYCODE, myCode);
-    }
+    if(!myCode){ myCode = randomCode(); localStorage.setItem(LS_MYCODE, myCode); }
     myCodeInline.textContent = myCode;
+    updateSettingsInfo();
 
     myName = localStorage.getItem(LS_MYNAME);
-    if(!myName){
-      myName = guessDeviceName();
-      localStorage.setItem(LS_MYNAME, myName);
-    }
+    if(!myName){ myName = guessDeviceName(); localStorage.setItem(LS_MYNAME, myName); }
     myNameInput.value = myName;
 
     setOnlineBadge('connecting', 'Connessione…');
@@ -1646,27 +2226,17 @@
       setOnlineBadge('ok', 'Online');
       savedDevices.forEach(d => attemptConnect(d.code, { silent: true }));
     });
-
     peer.on('error', (err) => {
       console.error(err);
-      if(err.type === 'unavailable-id'){
-        localStorage.removeItem(LS_MYCODE);
-        setTimeout(initPeer, 300);
-        return;
-      }
-      if(err.type === 'peer-unavailable'){
-        setPeerStatus('error', 'Dispositivo non raggiungibile: verifica che sia online');
-        return;
-      }
+      if(err.type === 'unavailable-id'){ localStorage.removeItem(LS_MYCODE); setTimeout(initPeer, 300); return; }
+      if(err.type === 'peer-unavailable'){ setPeerStatus('error', 'Dispositivo non raggiungibile: verifica che sia online'); return; }
       setOnlineBadge('offline', 'Errore');
     });
-
     peer.on('connection', (conn) => {
       const code = conn.peer.replace(PEER_PREFIX, '');
       upsertDevice(code);
       bindConnection(conn, code);
     });
-
     peer.on('disconnected', () => {
       setOnlineBadge('offline', 'Riconnessione…');
       peer.reconnect();
@@ -1680,15 +2250,10 @@
 
   function attemptConnect(code, opts){
     opts = opts || {};
-    if(!peer || peer.disconnected){
-      if(!opts.silent) setPeerStatus('error', 'In attesa della connessione…');
-      return;
-    }
+    if(!peer || peer.disconnected){ if(!opts.silent) setPeerStatus('error', 'In attesa della connessione…'); return; }
     if(connections[code] && connections[code].open){
       selectedTarget = code;
-      renderDevicesList();
-      renderRadarAvatars();
-      updateDropzoneState();
+      renderDevicesList(); renderRadarAvatars(); updateDropzoneState();
       return;
     }
     if(!opts.silent) setPeerStatus('connecting', 'Connessione a ' + deviceName(code) + ' in corso…');
@@ -1698,68 +2263,46 @@
 
   function bindConnection(conn, code){
     connections[code] = conn;
-    renderDevicesList();
-    renderRadarAvatars();
-    updateNearbySub();
-    renderDrawerDevices();
+    renderDevicesList(); renderRadarAvatars(); updateNearbySub(); renderDrawerDevices();
 
     conn.on('open', () => {
       upsertDevice(code);
       if(!selectedTarget) selectedTarget = code;
       setPeerStatus('connected', 'Connesso a ' + deviceName(code));
       conn.send({ type: 'hello', name: myName });
-      renderDevicesList();
-      renderRadarAvatars();
-      updateDropzoneState();
-      updateSendTargetLabel();
-      updateNearbySub();
-      renderDrawerDevices();
-      updateChatHeader();
+      renderDevicesList(); renderRadarAvatars();
+      updateDropzoneState(); updateSendTargetLabel();
+      updateNearbySub(); renderDrawerDevices();
+      updateChatHeader(); updateSettingsInfo();
     });
-
     conn.on('data', (msg) => handleIncomingData(msg, code));
-
     conn.on('close', () => {
       delete connections[code];
       if(selectedTarget === code) chooseFallbackTarget();
-      renderDevicesList();
-      renderRadarAvatars();
-      updateNearbySub();
-      renderDrawerDevices();
+      renderDevicesList(); renderRadarAvatars();
+      updateNearbySub(); renderDrawerDevices();
       updateChatHeader();
     });
-
     conn.on('error', (err) => {
       console.error(err);
       delete connections[code];
       if(selectedTarget === code) chooseFallbackTarget();
-      renderDevicesList();
-      renderRadarAvatars();
-      updateNearbySub();
-      renderDrawerDevices();
+      renderDevicesList(); renderRadarAvatars();
+      updateNearbySub(); renderDrawerDevices();
       updateChatHeader();
     });
   }
 
   connectBtn.addEventListener('click', () => {
     const code = peerCodeInput.value.trim().toUpperCase();
-    if(code.length !== 6){
-      setPeerStatus('error', 'Inserisci il codice a 6 caratteri');
-      return;
-    }
+    if(code.length !== 6){ setPeerStatus('error', 'Inserisci il codice a 6 caratteri'); return; }
     upsertDevice(code);
     attemptConnect(code);
     peerCodeInput.value = '';
-    renderDevicesList();
-    renderRadarAvatars();
-    renderDrawerDevices();
+    renderDevicesList(); renderRadarAvatars(); renderDrawerDevices();
   });
+  peerCodeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') connectBtn.click(); });
 
-  peerCodeInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') connectBtn.click();
-  });
-
-  // ---------- copia codice ----------
   $('copyCodeBtn').addEventListener('click', async () => {
     try{
       await navigator.clipboard.writeText(myCode);
@@ -1770,11 +2313,146 @@
     }catch(e){}
   });
 
-  // ---------- modali generiche ----------
+  // ===================== QR CODE =====================
+  function showQrModal(){
+    if(!myCode) return;
+    const box = $('qrCanvasBox');
+    box.innerHTML = '';
+    $('qrCodeText').textContent = myCode;
+
+    if(typeof QRCode === 'undefined'){
+      box.innerHTML = '<div style="color:#666;font-size:12px;text-align:center;padding:20px;">Errore caricamento QR. Verifica la connessione.</div>';
+      $('qrShowOverlay').classList.add('open');
+      return;
+    }
+
+    // genero canvas con QRCode.js
+    const canvas = document.createElement('canvas');
+    box.appendChild(canvas);
+    QRCode.toCanvas(canvas, myCode, {
+      width: 240,
+      margin: 1,
+      color: { dark: '#000000', light: '#FFFFFF' },
+      errorCorrectionLevel: 'M'
+    }, (err) => {
+      if(err){
+        box.innerHTML = '<div style="color:#666;font-size:12px;text-align:center;padding:20px;">Errore generazione QR.</div>';
+      }
+    });
+
+    $('qrShowOverlay').classList.add('open');
+  }
+
+  function closeQrModal(){
+    $('qrShowOverlay').classList.remove('open');
+  }
+
+  function openQrScanner(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      setPeerStatus('error', 'Fotocamera non supportata dal browser');
+      return;
+    }
+    if(typeof jsQR === 'undefined'){
+      setPeerStatus('error', 'Decoder QR non disponibile. Verifica la connessione.');
+      return;
+    }
+    $('qrScanOverlay').classList.add('open');
+    $('qrScanStatus').textContent = 'Richiedo accesso alla fotocamera…';
+    startQrCamera();
+  }
+
+  async function startQrCamera(){
+    try{
+      qrStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+      const video = $('qrVideo');
+      video.srcObject = qrStream;
+      await video.play();
+      $('qrScanStatus').textContent = 'Inquadra il QR dell\'altro dispositivo';
+      scanQrFrame();
+    }catch(err){
+      console.error(err);
+      let msg = 'Impossibile accedere alla fotocamera';
+      if(err.name === 'NotAllowedError') msg = 'Permesso fotocamera negato';
+      else if(err.name === 'NotFoundError') msg = 'Nessuna fotocamera trovata';
+      else if(err.name === 'NotReadableError') msg = 'Fotocamera occupata da un\'altra app';
+      $('qrScanStatus').textContent = msg + ' — puoi digitare il codice a mano';
+    }
+  }
+
+  function scanQrFrame(){
+    const video = $('qrVideo');
+    if(!video.videoWidth){
+      qrRAF = requestAnimationFrame(scanQrFrame);
+      return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: 'dontInvert'
+    });
+    if(code && code.data){
+      const detected = code.data.trim().toUpperCase();
+      // validazione: 6 caratteri alfanumerici
+      if(/^[A-Z0-9]{6}$/.test(detected)){
+        onQrDetected(detected);
+        return;
+      } else {
+        $('qrScanStatus').textContent = 'QR non valido — serve un codice DropMiki';
+      }
+    }
+    qrRAF = requestAnimationFrame(scanQrFrame);
+  }
+
+  function onQrDetected(code){
+    stopQrCamera();
+    closeQrScanner();
+    peerCodeInput.value = code;
+    setPeerStatus('connected', 'QR letto: ' + code);
+    // auto-connessione
+    upsertDevice(code);
+    attemptConnect(code);
+    renderDevicesList();
+    renderRadarAvatars();
+    renderDrawerDevices();
+  }
+
+  function stopQrCamera(){
+    if(qrRAF){ cancelAnimationFrame(qrRAF); qrRAF = null; }
+    if(qrStream){
+      qrStream.getTracks().forEach(t => t.stop());
+      qrStream = null;
+    }
+    const video = $('qrVideo');
+    if(video) video.srcObject = null;
+  }
+
+  function closeQrScanner(){
+    stopQrCamera();
+    $('qrScanOverlay').classList.remove('open');
+    $('qrScanStatus').textContent = 'Inquadra il QR dell\'altro dispositivo';
+  }
+
+  $('showQrBtn').addEventListener('click', showQrModal);
+  $('drawerQr').addEventListener('click', () => { closeDrawer(); showQrModal(); });
+  $('qrShowClose').addEventListener('click', closeQrModal);
+  $('qrShowOverlay').addEventListener('click', (e) => { if(e.target === $('qrShowOverlay')) closeQrModal(); });
+
+  $('scanQrBtn').addEventListener('click', openQrScanner);
+  $('qrScanClose').addEventListener('click', closeQrScanner);
+  $('qrScanCancel').addEventListener('click', closeQrScanner);
+  $('qrScanOverlay').addEventListener('click', (e) => { if(e.target === $('qrScanOverlay')) closeQrScanner(); });
+
+  // ---------- modali ----------
   const modalOverlay = $('modalOverlay');
   const modalTitle = $('modalTitle');
   const modalBody = $('modalBody');
-
   function openModal(title, html){
     modalTitle.textContent = title;
     modalBody.innerHTML = html;
@@ -1786,10 +2464,12 @@
 
   const confirmOverlay = $('confirmOverlay');
   const confirmBody = $('confirmBody');
+  const confirmTitle = $('confirmTitle');
   let confirmAction = null;
 
-  function showConfirm(message, action){
+  function showConfirm(message, action, title){
     confirmBody.textContent = message;
+    confirmTitle.textContent = title || 'Conferma';
     confirmAction = action;
     confirmOverlay.classList.add('open');
   }
@@ -1798,8 +2478,9 @@
     confirmAction = null;
   }
   $('confirmOkBtn').addEventListener('click', () => {
-    if(confirmAction) confirmAction();
+    const act = confirmAction;
     closeConfirm();
+    if(act){ try { act(); } catch(e){ console.error(e); } }
   });
   $('confirmCancelBtn').addEventListener('click', closeConfirm);
   $('confirmClose').addEventListener('click', closeConfirm);
@@ -1807,12 +2488,12 @@
 
   document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape'){
-      closeModal();
-      closeConfirm();
-      closeDevices();
-      closeSend();
-      closeChat();
-      closeDrawer();
+      if(confirmOverlay.classList.contains('open')){ closeConfirm(); return; }
+      if(modalOverlay.classList.contains('open')){ closeModal(); return; }
+      if($('qrScanOverlay').classList.contains('open')){ closeQrScanner(); return; }
+      if($('qrShowOverlay').classList.contains('open')){ closeQrModal(); return; }
+      if($('settingsSheet').classList.contains('open')){ closeSettings(); return; }
+      closeDevices(); closeSend(); closeChat(); closeDrawer();
       rightMenu.classList.remove('open');
     }
   });
@@ -1828,8 +2509,11 @@
 
   // ---------- send overlay ----------
   const sendOverlay = $('sendOverlay');
-  const fileUnreadDot = $('fileUnreadDot');
-  function openSend(){ sendOverlay.classList.add('open'); updateDropzoneState(); updateSendTargetLabel(); fileUnreadDot.classList.remove('show'); }
+  function openSend(){
+    sendOverlay.classList.add('open');
+    updateDropzoneState(); updateSendTargetLabel();
+    resetFileNotifications();
+  }
   function closeSend(){ sendOverlay.classList.remove('open'); }
   $('sendClose').addEventListener('click', closeSend);
   sendOverlay.addEventListener('click', (e) => { if(e.target === sendOverlay) closeSend(); });
@@ -1842,17 +2526,15 @@
     openSend();
   });
 
-  // ---------- invio file ----------
+  // ---------- file ----------
   dropzone.addEventListener('click', () => {
     if(dropzone.classList.contains('disabled')) return;
     fileInput.click();
   });
-
   fileInput.addEventListener('change', () => {
     if(fileInput.files[0]) sendFile(fileInput.files[0]);
     fileInput.value = '';
   });
-
   ['dragover','dragenter'].forEach(evt => {
     dropzone.addEventListener(evt, (e) => {
       e.preventDefault();
@@ -1882,12 +2564,10 @@
     transfersList.prepend(row);
     return row;
   }
-
   function updateProgress(id, pct){
     const bar = document.getElementById('bar-' + id);
     if(bar) bar.style.width = pct + '%';
   }
-
   function truncateName(name, maxLen){
     if(name.length <= maxLen) return name;
     const dotIndex = name.lastIndexOf('.');
@@ -1897,13 +2577,11 @@
     const keep = Math.max(4, maxLen - ext.length - 1);
     return base.slice(0, keep) + '…' + ext;
   }
-
   function markDone(id, downloadUrl, filename){
     const row = document.getElementById('transfer-' + id);
     if(!row) return;
     row.classList.add('done');
     if(downloadUrl){
-      if(!sendOverlay.classList.contains('open')) fileUnreadDot.classList.add('show');
       const a = document.createElement('a');
       a.href = downloadUrl;
       a.download = filename;
@@ -1913,7 +2591,6 @@
       row.appendChild(a);
     }
   }
-
   clearTransfersBtn.addEventListener('click', () => {
     if(transfersList.children.length === 0) return;
     showConfirm('Cancellare tutto il registro trasferimenti?', () => {
@@ -1925,7 +2602,6 @@
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
-
   function formatBytes(bytes){
     if(bytes < 1024) return bytes + ' B';
     if(bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
@@ -1934,22 +2610,10 @@
 
   async function sendFile(file){
     const conn = selectedTarget ? connections[selectedTarget] : null;
-    if(!conn || !conn.open){
-      setPeerStatus('error', "Nessun dispositivo selezionato per l'invio");
-      return;
-    }
-
+    if(!conn || !conn.open){ setPeerStatus('error', "Nessun dispositivo selezionato per l'invio"); return; }
     const transferId = 't' + Date.now();
     addTransferRow(transferId, file.name, file.size, 'up');
-
-    conn.send({
-      type: 'meta',
-      transferId,
-      name: file.name,
-      size: file.size,
-      mime: file.type || 'application/octet-stream'
-    });
-
+    conn.send({ type: 'meta', transferId, name: file.name, size: file.size, mime: file.type || 'application/octet-stream' });
     let offset = 0;
     while(offset < file.size){
       const slice = file.slice(offset, offset + CHUNK_SIZE);
@@ -1959,7 +2623,6 @@
       updateProgress(transferId, Math.min(100, Math.round((offset / file.size) * 100)));
       await new Promise(r => setTimeout(r, 0));
     }
-
     conn.send({ type: 'end', transferId });
     markDone(transferId, null, file.name);
   }
@@ -1970,14 +2633,14 @@
     } else if(msg.type === 'chat'){
       receiveChatMessage(code, msg.text, msg.ts);
     } else if(msg.type === 'meta'){
-      incoming = {
-        transferId: msg.transferId,
-        name: msg.name,
-        size: msg.size,
-        mime: msg.mime,
-        chunks: [],
-        received: 0
-      };
+      pendingFileCount++;
+      updateBadges();
+      const senderName = deviceName(code);
+      showToast('file', 'File in arrivo da ' + senderName, msg.name + ' · ' + formatBytes(msg.size), () => {
+        if(selectedTarget === null) selectedTarget = code;
+        openSend();
+      });
+      incoming = { transferId: msg.transferId, name: msg.name, size: msg.size, mime: msg.mime, chunks: [], received: 0 };
       addTransferRow(msg.transferId, msg.name, msg.size, 'down');
     } else if(msg.type === 'chunk'){
       if(!incoming || incoming.transferId !== msg.transferId) return;
@@ -1994,10 +2657,8 @@
   }
 
   // ---------- chat ----------
-  const chatModal = $('chatModal');
   const chatMessages = $('chatMessages');
   const chatEmpty = $('chatEmpty');
-  const chatUnreadDot = $('chatUnreadDot');
   const chatInput = $('chatInput');
   const chatSend = $('chatSend');
   const chatPeerName = $('chatPeerName');
@@ -2014,25 +2675,21 @@
     return chatHistories[code];
   }
   function persistChatHistory(code){
-    try{
-      localStorage.setItem(LS_CHAT + code, JSON.stringify(chatHistories[code] || []));
-    }catch(e){}
+    try{ localStorage.setItem(LS_CHAT + code, JSON.stringify(chatHistories[code] || [])); }catch(e){}
   }
 
   function openChat(code){
     if(!code){
       code = Object.keys(connections).find(c => connections[c] && connections[c].open);
-      if(!code){
-        setPeerStatus('error', 'Connetti prima un dispositivo');
-        openDevices();
-        return;
-      }
+      if(!code){ setPeerStatus('error', 'Connetti prima un dispositivo'); openDevices(); return; }
     }
     chatPeerCode = code;
+    clearUnread(code);
     chatModal.classList.add('open');
     updateChatHeader();
     renderChatMessages();
-    chatUnreadDot.classList.remove('show');
+    renderRadarAvatars();
+    renderDrawerDevices();
     setTimeout(() => chatInput.focus(), 100);
   }
   function closeChat(){
@@ -2050,20 +2707,15 @@
     chatSend.disabled = !online;
     chatInput.disabled = !online;
   }
-
   function renderChatMessages(){
     if(!chatPeerCode) return;
     const history = loadChatHistory(chatPeerCode);
     Array.from(chatMessages.querySelectorAll('.msg')).forEach(n => n.remove());
-    if(history.length === 0){
-      chatEmpty.style.display = 'flex';
-      return;
-    }
+    if(history.length === 0){ chatEmpty.style.display = 'flex'; return; }
     chatEmpty.style.display = 'none';
     history.forEach(m => appendMessageEl(m.text, m.ts, m.dir));
     scrollChatToBottom();
   }
-
   function appendMessageEl(text, ts, dir){
     const el = document.createElement('div');
     el.className = 'msg ' + (dir === 'out' ? 'out' : (dir === 'in' ? 'in' : 'system'));
@@ -2075,25 +2727,24 @@
     chatMessages.appendChild(el);
     return el;
   }
-
-  function scrollChatToBottom(){
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
+  function scrollChatToBottom(){ chatMessages.scrollTop = chatMessages.scrollHeight; }
   function pushChatMessage(code, text, ts, dir){
     const history = loadChatHistory(code);
     history.push({ text, ts, dir });
     persistChatHistory(code);
     if(chatPeerCode === code) renderChatMessages();
   }
-
   function receiveChatMessage(code, text, ts){
     pushChatMessage(code, text, ts || Date.now(), 'in');
-    if(!chatModal.classList.contains('open') || chatPeerCode !== code){
-      chatUnreadDot.classList.add('show');
+    if(chatPeerCode !== code){
+      incrementUnread(code);
+      renderRadarAvatars();
+      renderDrawerDevices();
+      showToast('chat', 'Nuovo messaggio da ' + deviceName(code),
+        text.length > 60 ? text.slice(0, 60) + '…' : text,
+        () => openChat(code));
     }
   }
-
   function sendChatMessage(){
     const text = chatInput.value.trim();
     if(!text || !chatPeerCode) return;
@@ -2105,120 +2756,125 @@
     chatInput.value = '';
     chatInput.focus();
   }
-
   chatSend.addEventListener('click', sendChatMessage);
   chatInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' && !e.shiftKey){
-      e.preventDefault();
-      sendChatMessage();
-    }
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChatMessage(); }
   });
   $('chatBack').addEventListener('click', closeChat);
   chatModal.addEventListener('click', (e) => { if(e.target === chatModal) closeChat(); });
 
   $('chatClear').addEventListener('click', () => {
-    if(!chatPeerCode) return;
-    showConfirm('Cancellare tutti i messaggi con "' + deviceName(chatPeerCode) + '"?', () => {
-      chatHistories[chatPeerCode] = [];
-      persistChatHistory(chatPeerCode);
-      renderChatMessages();
-    });
+    const code = chatPeerCode;
+    if(!code) return;
+    showConfirm(
+      'Cancellare tutti i messaggi con "' + deviceName(code) + '"?',
+      () => {
+        chatHistories[code] = [];
+        persistChatHistory(code);
+        clearUnread(code);
+        if(chatPeerCode === code) renderChatMessages();
+        renderRadarAvatars();
+        renderDrawerDevices();
+      },
+      'Cancella chat'
+    );
   });
 
   $('actionChat').addEventListener('click', () => openChat(null));
 
-  // ---------- menu a tendina in alto a destra ----------
   const rightMenu = $('rightMenu');
-  $('menuRight').addEventListener('click', (e) => {
-    e.stopPropagation();
-    rightMenu.classList.toggle('open');
-  });
+  $('menuRight').addEventListener('click', (e) => { e.stopPropagation(); rightMenu.classList.toggle('open'); });
   document.addEventListener('click', (e) => {
     const btn = $('menuRight');
-    if(!rightMenu.contains(e.target) && e.target !== btn && !btn.contains(e.target)){
-      rightMenu.classList.remove('open');
-    }
+    if(!rightMenu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) rightMenu.classList.remove('open');
   });
   $('rmInfo').addEventListener('click', () => { rightMenu.classList.remove('open'); showInfo(); });
   $('rmGuida').addEventListener('click', () => { rightMenu.classList.remove('open'); showGuida(); });
 
-  // ---------- drawer sinistro ----------
   const drawer = $('drawer');
   const drawerOverlay = $('drawerOverlay');
-
-  function openDrawer(){
-    drawer.classList.add('open');
-    drawerOverlay.classList.add('open');
-    renderDrawerDevices();
-  }
-  function closeDrawer(){
-    drawer.classList.remove('open');
-    drawerOverlay.classList.remove('open');
-  }
+  function openDrawer(){ drawer.classList.add('open'); drawerOverlay.classList.add('open'); renderDrawerDevices(); }
+  function closeDrawer(){ drawer.classList.remove('open'); drawerOverlay.classList.remove('open'); }
   $('menuLeft').addEventListener('click', openDrawer);
   $('drawerClose').addEventListener('click', closeDrawer);
   drawerOverlay.addEventListener('click', closeDrawer);
 
   $('drawerGuida').addEventListener('click', () => { closeDrawer(); showGuida(); });
   $('drawerInfo').addEventListener('click', () => { closeDrawer(); showInfo(); });
-  $('drawerSettings').addEventListener('click', () => { closeDrawer(); showSettings(); });
+  $('drawerSettings').addEventListener('click', () => { closeDrawer(); openSettings(); });
   $('drawerRefresh').addEventListener('click', () => { closeDrawer(); doRefresh(); });
 
-  // ---------- pulsanti in fondo alla home (stesse funzioni) ----------
   $('guidaBtn').addEventListener('click', showGuida);
   $('infoBtn').addEventListener('click', showInfo);
-  $('settingsBtn').addEventListener('click', showSettings);
+  $('settingsBtn').addEventListener('click', openSettings);
   $('refreshBtn').addEventListener('click', doRefresh);
 
-  // ---------- funzioni condivise ----------
+  const settingsSheet = $('settingsSheet');
+  const settingsOverlay = $('settingsOverlay');
+
+  function openSettings(){
+    updateSettingsInfo();
+    settingsSheet.classList.add('open');
+    settingsOverlay.classList.add('open');
+    document.body.classList.add('no-scroll');
+    applyTheme(localStorage.getItem(LS_THEME) || 'blue');
+    applyFont(localStorage.getItem(LS_FONT) || 'medium');
+    applyChatTheme(localStorage.getItem(LS_CHAT_THEME) || '1');
+  }
+  function closeSettings(){
+    settingsSheet.classList.remove('open');
+    settingsOverlay.classList.remove('open');
+    document.body.classList.remove('no-scroll');
+  }
+  settingsOverlay.addEventListener('click', closeSettings);
+  $('settingsClose').addEventListener('click', closeSettings);
+
+  document.querySelectorAll('#themeSwatches .swatch').forEach(s => {
+    s.addEventListener('click', () => applyTheme(s.dataset.theme));
+  });
+  document.querySelectorAll('#chatThemes .chat-th').forEach(c => {
+    c.addEventListener('click', () => applyChatTheme(c.dataset.chat));
+  });
+  document.querySelectorAll('#fontSizes .font-btn').forEach(b => {
+    b.addEventListener('click', () => applyFont(b.dataset.font));
+  });
+  $('resetAllBtn').addEventListener('click', () => {
+    showConfirm('Rimuovere TUTTI i dispositivi salvati e le chat?', () => {
+      savedDevices = [];
+      persistDevices();
+      chatHistories = {};
+      unreadCounts = {};
+      Object.keys(localStorage).forEach(k => {
+        if(k.startsWith(LS_CHAT) || k.startsWith(LS_UNREAD)) localStorage.removeItem(k);
+      });
+      renderDevicesList();
+      renderRadarAvatars();
+      updateNearbySub();
+      renderDrawerDevices();
+      updateBadges();
+      updateSettingsInfo();
+    }, 'Reset dati');
+  });
+
   function showGuida(){
     openModal('Guida', `
       <p><b>Il tuo codice</b> è fisso su questo dispositivo: comunicalo all'altro dispositivo per farti trovare.</p>
+      <p>Puoi anche mostrarlo come <b>QR code</b> (pulsante "Mostra QR"): l'altro dispositivo lo inquadra con la fotocamera e si collega automaticamente.</p>
       <p>Il tuo nome ("Sei visibile come") viene mostrato automaticamente agli altri dispositivi quando ti colleghi.</p>
-      <p>Tocca <b>Collega device</b> e inserisci il codice a 6 caratteri dell'altro dispositivo.</p>
+      <p>Tocca <b>Collega device</b> e inserisci il codice a 6 caratteri, oppure scansiona il QR.</p>
       <p>I dispositivi collegati vengono <b>salvati</b>: al prossimo avvio l'app prova a ricollegarsi da sola.</p>
       <p>Tocca un dispositivo <b>connesso</b> per selezionarlo come destinatario, poi <b>Invia file</b> o <b>Chat</b>.</p>
       <p>I file e i messaggi viaggiano <b>direttamente</b> tra i due dispositivi: nessun dato passa da un server.</p>
     `);
   }
-
   function showInfo(){
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.1</p>
-        <p style="margin-top:14px;">Miki by Claude ❤</p>
+        <p>Versione 3.3 — step 1</p>
+        <p style="margin-top:14px;">Miki by Claude</p>
       </div>
     `);
-  }
-
-  function showSettings(){
-    openModal('Impostazioni', `
-      <p><b>Nome dispositivo:</b> modificabile dalla schermata principale.</p>
-      <p><b>Codice dispositivo:</b> <b>${escapeHtml(myCode)}</b> (fisso).</p>
-      <p><b>Dispositivi salvati:</b> ${savedDevices.length}</p>
-      <p style="margin-top:14px;">
-        <button class="ghost" id="resetAllBtn" style="width:100%;">Rimuovi tutti i dispositivi salvati</button>
-      </p>
-    `);
-    const btn = $('resetAllBtn');
-    if(btn){
-      btn.addEventListener('click', () => {
-        showConfirm('Rimuovere TUTTI i dispositivi salvati e le chat?', () => {
-          savedDevices = [];
-          persistDevices();
-          chatHistories = {};
-          Object.keys(localStorage).forEach(k => {
-            if(k.startsWith(LS_CHAT)) localStorage.removeItem(k);
-          });
-          renderDevicesList();
-          renderRadarAvatars();
-          updateNearbySub();
-          renderDrawerDevices();
-          closeModal();
-        });
-      });
-    }
   }
 
   function doRefresh(){
@@ -2227,19 +2883,81 @@
         if(reg) reg.update().then(() => location.reload());
         else location.reload();
       });
-    } else {
-      location.reload();
+    } else location.reload();
+  }
+
+  let deferredInstallPrompt = null;
+  const installBanner = $('installBanner');
+  const rmInstall = $('rmInstall');
+  const drawerInstall = $('drawerInstall');
+
+  function isStandalone(){
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+  function showInstallUI(){
+    if(isStandalone() || localStorage.getItem(LS_INSTALL_DISMISSED) === '1') return;
+    if(!deferredInstallPrompt) return;
+    installBanner.classList.add('show');
+    rmInstall.style.display = 'flex';
+    drawerInstall.style.display = 'flex';
+  }
+  function hideInstallUI(){
+    installBanner.classList.remove('show');
+    rmInstall.style.display = 'none';
+    drawerInstall.style.display = 'none';
+  }
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showInstallUI();
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    hideInstallUI();
+  });
+  async function triggerInstall(){
+    if(!deferredInstallPrompt){
+      openModal('Installa DropMiki', `
+        <p>Per installare l'app sul tuo dispositivo:</p>
+        <p><b>Android (Chrome):</b> menu ⋮ in alto a destra → "Installa app" oppure "Aggiungi a schermata Home".</p>
+        <p><b>iPhone / iPad (Safari):</b> tasto Condividi ⬆ → "Aggiungi a schermata Home".</p>
+        <p><b>Desktop (Chrome/Edge):</b> icona installa nella barra degli indirizzi, oppure menu → "Installa DropMiki".</p>
+      `);
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if(outcome === 'accepted'){ deferredInstallPrompt = null; hideInstallUI(); }
+  }
+  installBanner.addEventListener('click', (e) => {
+    if(e.target.id === 'installBannerClose'){
+      e.stopPropagation();
+      localStorage.setItem(LS_INSTALL_DISMISSED, '1');
+      hideInstallUI();
+      return;
+    }
+    triggerInstall();
+  });
+  rmInstall.addEventListener('click', () => { rightMenu.classList.remove('open'); triggerInstall(); });
+  drawerInstall.addEventListener('click', () => { closeDrawer(); triggerInstall(); });
+
+  if(!isStandalone() && !localStorage.getItem(LS_INSTALL_DISMISSED)){
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    if(isIOS && isSafari){
+      setTimeout(() => {
+        installBanner.classList.add('show');
+        rmInstall.style.display = 'flex';
+        drawerInstall.style.display = 'flex';
+      }, 1500);
     }
   }
 
-  // ---------- service worker ----------
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').then((reg) => {
-        reg.update();
-      }).catch(console.error);
+      navigator.serviceWorker.register('./sw.js').then((reg) => reg.update()).catch(console.error);
     });
-
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if(refreshing) return;
@@ -2248,12 +2966,14 @@
     });
   }
 
-  // ---------- init ----------
+  loadPreferences();
   loadDevices();
+  loadUnread();
   renderDevicesList();
   renderRadarAvatars();
   renderDrawerDevices();
   updateNearbySub();
+  updateBadges();
   initPeer();
 })();
 </script>
