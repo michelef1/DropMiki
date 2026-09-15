@@ -2156,6 +2156,10 @@
       updateDropzoneState(); updateSendTargetLabel();
       updateNearbySub(); renderDrawerDevices();
       updateChatHeader(); updateSettingsInfo();
+      if(qrShowOverlay.classList.contains('open')){
+        qrShowOverlay.classList.remove('open');
+        closeDevices();
+      }
     });
     conn.on('data', (msg) => handleIncomingData(msg, code));
     conn.on('close', () => {
@@ -2767,7 +2771,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.3.5</p>
+        <p>Versione 3.3.6</p>
         <p style="margin-top:14px;">Miki by Claude</p>
       </div>
     `);
