@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dropmiki-v20';
+const CACHE_NAME = 'dropmiki-v22';
 const ASSETS = [
   './',
   './index.html',
@@ -34,11 +34,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-
-  // CDN esterne (peerjs, qrcode, jsqr): lascia passare senza cache
-  if (url.origin !== self.location.origin) {
-    return;
-  }
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
