@@ -546,11 +546,15 @@
   .bar-track{ width:100%; height:5px; background:#08111E; border-radius:3px; overflow:hidden; }
   .bar-fill{ height:100%; background:linear-gradient(90deg, #3EC7FF, #2F7FE0); width:0%; transition:width .12s linear; }
   .transfer.done .bar-fill{ background:linear-gradient(90deg, #2ED47A, #178F58); }
+  .transfer.error .bar-fill{ background:linear-gradient(90deg, #FF5B5B, #C43030); }
   .transfer .dl-link{
     align-self:flex-start; max-width:100%;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     font-size:13px; color:var(--cyan); text-decoration:none;
     border-bottom:1px solid var(--cyan-dim);
+  }
+  .transfer .err-note{
+    font-size:11.5px; color:var(--err); font-style:italic;
   }
   .empty-note{ font-size:12.5px; color:var(--ice-dim); text-align:center; padding:8px 0 2px; }
 
@@ -569,6 +573,7 @@
   #devicesOverlay{ z-index:70; }
   #qrShowOverlay{ z-index:90; }
   #qrScanOverlay{ z-index:90; }
+  #guidaOverlay{ z-index:95; }
 
   .modal-box{
     background:linear-gradient(180deg, #0D1B2E 0%, #0A1626 100%);
@@ -591,6 +596,114 @@
   .modal-body p{ margin:0 0 10px; }
   .modal-body p:last-child{ margin-bottom:0; }
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+
+  /* ============ GUIDA RINNOVATA ============ */
+  #guidaOverlay .modal-box{
+    max-width:480px;
+    padding:0;
+    overflow:hidden;
+  }
+  .guida-header{
+    background:linear-gradient(135deg, #12233C 0%, #0D1B2E 100%);
+    padding:22px 22px 18px;
+    border-bottom:1px solid var(--card-border);
+    text-align:center;
+    position:relative;
+  }
+  .guida-header h3{
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:22px;
+    margin:0;
+    background:linear-gradient(180deg, #FFFFFF 0%, #8FD3FF 100%);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent;
+  }
+  .guida-header p{
+    font-size:12.5px;
+    color:var(--cyan-soft);
+    margin:6px 0 0;
+  }
+  .guida-header .modal-close{
+    right:14px; top:18px;
+    font-size:20px;
+  }
+  .guida-body{
+    padding:8px 16px 22px;
+    max-height:70vh;
+    overflow-y:auto;
+  }
+  .guida-step{
+    display:flex;
+    gap:14px;
+    padding:14px 12px;
+    border-radius:14px;
+    margin-bottom:6px;
+    transition:background .15s;
+  }
+  .guida-step:hover{ background:rgba(62,199,255,0.04); }
+  .guida-step-icon{
+    width:42px; height:42px;
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    color:#fff;
+    box-shadow:0 4px 12px rgba(0,0,0,0.35);
+  }
+  .guida-step-icon svg{ width:20px; height:20px; }
+
+  /* Colori IDENTICI ai pulsanti della home */
+  .guida-step.blue .guida-step-icon{
+    background:linear-gradient(180deg, #2F7FE0 0%, #1E5FB5 100%);
+    box-shadow:0 4px 12px rgba(47,127,224,0.4);
+  }
+  .guida-step.green .guida-step-icon{
+    background:linear-gradient(180deg, #1FBF75 0%, #178F58 100%);
+    box-shadow:0 4px 12px rgba(31,191,117,0.4);
+  }
+  .guida-step.purple .guida-step-icon{
+    background:linear-gradient(180deg, #7C5CE0 0%, #5F44B8 100%);
+    box-shadow:0 4px 12px rgba(124,92,224,0.4);
+  }
+  .guida-step.cyan .guida-step-icon{
+    background:linear-gradient(180deg, #3EC7FF 0%, #2A9CD1 100%);
+    box-shadow:0 4px 12px rgba(62,199,255,0.4);
+  }
+  .guida-step.amber .guida-step-icon{
+    background:linear-gradient(180deg, #F5A623 0%, #C77A00 100%);
+    box-shadow:0 4px 12px rgba(245,166,35,0.4);
+  }
+  .guida-step-text{ flex:1; min-width:0; }
+  .guida-step-title{
+    font-size:14px;
+    font-weight:600;
+    color:var(--ice);
+    margin-bottom:3px;
+  }
+  .guida-step-desc{
+    font-size:12.5px;
+    color:var(--ice-dim);
+    line-height:1.5;
+  }
+  .guida-step-desc b{ color:var(--cyan-soft); font-weight:600; }
+  .guida-section-title{
+    font-size:11px;
+    font-weight:600;
+    color:var(--cyan-soft);
+    letter-spacing:0.8px;
+    text-transform:uppercase;
+    padding:16px 12px 6px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .guida-section-title::before{
+    content:'';
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--cyan);
+    box-shadow:0 0 8px var(--cyan);
+  }
 
   #chatModal .modal-box{
     display:flex; flex-direction:column;
@@ -754,6 +867,66 @@
   .file-chip-size{ font-size:11px; opacity:0.75; }
   .file-chip-dl{ display:inline-block; margin-top:2px; font-size:12px; color:inherit; text-decoration:underline; }
   .file-chip-expired{ display:inline-block; margin-top:2px; font-size:11px; opacity:0.65; font-style:italic; }
+
+  .img-chip{
+    border-radius:12px;
+    overflow:hidden;
+    margin-bottom:4px;
+    max-width:220px;
+  }
+  .img-chip img{
+    display:block;
+    width:100%;
+    height:auto;
+    max-height:260px;
+    object-fit:cover;
+    border-radius:12px;
+    cursor:pointer;
+  }
+  .img-chip .img-meta{
+    font-size:11px;
+    opacity:0.75;
+    margin-top:4px;
+  }
+
+  .chat-upload{
+    display:flex; align-items:center; gap:10px;
+    padding:8px 12px;
+    background:linear-gradient(90deg, rgba(62,199,255,0.10), rgba(62,199,255,0.04));
+    border-top:1px solid var(--card-border);
+    border-bottom:1px solid var(--card-border);
+    font-size:12px;
+    color:var(--cyan-soft);
+    flex-shrink:0;
+  }
+  .chat-upload .cu-name{
+    flex:1;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--ice);
+  }
+  .chat-upload .cu-pct{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    color:var(--cyan);
+    flex-shrink:0;
+  }
+  .chat-upload-bar{
+    width:100%;
+    height:3px;
+    background:#08111E;
+    border-radius:2px;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .chat-upload-wrap{
+    flex-shrink:0;
+    background:linear-gradient(180deg, #0A1626 0%, #0D1B2E 100%);
+  }
+  .chat-upload-wrap .chat-upload-bar{
+    border-radius:0;
+  }
 
   .drawer-overlay{
     position:fixed; inset:0;
@@ -1130,6 +1303,56 @@
   .font-btn[data-font="medium"] .preview{ font-size:15px; }
   .font-btn[data-font="large"] .preview{ font-size:19px; }
 
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 4px;
+  }
+  .toggle-row-label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:13.5px;
+    color:var(--ice);
+  }
+  .toggle-row-label .tr-icon{
+    width:28px; height:28px; border-radius:8px;
+    background:rgba(62,199,255,0.14);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+    color:var(--cyan);
+  }
+  .toggle-switch{
+    position:relative;
+    width:46px;
+    height:26px;
+    border-radius:13px;
+    background:#08111E;
+    border:1.5px solid var(--card-border);
+    cursor:pointer;
+    transition:background .2s, border-color .2s;
+    flex-shrink:0;
+  }
+  .toggle-switch::after{
+    content:'';
+    position:absolute;
+    top:2px; left:2px;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:#8FA9C9;
+    transition:transform .22s cubic-bezier(.3,.7,.3,1.2), background .2s;
+  }
+  .toggle-switch.on{
+    background:linear-gradient(180deg, #1FBF75 0%, #178F58 100%);
+    border-color:#5CE89C;
+  }
+  .toggle-switch.on::after{
+    transform:translateX(20px);
+    background:#fff;
+    box-shadow:0 0 8px rgba(255,255,255,0.6);
+  }
+
   .info-list{
     list-style:none; padding:0; margin:0;
     font-size:12.5px; color:var(--ice-dim);
@@ -1440,6 +1663,141 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="guidaOverlay">
+  <div class="modal-box">
+    <div class="guida-header">
+      <h3>Guida DropMiki</h3>
+      <p>Tutto quello che puoi fare con l'app</p>
+      <button class="modal-close" id="guidaClose" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="guida-body">
+      <div class="guida-section-title">Iniziare</div>
+
+      <div class="guida-step cyan">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+            <path d="M14 14h3v3h-3z"></path>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Il tuo codice dispositivo</div>
+          <div class="guida-step-desc">È fisso e identificativo: comunicalo all'altro dispositivo oppure lascia che <b>scansioni il tuo QR</b> dal pulsante "Collega device".</div>
+        </div>
+      </div>
+
+      <div class="guida-step purple">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Collega un dispositivo</div>
+          <div class="guida-step-desc">Tocca <b>Collega device</b> → inserisci il codice a 6 caratteri, oppure tocca <b>Scansiona QR</b> e inquadra il QR dell'altro. La connessione è automatica.</div>
+        </div>
+      </div>
+
+      <div class="guida-step blue">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Invia file</div>
+          <div class="guida-step-desc">Tocca <b>Invia file</b>, scegli un dispositivo connesso e trascina il file (o tocca per sceglierlo). Vedi la barra di avanzamento in tempo reale.</div>
+        </div>
+      </div>
+
+      <div class="guida-section-title">Chat</div>
+
+      <div class="guida-step green">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Apri una chat</div>
+          <div class="guida-step-desc">Tocca <b>Chat</b> per aprire la conversazione con il primo dispositivo connesso, oppure tocca un avatar sul radar o nel drawer.</div>
+        </div>
+      </div>
+
+      <div class="guida-step amber">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Allega file in chat</div>
+          <div class="guida-step-desc">Tocca la <b>graffetta 📎</b> nella barra di scrittura: il file appare come <b>bolla-allegato</b> con nome, dimensione e link "Scarica". Se è un'immagine, vedi l'anteprima.</div>
+        </div>
+      </div>
+
+      <div class="guida-section-title">Personalizzazione</div>
+
+      <div class="guida-step purple">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 3v18M3 12h18M5.5 5.5l13 13M5.5 18.5l13-13"></path>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Temi e colori</div>
+          <div class="guida-step-desc">Tocca <b>Impostazioni</b> → scegli tra <b>8 colori sfondo</b> e <b>6 sfondi chat</b>. Cambio immediato e salvato.</div>
+        </div>
+      </div>
+
+      <div class="guida-step purple">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Dimensione carattere</div>
+          <div class="guida-step-desc">Piccolo · Medio · Grande. Cambia subito l'aspetto di tutta l'app.</div>
+        </div>
+      </div>
+
+      <div class="guida-step cyan">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4z"></path>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Suoni di notifica</div>
+          <div class="guida-step-desc">Pop messaggi, whoosh invio, chime file e ding connessione — stile WhatsApp. Puoi <b>disattivarli</b> dal toggle in Impostazioni.</div>
+        </div>
+      </div>
+
+      <div class="guida-section-title">Sicurezza e privacy</div>
+
+      <div class="guida-step green">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Peer-to-peer diretto</div>
+          <div class="guida-step-desc">File e messaggi viaggiano <b>direttamente</b> tra i due dispositivi tramite WebRTC: nessun dato passa da un server. Il codice serve solo per l'aggancio iniziale.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="confirmOverlay">
   <div class="modal-box">
     <div class="modal-head">
@@ -1557,6 +1915,13 @@
         </svg>
       </button>
     </div>
+    <div class="chat-upload-wrap" id="chatUploadWrap" style="display:none;">
+      <div class="chat-upload" id="chatUpload">
+        <span class="cu-name" id="chatUploadName">file.jpg</span>
+        <span class="cu-pct" id="chatUploadPct">0%</span>
+      </div>
+      <div class="chat-upload-bar"><div class="bar-fill" id="chatUploadBar" style="height:100%;"></div></div>
+    </div>
     <div class="chat-messages" id="chatMessages">
       <div class="chat-empty" id="chatEmpty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -1640,6 +2005,23 @@
 
   <div class="sheet-section">
     <div class="sheet-section-title">
+      <span class="icon-circle">🔊</span>
+      Suoni
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-row-label">
+        <span class="tr-icon">🔔</span>
+        <div>
+          Suoni di notifica
+          <div style="font-size:11.5px;color:var(--ice-dim);margin-top:2px;font-weight:400;">Messaggi, file e connessioni</div>
+        </div>
+      </div>
+      <div class="toggle-switch on" id="soundToggle" role="switch" aria-checked="true"></div>
+    </div>
+  </div>
+
+  <div class="sheet-section">
+    <div class="sheet-section-title">
       <span class="icon-circle">📱</span>
       Info dispositivo
     </div>
@@ -1671,6 +2053,7 @@
   const LS_THEME = 'dropmiki_theme';
   const LS_CHAT_THEME = 'dropmiki_chat_theme';
   const LS_FONT = 'dropmiki_font';
+  const LS_SOUND = 'dropmiki_sound';
 
   const $ = (id) => document.getElementById(id);
 
@@ -1710,6 +2093,51 @@
   let chatHistories = {};
   let unreadCounts = {};
   let pendingFileCount = 0;
+  let soundEnabled = true;
+
+  // ---------- SUONI ----------
+  let audioCtx = null;
+  function getAudioCtx(){
+    if(audioCtx) return audioCtx;
+    try{
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }catch(e){ audioCtx = null; }
+    return audioCtx;
+  }
+  function playTone(freq, duration, type, volume, delayStart){
+    if(!soundEnabled) return;
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    if(ctx.state === 'suspended') ctx.resume();
+    const now = ctx.currentTime + (delayStart || 0);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(volume || 0.12, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration + 0.02);
+  }
+  function soundMessageIn(){
+    playTone(880, 0.10, 'sine', 0.10, 0);
+    playTone(1318, 0.14, 'sine', 0.09, 0.09);
+  }
+  function soundMessageOut(){
+    playTone(1200, 0.06, 'triangle', 0.07, 0);
+    playTone(900, 0.06, 'triangle', 0.05, 0.05);
+  }
+  function soundFileIn(){
+    playTone(660, 0.10, 'sine', 0.10, 0);
+    playTone(880, 0.10, 'sine', 0.10, 0.09);
+    playTone(1175, 0.16, 'sine', 0.10, 0.18);
+  }
+  function soundConnect(){
+    playTone(1568, 0.10, 'sine', 0.09, 0);
+    playTone(2093, 0.14, 'sine', 0.07, 0.08);
+  }
 
   function applyTheme(theme){
     document.documentElement.setAttribute('data-theme', theme);
@@ -1732,10 +2160,20 @@
       c.classList.toggle('active', c.dataset.chat === theme);
     });
   }
+  function applySound(on){
+    soundEnabled = !!on;
+    localStorage.setItem(LS_SOUND, soundEnabled ? '1' : '0');
+    const tg = $('soundToggle');
+    if(tg){
+      tg.classList.toggle('on', soundEnabled);
+      tg.setAttribute('aria-checked', soundEnabled ? 'true' : 'false');
+    }
+  }
   function loadPreferences(){
     applyTheme(localStorage.getItem(LS_THEME) || 'blue');
     applyFont(localStorage.getItem(LS_FONT) || 'medium');
     applyChatTheme(localStorage.getItem(LS_CHAT_THEME) || '1');
+    applySound(localStorage.getItem(LS_SOUND) !== '0');
   }
 
   function guessDeviceName(){
@@ -2151,6 +2589,7 @@
       upsertDevice(code);
       if(!selectedTarget) selectedTarget = code;
       setPeerStatus('connected', 'Connesso a ' + deviceName(code));
+      soundConnect();
       conn.send({ type: 'hello', name: myName });
       renderDevicesList(); renderRadarAvatars();
       updateDropzoneState(); updateSendTargetLabel();
@@ -2211,6 +2650,10 @@
   $('modalClose').addEventListener('click', closeModal);
   modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
 
+  const guidaOverlay = $('guidaOverlay');
+  $('guidaClose').addEventListener('click', () => guidaOverlay.classList.remove('open'));
+  guidaOverlay.addEventListener('click', (e) => { if(e.target === guidaOverlay) guidaOverlay.classList.remove('open'); });
+
   const confirmOverlay = $('confirmOverlay');
   const confirmBody = $('confirmBody');
   const confirmTitle = $('confirmTitle');
@@ -2238,6 +2681,7 @@
   document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape'){
       if(confirmOverlay.classList.contains('open')){ closeConfirm(); return; }
+      if(guidaOverlay.classList.contains('open')){ guidaOverlay.classList.remove('open'); return; }
       if(modalOverlay.classList.contains('open')){ closeModal(); return; }
       if($('settingsSheet').classList.contains('open')){ closeSettings(); return; }
       if(qrShowOverlay.classList.contains('open')){ qrShowOverlay.classList.remove('open'); return; }
@@ -2253,7 +2697,6 @@
   $('devicesClose').addEventListener('click', closeDevices);
   devicesOverlay.addEventListener('click', (e) => { if(e.target === devicesOverlay) closeDevices(); });
 
-  // ---------- QR: mostra il mio codice ----------
   const qrShowOverlay = $('qrShowOverlay');
   $('showMyQrBtn').addEventListener('click', () => {
     qrShowOverlay.classList.add('open');
@@ -2282,7 +2725,6 @@
   $('qrShowClose').addEventListener('click', () => qrShowOverlay.classList.remove('open'));
   qrShowOverlay.addEventListener('click', (e) => { if(e.target === qrShowOverlay) qrShowOverlay.classList.remove('open'); });
 
-  // ---------- QR: scansiona un codice ----------
   const qrScanOverlay = $('qrScanOverlay');
   const qrScanVideo = $('qrScanVideo');
   const qrScanStatus = $('qrScanStatus');
@@ -2406,6 +2848,17 @@
     const bar = document.getElementById('bar-' + id);
     if(bar) bar.style.width = pct + '%';
   }
+  function markTransferError(id, note){
+    const row = document.getElementById('transfer-' + id);
+    if(!row) return;
+    row.classList.add('error');
+    if(note){
+      const el = document.createElement('div');
+      el.className = 'err-note';
+      el.textContent = note;
+      row.appendChild(el);
+    }
+  }
   function truncateName(name, maxLen){
     if(name.length <= maxLen) return name;
     const dotIndex = name.lastIndexOf('.');
@@ -2451,18 +2904,30 @@
     if(!conn || !conn.open){ setPeerStatus('error', "Nessun dispositivo selezionato per l'invio"); return; }
     const transferId = 't' + Date.now();
     addTransferRow(transferId, file.name, file.size, 'up');
-    conn.send({ type: 'meta', transferId, name: file.name, size: file.size, mime: file.type || 'application/octet-stream' });
-    let offset = 0;
-    while(offset < file.size){
-      const slice = file.slice(offset, offset + CHUNK_SIZE);
-      const buffer = await slice.arrayBuffer();
-      conn.send({ type: 'chunk', transferId, data: buffer });
-      offset += buffer.byteLength;
-      updateProgress(transferId, Math.min(100, Math.round((offset / file.size) * 100)));
-      await new Promise(r => setTimeout(r, 0));
+    try{
+      conn.send({ type: 'meta', transferId, name: file.name, size: file.size, mime: file.type || 'application/octet-stream' });
+      let offset = 0;
+      while(offset < file.size){
+        if(!conn || !conn.open) throw new Error('connessione interrotta');
+        const slice = file.slice(offset, offset + CHUNK_SIZE);
+        const buffer = await slice.arrayBuffer();
+        conn.send({ type: 'chunk', transferId, data: buffer });
+        offset += buffer.byteLength;
+        updateProgress(transferId, Math.min(100, Math.round((offset / file.size) * 100)));
+        await new Promise(r => setTimeout(r, 0));
+      }
+      conn.send({ type: 'end', transferId });
+      markDone(transferId, null, file.name);
+      soundMessageOut();
+    }catch(e){
+      console.error(e);
+      markTransferError(transferId, 'Trasferimento interrotto');
+      setPeerStatus('error', 'Trasferimento interrotto: dispositivo offline?');
     }
-    conn.send({ type: 'end', transferId });
-    markDone(transferId, null, file.name);
+  }
+
+  function isImageMime(mime){
+    return typeof mime === 'string' && mime.indexOf('image/') === 0;
   }
 
   function handleIncomingData(msg, code){
@@ -2475,10 +2940,13 @@
       updateBadges();
       const senderName = deviceName(code);
       if(!msg.viaChat){
+        soundFileIn();
         showToast('file', 'File in arrivo da ' + senderName, msg.name + ' · ' + formatBytes(msg.size), () => {
           if(selectedTarget === null) selectedTarget = code;
           openSend();
         });
+      } else {
+        soundFileIn();
       }
       incoming = { transferId: msg.transferId, name: msg.name, size: msg.size, mime: msg.mime, chunks: [], received: 0, viaChat: !!msg.viaChat, fromCode: code };
       addTransferRow(msg.transferId, msg.name, msg.size, 'down');
@@ -2487,19 +2955,32 @@
       incoming.chunks.push(msg.data);
       incoming.received += msg.data.byteLength;
       updateProgress(msg.transferId, Math.min(100, Math.round((incoming.received / incoming.size) * 100)));
+      if(incoming.viaChat){
+        const pct = Math.min(100, Math.round((incoming.received / incoming.size) * 100));
+        if(chatPeerCode === incoming.fromCode){
+          $('chatUploadWrap').style.display = 'block';
+          $('chatUploadName').textContent = '↓ ' + incoming.name;
+          $('chatUploadPct').textContent = pct + '%';
+          $('chatUploadBar').style.width = pct + '%';
+        }
+      }
     } else if(msg.type === 'end'){
       if(!incoming || incoming.transferId !== msg.transferId) return;
       const blob = new Blob(incoming.chunks, { type: incoming.mime });
       const url = URL.createObjectURL(blob);
       markDone(msg.transferId, url, incoming.name);
       if(incoming.viaChat){
-        pushChatFileMessage(incoming.fromCode, 'in', incoming.name, incoming.size, url);
+        const isImg = isImageMime(incoming.mime);
+        pushChatFileMessage(incoming.fromCode, 'in', incoming.name, incoming.size, url, isImg);
         if(chatPeerCode !== incoming.fromCode){
           incrementUnread(incoming.fromCode);
           renderRadarAvatars();
           renderDrawerDevices();
           showToast('chat', 'File ricevuto da ' + deviceName(incoming.fromCode), incoming.name, () => openChat(incoming.fromCode));
+        } else {
+          setTimeout(() => { $('chatUploadWrap').style.display = 'none'; }, 400);
         }
+        soundFileIn();
       }
       incoming = null;
     }
@@ -2543,6 +3024,7 @@
   function closeChat(){
     chatModal.classList.remove('open');
     chatPeerCode = null;
+    $('chatUploadWrap').style.display = 'none';
   }
   function updateChatHeader(){
     if(!chatPeerCode) return;
@@ -2572,19 +3054,25 @@
     const hh = String(d.getHours()).padStart(2, '0');
     const mm = String(d.getMinutes()).padStart(2, '0');
     if(m.kind === 'file'){
-      const dlHtml = m.downloadUrl
-        ? '<a class="file-chip-dl" href="' + m.downloadUrl + '" download="' + escapeHtml(m.fileName) + '">Scarica</a>'
-        : '<span class="file-chip-expired">non più disponibile</span>';
-      el.innerHTML =
-        '<div class="file-chip">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' +
-          '<div class="file-chip-info">' +
-            '<div class="file-chip-name">' + escapeHtml(m.fileName) + '</div>' +
-            '<div class="file-chip-size">' + formatBytes(m.fileSize) + '</div>' +
-            dlHtml +
+      if(m.isImage && m.downloadUrl){
+        el.innerHTML =
+          '<div class="img-chip"><img src="' + m.downloadUrl + '" alt="' + escapeHtml(m.fileName) + '"><div class="img-meta">' + escapeHtml(m.fileName) + ' · ' + formatBytes(m.fileSize) + '</div></div>' +
+          '<span class="time">' + hh + ':' + mm + '</span>';
+      } else {
+        const dlHtml = m.downloadUrl
+          ? '<a class="file-chip-dl" href="' + m.downloadUrl + '" download="' + escapeHtml(m.fileName) + '">Scarica</a>'
+          : '<span class="file-chip-expired">non più disponibile</span>';
+        el.innerHTML =
+          '<div class="file-chip">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' +
+            '<div class="file-chip-info">' +
+              '<div class="file-chip-name">' + escapeHtml(m.fileName) + '</div>' +
+              '<div class="file-chip-size">' + formatBytes(m.fileSize) + '</div>' +
+              dlHtml +
+            '</div>' +
           '</div>' +
-        '</div>' +
-        '<span class="time">' + hh + ':' + mm + '</span>';
+          '<span class="time">' + hh + ':' + mm + '</span>';
+      }
     } else {
       el.innerHTML = escapeHtml(m.text).replace(/\n/g, '<br>') +
         '<span class="time">' + hh + ':' + mm + '</span>';
@@ -2609,6 +3097,7 @@
         text.length > 60 ? text.slice(0, 60) + '…' : text,
         () => openChat(code));
     }
+    soundMessageIn();
   }
   function sendChatMessage(){
     const text = chatInput.value.trim();
@@ -2618,12 +3107,13 @@
     const ts = Date.now();
     conn.send({ type: 'chat', text, ts });
     pushChatMessage(chatPeerCode, text, ts, 'out');
+    soundMessageOut();
     chatInput.value = '';
     chatInput.focus();
   }
-  function pushChatFileMessage(code, dir, fileName, fileSize, downloadUrl){
+  function pushChatFileMessage(code, dir, fileName, fileSize, downloadUrl, isImage){
     const history = loadChatHistory(code);
-    history.push({ kind: 'file', dir, ts: Date.now(), fileName, fileSize, downloadUrl: downloadUrl || null });
+    history.push({ kind: 'file', dir, ts: Date.now(), fileName, fileSize, downloadUrl: downloadUrl || null, isImage: !!isImage });
     persistChatHistory(code);
     if(chatPeerCode === code) renderChatMessages();
   }
@@ -2633,18 +3123,35 @@
     const conn = code ? connections[code] : null;
     if(!conn || !conn.open) return;
     const transferId = 't' + Date.now();
-    conn.send({ type: 'meta', transferId, name: file.name, size: file.size, mime: file.type || 'application/octet-stream', viaChat: true });
-    let offset = 0;
-    while(offset < file.size){
-      const slice = file.slice(offset, offset + CHUNK_SIZE);
-      const buffer = await slice.arrayBuffer();
-      conn.send({ type: 'chunk', transferId, data: buffer });
-      offset += buffer.byteLength;
-      await new Promise(r => setTimeout(r, 0));
+    const isImg = isImageMime(file.type);
+    $('chatUploadWrap').style.display = 'block';
+    $('chatUploadName').textContent = '↑ ' + file.name;
+    $('chatUploadPct').textContent = '0%';
+    $('chatUploadBar').style.width = '0%';
+    try{
+      conn.send({ type: 'meta', transferId, name: file.name, size: file.size, mime: file.type || 'application/octet-stream', viaChat: true });
+      let offset = 0;
+      while(offset < file.size){
+        if(!conn || !conn.open) throw new Error('connessione interrotta');
+        const slice = file.slice(offset, offset + CHUNK_SIZE);
+        const buffer = await slice.arrayBuffer();
+        conn.send({ type: 'chunk', transferId, data: buffer });
+        offset += buffer.byteLength;
+        const pct = Math.min(100, Math.round((offset / file.size) * 100));
+        $('chatUploadPct').textContent = pct + '%';
+        $('chatUploadBar').style.width = pct + '%';
+        await new Promise(r => setTimeout(r, 0));
+      }
+      conn.send({ type: 'end', transferId });
+      const localUrl = URL.createObjectURL(file);
+      pushChatFileMessage(code, 'out', file.name, file.size, localUrl, isImg);
+      soundMessageOut();
+      setTimeout(() => { $('chatUploadWrap').style.display = 'none'; }, 400);
+    }catch(e){
+      console.error(e);
+      $('chatUploadWrap').style.display = 'none';
+      showToast('chat', 'Invio fallito', 'Connessione interrotta: ' + file.name);
     }
-    conn.send({ type: 'end', transferId });
-    const localUrl = URL.createObjectURL(file);
-    pushChatFileMessage(code, 'out', file.name, file.size, localUrl);
   }
 
   $('chatAttachBtn').addEventListener('click', () => {
@@ -2721,6 +3228,7 @@
     applyTheme(localStorage.getItem(LS_THEME) || 'blue');
     applyFont(localStorage.getItem(LS_FONT) || 'medium');
     applyChatTheme(localStorage.getItem(LS_CHAT_THEME) || '1');
+    applySound(localStorage.getItem(LS_SOUND) !== '0');
   }
   function closeSettings(){
     settingsSheet.classList.remove('open');
@@ -2738,6 +3246,10 @@
   });
   document.querySelectorAll('#fontSizes .font-btn').forEach(b => {
     b.addEventListener('click', () => applyFont(b.dataset.font));
+  });
+  $('soundToggle').addEventListener('click', () => {
+    applySound(!soundEnabled);
+    if(soundEnabled) soundMessageIn();
   });
   $('resetAllBtn').addEventListener('click', () => {
     showConfirm('Rimuovere TUTTI i dispositivi salvati e le chat?', () => {
@@ -2758,32 +3270,45 @@
   });
 
   function showGuida(){
-    openModal('Guida', `
-      <p><b>Il tuo codice</b> è fisso su questo dispositivo: comunicalo all'altro dispositivo per farti trovare.</p>
-      <p>Il tuo nome ("Sei visibile come") viene mostrato automaticamente agli altri dispositivi quando ti colleghi.</p>
-      <p>Tocca <b>Collega device</b> e inserisci il codice a 6 caratteri dell'altro dispositivo.</p>
-      <p>I dispositivi collegati vengono <b>salvati</b>: al prossimo avvio l'app prova a ricollegarsi da sola.</p>
-      <p>Tocca un dispositivo <b>connesso</b> per selezionarlo come destinatario, poi <b>Invia file</b> o <b>Chat</b>.</p>
-      <p>I file e i messaggi viaggiano <b>direttamente</b> tra i due dispositivi: nessun dato passa da un server.</p>
-    `);
+    guidaOverlay.classList.add('open');
   }
   function showInfo(){
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.3.6</p>
+        <p>Versione 3.5.0</p>
         <p style="margin-top:14px;">Miki by Claude</p>
       </div>
     `);
   }
 
+  // ===== FIX AGGIORNA =====
   function doRefresh(){
+    const reloadHard = () => {
+      if(location.reload.length){
+        try{ location.reload(true); }catch(e){ location.reload(); }
+      } else {
+        location.reload();
+      }
+    };
+
     if('serviceWorker' in navigator){
       navigator.serviceWorker.getRegistration().then(reg => {
-        if(reg) reg.update().then(() => location.reload());
-        else location.reload();
-      });
-    } else location.reload();
+        if(!reg){ reloadHard(); return; }
+
+        const onUpdate = () => {
+          if(reg.waiting){
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+          setTimeout(reloadHard, 400);
+        };
+
+        reg.update().then(onUpdate).catch(reloadHard);
+        setTimeout(reloadHard, 1500);
+      }).catch(reloadHard);
+    } else {
+      reloadHard();
+    }
   }
 
   let deferredInstallPrompt = null;
