@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dropmiki-v31';
+const CACHE_NAME = 'dropmiki-v32';
 const ASSETS = [
   './',
   './index.html',
@@ -50,7 +50,6 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// FIX AGGIORNA: risponde al messaggio del client per attivare subito il nuovo SW
 self.addEventListener('message', (event) => {
   if(event.data && event.data.type === 'SKIP_WAITING'){
     self.skipWaiting();

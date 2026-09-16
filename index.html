@@ -574,6 +574,7 @@
   #qrShowOverlay{ z-index:90; }
   #qrScanOverlay{ z-index:90; }
   #guidaOverlay{ z-index:95; }
+  #lightboxOverlay{ z-index:1100; }
 
   .modal-box{
     background:linear-gradient(180deg, #0D1B2E 0%, #0A1626 100%);
@@ -597,7 +598,7 @@
   .modal-body p:last-child{ margin-bottom:0; }
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
 
-  /* ============ GUIDA RINNOVATA ============ */
+  /* ============ GUIDA ============ */
   #guidaOverlay .modal-box{
     max-width:480px;
     padding:0;
@@ -651,8 +652,6 @@
     box-shadow:0 4px 12px rgba(0,0,0,0.35);
   }
   .guida-step-icon svg{ width:20px; height:20px; }
-
-  /* Colori IDENTICI ai pulsanti della home */
   .guida-step.blue .guida-step-icon{
     background:linear-gradient(180deg, #2F7FE0 0%, #1E5FB5 100%);
     box-shadow:0 4px 12px rgba(47,127,224,0.4);
@@ -873,7 +872,10 @@
     overflow:hidden;
     margin-bottom:4px;
     max-width:220px;
+    cursor:zoom-in;
+    transition:transform .15s;
   }
+  .img-chip:active{ transform:scale(0.98); }
   .img-chip img{
     display:block;
     width:100%;
@@ -881,7 +883,7 @@
     max-height:260px;
     object-fit:cover;
     border-radius:12px;
-    cursor:pointer;
+    pointer-events:none;
   }
   .img-chip .img-meta{
     font-size:11px;
@@ -927,6 +929,124 @@
   .chat-upload-wrap .chat-upload-bar{
     border-radius:0;
   }
+
+  /* ============ LIGHTBOX ============ */
+  .lightbox-overlay{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.96);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1100;
+    padding:0;
+    overflow:hidden;
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .lightbox-overlay.open{ display:flex; }
+  .lightbox-img-wrap{
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .lightbox-img{
+    max-width:100%;
+    max-height:100%;
+    display:block;
+    transform-origin:center center;
+    transition:transform .18s cubic-bezier(.2,.7,.3,1);
+    will-change:transform;
+    user-select:none;
+    -webkit-user-drag:none;
+    pointer-events:none;
+  }
+  .lightbox-img.dragging{ transition:none; }
+
+  .lightbox-topbar{
+    position:absolute;
+    top:0; left:0; right:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 14px;
+    padding-top:calc(14px + env(safe-area-inset-top, 0px));
+    background:linear-gradient(180deg, rgba(0,0,0,0.75) 0%, transparent 100%);
+    z-index:2;
+    pointer-events:none;
+  }
+  .lightbox-topbar > *{ pointer-events:auto; }
+  .lightbox-name{
+    flex:1;
+    min-width:0;
+    color:#fff;
+    font-size:13.5px;
+    font-weight:500;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    text-shadow:0 1px 3px rgba(0,0,0,0.8);
+    padding-right:12px;
+  }
+  .lightbox-close{
+    width:38px; height:38px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.2);
+    color:#fff;
+    font-size:18px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+  }
+  .lightbox-close:hover{ background:rgba(255,255,255,0.2); }
+
+  .lightbox-bottombar{
+    position:absolute;
+    bottom:0; left:0; right:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:16px 14px;
+    padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(0deg, rgba(0,0,0,0.75) 0%, transparent 100%);
+    z-index:2;
+  }
+  .lightbox-action{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 16px;
+    border-radius:24px;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.2);
+    color:#fff;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    text-decoration:none;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    transition:background .15s, transform .15s;
+    white-space:nowrap;
+  }
+  .lightbox-action:hover{ background:rgba(255,255,255,0.22); }
+  .lightbox-action:active{ transform:scale(0.95); }
+  .lightbox-action.primary{
+    background:linear-gradient(180deg, #3EC7FF 0%, #2A9CD1 100%);
+    border-color:transparent;
+    color:#052033;
+    font-weight:600;
+  }
+  .lightbox-action.primary:hover{ filter:brightness(1.1); }
+  .lightbox-action svg{ width:16px; height:16px; }
 
   .drawer-overlay{
     position:fixed; inset:0;
@@ -1739,6 +1859,21 @@
         </div>
       </div>
 
+      <div class="guida-step cyan">
+        <div class="guida-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="11" y1="8" x2="11" y2="14"></line>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+          </svg>
+        </div>
+        <div class="guida-step-text">
+          <div class="guida-step-title">Ingrandisci le immagini</div>
+          <div class="guida-step-desc">Tocca una foto in chat: si apre a <b>schermo intero</b>. Puoi <b>zoomare</b> con due dita, <b>doppio tap</b> per ingrandire, e usare i pulsanti in basso per <b>aprire</b> o <b>scaricare</b> l'immagine.</div>
+        </div>
+      </div>
+
       <div class="guida-section-title">Personalizzazione</div>
 
       <div class="guida-step purple">
@@ -2033,6 +2168,35 @@
   </div>
 
   <div class="sheet-hint">Le impostazioni vengono salvate automaticamente</div>
+</div>
+
+<!-- ============ LIGHTBOX ============ -->
+<div class="lightbox-overlay" id="lightboxOverlay">
+  <div class="lightbox-img-wrap" id="lightboxImgWrap">
+    <img class="lightbox-img" id="lightboxImg" alt="">
+  </div>
+  <div class="lightbox-topbar">
+    <div class="lightbox-name" id="lightboxName">immagine.jpg</div>
+    <button class="lightbox-close" id="lightboxClose" aria-label="Chiudi">✕</button>
+  </div>
+  <div class="lightbox-bottombar">
+    <a class="lightbox-action" id="lightboxOpenNew" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <line x1="10" y1="14" x2="21" y2="3"></line>
+      </svg>
+      Apri
+    </a>
+    <a class="lightbox-action primary" id="lightboxDownload">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      Scarica
+    </a>
+  </div>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -2680,6 +2844,7 @@
 
   document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape'){
+      if($('lightboxOverlay').classList.contains('open')){ closeLightbox(); return; }
       if(confirmOverlay.classList.contains('open')){ closeConfirm(); return; }
       if(guidaOverlay.classList.contains('open')){ guidaOverlay.classList.remove('open'); return; }
       if(modalOverlay.classList.contains('open')){ closeModal(); return; }
@@ -3055,9 +3220,22 @@
     const mm = String(d.getMinutes()).padStart(2, '0');
     if(m.kind === 'file'){
       if(m.isImage && m.downloadUrl){
-        el.innerHTML =
-          '<div class="img-chip"><img src="' + m.downloadUrl + '" alt="' + escapeHtml(m.fileName) + '"><div class="img-meta">' + escapeHtml(m.fileName) + ' · ' + formatBytes(m.fileSize) + '</div></div>' +
-          '<span class="time">' + hh + ':' + mm + '</span>';
+        const imgChip = document.createElement('div');
+        imgChip.className = 'img-chip';
+        const img = document.createElement('img');
+        img.src = m.downloadUrl;
+        img.alt = m.fileName;
+        imgChip.appendChild(img);
+        const meta = document.createElement('div');
+        meta.className = 'img-meta';
+        meta.textContent = m.fileName + ' · ' + formatBytes(m.fileSize);
+        imgChip.appendChild(meta);
+        imgChip.addEventListener('click', () => openLightbox(m.downloadUrl, m.fileName));
+        el.appendChild(imgChip);
+        const time = document.createElement('span');
+        time.className = 'time';
+        time.textContent = hh + ':' + mm;
+        el.appendChild(time);
       } else {
         const dlHtml = m.downloadUrl
           ? '<a class="file-chip-dl" href="' + m.downloadUrl + '" download="' + escapeHtml(m.fileName) + '">Scarica</a>'
@@ -3190,6 +3368,200 @@
 
   $('actionChat').addEventListener('click', () => openChat(null));
 
+  // ===================== LIGHTBOX =====================
+  const lightboxOverlay = $('lightboxOverlay');
+  const lightboxImg = $('lightboxImg');
+  const lightboxName = $('lightboxName');
+  const lightboxOpenNew = $('lightboxOpenNew');
+  const lightboxDownload = $('lightboxDownload');
+  const lightboxImgWrap = $('lightboxImgWrap');
+
+  let lbScale = 1;
+  let lbMinScale = 1;
+  let lbMaxScale = 5;
+  let lbTranslateX = 0;
+  let lbTranslateY = 0;
+  let lbStartX = 0, lbStartY = 0;
+  let lbStartDist = 0;
+  let lbStartScale = 1;
+  let lbInitialPinchMidX = 0, lbInitialPinchMidY = 0;
+  let lbLastTap = 0;
+  let lbCurrentUrl = '';
+  let lbCurrentName = '';
+
+  function applyLbTransform(){
+    lightboxImg.style.transform = 'translate(' + lbTranslateX + 'px,' + lbTranslateY + 'px) scale(' + lbScale + ')';
+  }
+  function clampLbTranslation(){
+    const rect = lightboxImg.getBoundingClientRect();
+    const maxOffsetX = Math.max(0, (rect.width * lbScale - rect.width) / 2);
+    const maxOffsetY = Math.max(0, (rect.height * lbScale - rect.height) / 2);
+    lbTranslateX = Math.max(-maxOffsetX, Math.min(maxOffsetX, lbTranslateX));
+    lbTranslateY = Math.max(-maxOffsetY, Math.min(maxOffsetY, lbTranslateY));
+  }
+  function resetLbTransform(){
+    lbScale = 1;
+    lbTranslateX = 0;
+    lbTranslateY = 0;
+    lightboxImg.style.transition = '';
+    applyLbTransform();
+  }
+
+  function openLightbox(url, name){
+    lbCurrentUrl = url;
+    lbCurrentName = name || 'immagine';
+    lightboxImg.src = url;
+    lightboxName.textContent = name || 'immagine';
+    lightboxOpenNew.href = url;
+    lightboxDownload.href = url;
+    lightboxDownload.download = name || 'immagine';
+    resetLbTransform();
+    lightboxOverlay.classList.add('open');
+    document.body.classList.add('no-scroll');
+  }
+  function closeLightbox(){
+    lightboxOverlay.classList.remove('open');
+    document.body.classList.remove('no-scroll');
+    resetLbTransform();
+    setTimeout(() => { lightboxImg.src = ''; }, 200);
+  }
+
+  $('lightboxClose').addEventListener('click', closeLightbox);
+  lightboxOverlay.addEventListener('click', (e) => {
+    if(e.target === lightboxOverlay || e.target === lightboxImgWrap){
+      // chiude solo se non è uno swipe in corso
+      if(!lbIsDragging) closeLightbox();
+    }
+  });
+
+  // ---- gesture: pinch, pan, double tap, swipe-down ----
+  let lbIsDragging = false;
+  let lbDragStartX = 0, lbDragStartY = 0;
+  let lbDragStartTx = 0, lbDragStartTy = 0;
+  let lbTouchActive = false;
+
+  function lbTouchStart(e){
+    if(e.touches.length === 1){
+      lbTouchActive = true;
+      lbStartX = e.touches[0].clientX;
+      lbStartY = e.touches[0].clientY;
+      lbDragStartX = e.touches[0].clientX;
+      lbDragStartY = e.touches[0].clientY;
+      lbDragStartTx = lbTranslateX;
+      lbDragStartTy = lbTranslateY;
+      lightboxImg.style.transition = 'none';
+    } else if(e.touches.length === 2){
+      lbTouchActive = true;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      lbStartDist = Math.sqrt(dx*dx + dy*dy);
+      lbStartScale = lbScale;
+      lbInitialPinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      lbInitialPinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      lightboxImg.style.transition = 'none';
+    }
+  }
+  function lbTouchMove(e){
+    if(!lbTouchActive) return;
+    e.preventDefault();
+    if(e.touches.length === 1 && lbScale > 1.02){
+      const dx = e.touches[0].clientX - lbDragStartX;
+      const dy = e.touches[0].clientY - lbDragStartY;
+      lbIsDragging = true;
+      lightboxImg.classList.add('dragging');
+      lbTranslateX = lbDragStartTx + dx;
+      lbTranslateY = lbDragStartTy + dy;
+      clampLbTranslation();
+      applyLbTransform();
+    } else if(e.touches.length === 1 && lbScale <= 1.02){
+      // swipe down per chiudere
+      const dy = e.touches[0].clientY - lbDragStartY;
+      const dx = e.touches[0].clientX - lbDragStartX;
+      if(Math.abs(dy) > 5 && Math.abs(dy) > Math.abs(dx)){
+        lightboxImg.classList.add('dragging');
+        lbTranslateY = dy;
+        lightboxImg.style.transform = 'translateY(' + dy + 'px)';
+        lightboxOverlay.style.opacity = String(Math.max(0.3, 1 - Math.abs(dy)/300));
+      }
+    } else if(e.touches.length === 2){
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const ratio = dist / lbStartDist;
+      lbScale = Math.max(lbMinScale, Math.min(lbMaxScale, lbStartScale * ratio));
+      applyLbTransform();
+    }
+  }
+  function lbTouchEnd(e){
+    if(!lbTouchActive) return;
+
+    // fine swipe-down
+    if(!lbIsDragging && lbScale <= 1.02 && lightboxImg.classList.contains('dragging')){
+      if(Math.abs(lbTranslateY) > 80){
+        lightboxImg.classList.remove('dragging');
+        lightboxImg.style.transition = '';
+        lightboxImg.style.transform = '';
+        lightboxOverlay.style.opacity = '';
+        closeLightbox();
+        lbTouchActive = false;
+        return;
+      } else {
+        lightboxImg.classList.remove('dragging');
+        lightboxImg.style.transition = '';
+        lightboxImg.style.transform = '';
+        lightboxOverlay.style.opacity = '';
+        lbTranslateY = 0;
+      }
+    }
+
+    lightboxImg.classList.remove('dragging');
+    lightboxImg.style.transition = '';
+    lbIsDragging = false;
+    lbTouchActive = false;
+
+    // doppio tap per zoom
+    if(e.changedTouches && e.changedTouches.length === 1){
+      const now = Date.now();
+      if(now - lbLastTap < 280){
+        if(lbScale > 1.5){
+          resetLbTransform();
+        } else {
+          lbScale = 2.5;
+          applyLbTransform();
+        }
+        lbLastTap = 0;
+        return;
+      }
+      lbLastTap = now;
+    }
+
+    if(lbScale < 1){
+      resetLbTransform();
+    } else if(lbScale > 1){
+      clampLbTranslation();
+      applyLbTransform();
+    }
+  }
+
+  lightboxImgWrap.addEventListener('touchstart', lbTouchStart, { passive: false });
+  lightboxImgWrap.addEventListener('touchmove', lbTouchMove, { passive: false });
+  lightboxImgWrap.addEventListener('touchend', lbTouchEnd);
+  lightboxImgWrap.addEventListener('touchcancel', lbTouchEnd);
+
+  // wheel zoom (desktop)
+  lightboxImgWrap.addEventListener('wheel', (e) => {
+    if(!lightboxOverlay.classList.contains('open')) return;
+    e.preventDefault();
+    const delta = -e.deltaY * 0.002;
+    lbScale = Math.max(lbMinScale, Math.min(lbMaxScale, lbScale + delta));
+    if(lbScale <= 1){
+      resetLbTransform();
+    } else {
+      clampLbTranslation();
+      applyLbTransform();
+    }
+  }, { passive: false });
+
   const rightMenu = $('rightMenu');
   $('menuRight').addEventListener('click', (e) => { e.stopPropagation(); rightMenu.classList.toggle('open'); });
   document.addEventListener('click', (e) => {
@@ -3276,13 +3648,12 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.5.0</p>
+        <p>Versione 3.6.0</p>
         <p style="margin-top:14px;">Miki by Claude</p>
       </div>
     `);
   }
 
-  // ===== FIX AGGIORNA =====
   function doRefresh(){
     const reloadHard = () => {
       if(location.reload.length){
