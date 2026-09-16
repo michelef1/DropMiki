@@ -932,7 +932,7 @@
   .lightbox-overlay{
     position:fixed; inset:0;
     background:rgba(0,0,0,0.96);
-    display:none;
+    display:none !important;
     align-items:center;
     justify-content:center;
     z-index:1100;
@@ -941,8 +941,16 @@
     touch-action:none;
     user-select:none;
     -webkit-user-select:none;
+    visibility:hidden;
+    opacity:0;
+    pointer-events:none;
   }
-  .lightbox-overlay.open{ display:flex; }
+  .lightbox-overlay.open{
+    display:flex !important;
+    visibility:visible;
+    opacity:1;
+    pointer-events:auto;
+  }
   .lightbox-img-wrap{
     position:absolute;
     top:0; left:0; right:0; bottom:0;
@@ -1230,14 +1238,20 @@
     border-top-right-radius:24px;
     border-top:1.5px solid var(--card-border-2);
     box-shadow:0 -12px 40px rgba(0,0,0,0.7);
-    transition:transform .3s cubic-bezier(.2,.7,.3,1);
+    transition:transform .3s cubic-bezier(.2,.7,.3,1), visibility .3s;
     z-index:601;
     max-height:85vh;
     overflow-y:auto;
     padding:8px 16px 24px;
     padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+    visibility:hidden;
+    pointer-events:none;
   }
-  .sheet.open{ transform:translateX(-50%) translateY(0); }
+  .sheet.open{
+    transform:translateX(-50%) translateY(0);
+    visibility:visible;
+    pointer-events:auto;
+  }
 
   @media (min-width: 620px){
     .sheet{
@@ -2256,7 +2270,6 @@
   let pendingFileCount = 0;
   let soundEnabled = true;
 
-  // ---------- SUONI ----------
   let audioCtx = null;
   function getAudioCtx(){
     if(audioCtx) return audioCtx;
@@ -3422,7 +3435,6 @@
     setTimeout(() => { lightboxImg.src = ''; }, 200);
   }
 
-  // "Apri con": usa il menu di condivisione nativo se disponibile
   lightboxOpenWith.addEventListener('click', async () => {
     const name = lbCurrentName || 'immagine';
     try{
@@ -3674,7 +3686,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.6.1</p>
+        <p>Versione 3.6.3</p>
         <p style="margin-top:14px;">Miki by Claude &amp; DeepSeek</p>
       </div>
     `);
@@ -3797,6 +3809,43 @@
   updateNearbySub();
   updateBadges();
   initPeer();
+
+  function forceCloseAllOverlays(){
+    ['lightboxOverlay','modalOverlay','confirmOverlay','guidaOverlay','devicesOverlay','sendOverlay','chatModal','qrShowOverlay','qrScanOverlay']
+      .forEach(id => {
+        const el = document.getElementById(id);
+        if(el){
+          el.classList.remove('open');
+          el.style.display = '';
+          el.style.opacity = '';
+          el.style.pointerEvents = '';
+          el.style.visibility = '';
+        }
+      });
+    const sheet = document.getElementById('settingsSheet');
+    const sheetOv = document.getElementById('settingsOverlay');
+    if(sheet){
+      sheet.classList.remove('open');
+      sheet.style.transform = '';
+      sheet.style.visibility = '';
+      sheet.style.pointerEvents = '';
+    }
+    if(sheetOv){
+      sheetOv.classList.remove('open');
+      sheetOv.style.opacity = '';
+      sheetOv.style.pointerEvents = '';
+    }
+    document.body.classList.remove('no-scroll');
+
+    const lb = document.getElementById('lightboxOverlay');
+    if(lb && !lb.classList.contains('open')){
+      lb.style.display = 'none';
+      lb.style.visibility = 'hidden';
+    }
+  }
+  forceCloseAllOverlays();
+  setTimeout(forceCloseAllOverlays, 50);
+  setTimeout(forceCloseAllOverlays, 300);
 })();
 </script>
 
