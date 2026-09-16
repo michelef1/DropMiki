@@ -598,7 +598,6 @@
   .modal-body p:last-child{ margin-bottom:0; }
   .modal-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
 
-  /* ============ GUIDA ============ */
   #guidaOverlay .modal-box{
     max-width:480px;
     padding:0;
@@ -930,7 +929,6 @@
     border-radius:0;
   }
 
-  /* ============ LIGHTBOX ============ */
   .lightbox-overlay{
     position:fixed; inset:0;
     background:rgba(0,0,0,0.96);
@@ -1870,7 +1868,7 @@
         </div>
         <div class="guida-step-text">
           <div class="guida-step-title">Ingrandisci le immagini</div>
-          <div class="guida-step-desc">Tocca una foto in chat: si apre a <b>schermo intero</b>. Puoi <b>zoomare</b> con due dita, <b>doppio tap</b> per ingrandire, e usare i pulsanti in basso per <b>aprire</b> o <b>scaricare</b> l'immagine.</div>
+          <div class="guida-step-desc">Tocca una foto in chat: si apre a <b>schermo intero</b>. Puoi <b>zoomare</b> con due dita, <b>doppio tap</b> per ingrandire, e usare i pulsanti in basso per <b>scaricare</b> o <b>condividere</b> con un'altra app (<b>Apri con</b>).</div>
         </div>
       </div>
 
@@ -2170,7 +2168,6 @@
   <div class="sheet-hint">Le impostazioni vengono salvate automaticamente</div>
 </div>
 
-<!-- ============ LIGHTBOX ============ -->
 <div class="lightbox-overlay" id="lightboxOverlay">
   <div class="lightbox-img-wrap" id="lightboxImgWrap">
     <img class="lightbox-img" id="lightboxImg" alt="">
@@ -2180,14 +2177,14 @@
     <button class="lightbox-close" id="lightboxClose" aria-label="Chiudi">✕</button>
   </div>
   <div class="lightbox-bottombar">
-    <a class="lightbox-action" id="lightboxOpenNew" target="_blank" rel="noopener">
+    <button class="lightbox-action" id="lightboxOpenWith" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-        <polyline points="15 3 21 3 21 9"></polyline>
-        <line x1="10" y1="14" x2="21" y2="3"></line>
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+        <polyline points="16 6 12 2 8 6"></polyline>
+        <line x1="12" y1="2" x2="12" y2="15"></line>
       </svg>
-      Apri
-    </a>
+      Apri con
+    </button>
     <a class="lightbox-action primary" id="lightboxDownload">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -3372,7 +3369,7 @@
   const lightboxOverlay = $('lightboxOverlay');
   const lightboxImg = $('lightboxImg');
   const lightboxName = $('lightboxName');
-  const lightboxOpenNew = $('lightboxOpenNew');
+  const lightboxOpenWith = $('lightboxOpenWith');
   const lightboxDownload = $('lightboxDownload');
   const lightboxImgWrap = $('lightboxImgWrap');
 
@@ -3412,7 +3409,6 @@
     lbCurrentName = name || 'immagine';
     lightboxImg.src = url;
     lightboxName.textContent = name || 'immagine';
-    lightboxOpenNew.href = url;
     lightboxDownload.href = url;
     lightboxDownload.download = name || 'immagine';
     resetLbTransform();
@@ -3426,15 +3422,49 @@
     setTimeout(() => { lightboxImg.src = ''; }, 200);
   }
 
+  // "Apri con": usa il menu di condivisione nativo se disponibile
+  lightboxOpenWith.addEventListener('click', async () => {
+    const name = lbCurrentName || 'immagine';
+    try{
+      if(navigator.share && navigator.canShare){
+        const res = await fetch(lbCurrentUrl);
+        const blob = await res.blob();
+        const file = new File([blob], name, { type: blob.type || 'image/jpeg' });
+        if(navigator.canShare({ files: [file] })){
+          try{
+            await navigator.share({
+              files: [file],
+              title: name,
+              text: 'Condiviso da DropMiki'
+            });
+            return;
+          }catch(err){
+            if(err && err.name === 'AbortError') return;
+          }
+        }
+      }
+      const a = document.createElement('a');
+      a.href = lbCurrentUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      const origLabel = lightboxOpenWith.innerHTML;
+      lightboxOpenWith.innerHTML = lightboxOpenWith.innerHTML.replace('Apri con', 'File salvato');
+      setTimeout(() => { lightboxOpenWith.innerHTML = origLabel; }, 1500);
+    }catch(e){
+      console.error(e);
+      window.open(lbCurrentUrl, '_blank', 'noopener');
+    }
+  });
+
   $('lightboxClose').addEventListener('click', closeLightbox);
   lightboxOverlay.addEventListener('click', (e) => {
     if(e.target === lightboxOverlay || e.target === lightboxImgWrap){
-      // chiude solo se non è uno swipe in corso
       if(!lbIsDragging) closeLightbox();
     }
   });
 
-  // ---- gesture: pinch, pan, double tap, swipe-down ----
   let lbIsDragging = false;
   let lbDragStartX = 0, lbDragStartY = 0;
   let lbDragStartTx = 0, lbDragStartTy = 0;
@@ -3474,7 +3504,6 @@
       clampLbTranslation();
       applyLbTransform();
     } else if(e.touches.length === 1 && lbScale <= 1.02){
-      // swipe down per chiudere
       const dy = e.touches[0].clientY - lbDragStartY;
       const dx = e.touches[0].clientX - lbDragStartX;
       if(Math.abs(dy) > 5 && Math.abs(dy) > Math.abs(dx)){
@@ -3495,7 +3524,6 @@
   function lbTouchEnd(e){
     if(!lbTouchActive) return;
 
-    // fine swipe-down
     if(!lbIsDragging && lbScale <= 1.02 && lightboxImg.classList.contains('dragging')){
       if(Math.abs(lbTranslateY) > 80){
         lightboxImg.classList.remove('dragging');
@@ -3519,7 +3547,6 @@
     lbIsDragging = false;
     lbTouchActive = false;
 
-    // doppio tap per zoom
     if(e.changedTouches && e.changedTouches.length === 1){
       const now = Date.now();
       if(now - lbLastTap < 280){
@@ -3548,7 +3575,6 @@
   lightboxImgWrap.addEventListener('touchend', lbTouchEnd);
   lightboxImgWrap.addEventListener('touchcancel', lbTouchEnd);
 
-  // wheel zoom (desktop)
   lightboxImgWrap.addEventListener('wheel', (e) => {
     if(!lightboxOverlay.classList.contains('open')) return;
     e.preventDefault();
@@ -3648,8 +3674,8 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.6.0</p>
-        <p style="margin-top:14px;">Miki by Claude</p>
+        <p>Versione 3.6.1</p>
+        <p style="margin-top:14px;">Miki by Claude &amp; DeepSeek</p>
       </div>
     `);
   }
