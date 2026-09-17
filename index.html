@@ -1871,7 +1871,7 @@
         </div>
         <div class="guida-step-text">
           <div class="guida-step-title">Ingrandisci le immagini</div>
-          <div class="guida-step-desc">Tocca una foto in chat: si apre a <b>schermo intero</b>. Puoi <b>zoomare</b> con due dita, <b>doppio tap</b> per ingrandire, e usare i pulsanti in basso per <b>scaricare</b> o <b>condividere</b> con un'altra app (<b>Apri con</b>).</div>
+          <div class="guida-step-desc">Tocca una foto in chat: si apre a <b>schermo intero</b>. Puoi <b>zoomare</b> con due dita, <b>doppio tap</b> per ingrandire, e usare il pulsante <b>Scarica</b> in basso per salvarla.</div>
         </div>
       </div>
 
@@ -2180,14 +2180,6 @@
     <button class="lightbox-close" id="lightboxClose" aria-label="Chiudi">✕</button>
   </div>
   <div class="lightbox-bottombar">
-    <button class="lightbox-action" id="lightboxOpenWith" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-        <polyline points="16 6 12 2 8 6"></polyline>
-        <line x1="12" y1="2" x2="12" y2="15"></line>
-      </svg>
-      Apri con
-    </button>
     <a class="lightbox-action primary" id="lightboxDownload">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -3135,8 +3127,7 @@
       markDone(msg.transferId, url, incoming.name);
       if(incoming.viaChat){
         const isImg = isImageMime(incoming.mime);
-        const blobFile = new File([blob], incoming.name, { type: incoming.mime || 'application/octet-stream' });
-        pushChatFileMessage(incoming.fromCode, 'in', incoming.name, incoming.size, url, isImg, blobFile);
+        pushChatFileMessage(incoming.fromCode, 'in', incoming.name, incoming.size, url, isImg);
         if(chatPeerCode !== incoming.fromCode){
           incrementUnread(incoming.fromCode);
           renderRadarAvatars();
@@ -3230,10 +3221,7 @@
         meta.className = 'img-meta';
         meta.textContent = m.fileName + ' · ' + formatBytes(m.fileSize);
         imgChip.appendChild(meta);
-        imgChip.addEventListener('click', () => {
-          const cachedFile = (chatFileCache[chatPeerCode] || {})[m.fileName] || null;
-          openLightbox(m.downloadUrl, m.fileName, cachedFile);
-        });
+        imgChip.addEventListener('click', () => openLightbox(m.downloadUrl, m.fileName));
         el.appendChild(imgChip);
         const time = document.createElement('span');
         time.className = 'time';
@@ -3292,17 +3280,10 @@
     chatInput.value = '';
     chatInput.focus();
   }
-
-  const chatFileCache = {};
-
-  function pushChatFileMessage(code, dir, fileName, fileSize, downloadUrl, isImage, fileObj){
+  function pushChatFileMessage(code, dir, fileName, fileSize, downloadUrl, isImage){
     const history = loadChatHistory(code);
     history.push({ kind: 'file', dir, ts: Date.now(), fileName, fileSize, downloadUrl: downloadUrl || null, isImage: !!isImage });
     persistChatHistory(code);
-    if(fileObj){
-      if(!chatFileCache[code]) chatFileCache[code] = {};
-      chatFileCache[code][fileName] = fileObj;
-    }
     if(chatPeerCode === code) renderChatMessages();
   }
 
@@ -3332,7 +3313,7 @@
       }
       conn.send({ type: 'end', transferId });
       const localUrl = URL.createObjectURL(file);
-      pushChatFileMessage(code, 'out', file.name, file.size, localUrl, isImg, file);
+      pushChatFileMessage(code, 'out', file.name, file.size, localUrl, isImg);
       soundMessageOut();
       setTimeout(() => { $('chatUploadWrap').style.display = 'none'; }, 400);
     }catch(e){
@@ -3366,7 +3347,6 @@
       'Cancellare tutti i messaggi con "' + deviceName(code) + '"?',
       () => {
         chatHistories[code] = [];
-        delete chatFileCache[code];
         persistChatHistory(code);
         clearUnread(code);
         if(chatPeerCode === code) renderChatMessages();
@@ -3383,7 +3363,6 @@
   const lightboxOverlay = $('lightboxOverlay');
   const lightboxImg = $('lightboxImg');
   const lightboxName = $('lightboxName');
-  const lightboxOpenWith = $('lightboxOpenWith');
   const lightboxDownload = $('lightboxDownload');
   const lightboxImgWrap = $('lightboxImgWrap');
 
@@ -3399,7 +3378,6 @@
   let lbLastTap = 0;
   let lbCurrentUrl = '';
   let lbCurrentName = '';
-  let lbCurrentFile = null;
 
   function applyLbTransform(){
     lightboxImg.style.transform = 'translate(' + lbTranslateX + 'px,' + lbTranslateY + 'px) scale(' + lbScale + ')';
@@ -3419,10 +3397,9 @@
     applyLbTransform();
   }
 
-  function openLightbox(url, name, fileObj){
+  function openLightbox(url, name){
     lbCurrentUrl = url;
     lbCurrentName = name || 'immagine';
-    lbCurrentFile = fileObj || null;
     lightboxImg.src = url;
     lightboxName.textContent = name || 'immagine';
     lightboxDownload.href = url;
@@ -3437,54 +3414,6 @@
     resetLbTransform();
     setTimeout(() => { lightboxImg.src = ''; }, 200);
   }
-
-  lightboxOpenWith.addEventListener('click', async () => {
-    const name = lbCurrentName || 'immagine';
-    try{
-      // 1) Prova con il File in memoria (Android + iOS)
-      if(lbCurrentFile && navigator.share && navigator.canShare && navigator.canShare({ files: [lbCurrentFile] })){
-        try{
-          await navigator.share({
-            files: [lbCurrentFile],
-            title: name
-          });
-          return;
-        }catch(err){
-          if(err && err.name === 'AbortError') return;
-          console.warn('share fallito (file cached), provo fallback', err);
-        }
-      }
-      // 2) Provo a costruire un File dal blob
-      if(navigator.share && navigator.canShare){
-        try{
-          const res = await fetch(lbCurrentUrl);
-          const blob = await res.blob();
-          const buf = await blob.arrayBuffer();
-          const file = new File([buf], name, { type: blob.type || 'image/jpeg' });
-          if(navigator.canShare({ files: [file] })){
-            await navigator.share({ files: [file], title: name });
-            return;
-          }
-        }catch(err){
-          if(err && err.name === 'AbortError') return;
-          console.warn('share fallito (fetch), provo fallback', err);
-        }
-      }
-      // 3) Fallback: scarica il file
-      const a = document.createElement('a');
-      a.href = lbCurrentUrl;
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      const origLabel = lightboxOpenWith.innerHTML;
-      lightboxOpenWith.innerHTML = lightboxOpenWith.innerHTML.replace('Apri con', 'File salvato');
-      setTimeout(() => { lightboxOpenWith.innerHTML = origLabel; }, 1500);
-    }catch(e){
-      console.error(e);
-      window.open(lbCurrentUrl, '_blank', 'noopener');
-    }
-  });
 
   $('lightboxClose').addEventListener('click', closeLightbox);
   lightboxOverlay.addEventListener('click', (e) => {
@@ -3683,7 +3612,6 @@
       persistDevices();
       chatHistories = {};
       unreadCounts = {};
-      Object.keys(chatFileCache).forEach(k => delete chatFileCache[k]);
       Object.keys(localStorage).forEach(k => {
         if(k.startsWith(LS_CHAT) || k.startsWith(LS_UNREAD)) localStorage.removeItem(k);
       });
@@ -3703,7 +3631,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.7.0</p>
+        <p>Versione 3.7.1</p>
         <p style="margin-top:14px;">Miki by Claude &amp; DeepSeek</p>
       </div>
     `);
