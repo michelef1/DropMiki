@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dropmiki-v35';
+const CACHE_NAME = 'dropmiki-v36';
 const ASSETS = [
   './',
   './index.html',
