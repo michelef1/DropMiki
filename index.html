@@ -2898,31 +2898,57 @@
     stopQrScan();
     qrScanOverlay.classList.remove('open');
   }
-  function qrScanTick(){
+
+  // Analizza un frame a una certa risoluzione target. Ritorna il codice se trovato.
+  function tryScanAtResolution(targetWidth){
+    const vw = qrScanVideo.videoWidth, vh = qrScanVideo.videoHeight;
+    if(!vw || !vh) return null;
+    const scale = Math.min(1, targetWidth / vw);
+    qrScanCanvas.width = Math.round(vw * scale);
+    qrScanCanvas.height = Math.round(vh * scale);
+    qrScanCtx.drawImage(qrScanVideo, 0, 0, qrScanCanvas.width, qrScanCanvas.height);
+    const imageData = qrScanCtx.getImageData(0, 0, qrScanCanvas.width, qrScanCanvas.height);
+    // attemptBoth: legge anche QR con colori invertiti
+    const result = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: 'attemptBoth'
+    });
+    if(result && result.data){
+      const code = result.data.trim().toUpperCase();
+      if(/^[A-Z0-9]{6}$/.test(code)) return code;
+    }
+    return null;
+  }
+
+  let qrScanLastTime = 0;
+  function qrScanTick(now){
+    // Limita scansione a ~10 fps per non scaldare la CPU
+    now = now || performance.now();
+    if(now - qrScanLastTime < 100){
+      qrScanRAF = requestAnimationFrame(qrScanTick);
+      return;
+    }
+    qrScanLastTime = now;
+
     if(qrScanVideo.readyState === qrScanVideo.HAVE_ENOUGH_DATA && window.jsQR){
-      const vw = qrScanVideo.videoWidth, vh = qrScanVideo.videoHeight;
-      if(vw && vh){
-        const scale = Math.min(1, 480 / vw);
-        qrScanCanvas.width = Math.round(vw * scale);
-        qrScanCanvas.height = Math.round(vh * scale);
-        qrScanCtx.drawImage(qrScanVideo, 0, 0, qrScanCanvas.width, qrScanCanvas.height);
-        const imageData = qrScanCtx.getImageData(0, 0, qrScanCanvas.width, qrScanCanvas.height);
-        const result = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
-        if(result && result.data){
-          const code = result.data.trim().toUpperCase();
-          if(/^[A-Z0-9]{6}$/.test(code)){
-            qrScanStatus.textContent = 'Codice trovato: ' + code;
-            closeQrScan();
-            closeDevices();
-            peerCodeInput.value = code;
-            connectBtn.click();
-            return;
-          }
-        }
+      // Provo prima a risoluzione bassa (veloce), poi media, poi alta
+      let code = tryScanAtResolution(480);
+      if(!code) code = tryScanAtResolution(720);
+      if(!code) code = tryScanAtResolution(1080);
+
+      if(code){
+        qrScanStatus.textContent = 'Codice trovato: ' + code;
+        // Feedback aptico se supportato
+        if(navigator.vibrate) navigator.vibrate(80);
+        closeQrScan();
+        closeDevices();
+        peerCodeInput.value = code;
+        connectBtn.click();
+        return;
       }
     }
     qrScanRAF = requestAnimationFrame(qrScanTick);
   }
+
   $('scanQrBtn').addEventListener('click', async () => {
     qrScanOverlay.classList.add('open');
     if(!window.jsQR){
@@ -2931,9 +2957,33 @@
     }
     qrScanStatus.textContent = 'Inquadra il QR dell\'altro dispositivo…';
     try{
-      qrScanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      // Chiedo risoluzione alta per leggere QR anche a distanza
+      const constraints = {
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          focusMode: 'continuous'
+        },
+        audio: false
+      };
+      qrScanStream = await navigator.mediaDevices.getUserMedia(constraints);
       qrScanVideo.srcObject = qrScanStream;
       await qrScanVideo.play();
+
+      // Provo ad attivare la messa a fuoco continua e lo zoom digitale (se supportati)
+      const track = qrScanStream.getVideoTracks()[0];
+      if(track){
+        const caps = track.getCapabilities ? track.getCapabilities() : {};
+        if(caps.focusMode && caps.focusMode.indexOf('continuous') !== -1){
+          try{ await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }); }catch(e){}
+        }
+        if(caps.zoom){
+          const targetZoom = Math.min(caps.zoom.max || 1, Math.max(caps.zoom.min || 1, 1.5));
+          try{ await track.applyConstraints({ advanced: [{ zoom: targetZoom }] }); }catch(e){}
+        }
+      }
+
       qrScanRAF = requestAnimationFrame(qrScanTick);
     }catch(e){
       console.error(e);
@@ -3631,7 +3681,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.7.1</p>
+        <p>Versione 3.7.2</p>
         <p style="margin-top:14px;">Miki by Claude &amp; DeepSeek</p>
       </div>
     `);
