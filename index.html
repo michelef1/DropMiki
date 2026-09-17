@@ -287,12 +287,12 @@
 
   .code-label{ text-align:center; font-size:13px; color:var(--cyan-soft); font-weight:500; margin-bottom:8px; }
   .code-pill{
-    display:flex; align-items:center; justify-content:center; gap:10px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
     background:linear-gradient(180deg, #0D1B2E 0%, #0A1626 100%);
     border:1.5px solid var(--cyan-dim);
     border-radius:16px;
-    padding:11px 16px;
-    max-width:300px; margin:0 auto 16px;
+    padding:11px 14px;
+    max-width:320px; margin:0 auto 16px;
     box-shadow:0 0 24px rgba(62,199,255,0.15), inset 0 0 20px rgba(62,199,255,0.05);
   }
   .code-pill b{
@@ -300,13 +300,17 @@
     font-size:21px; font-weight:600;
     letter-spacing:3px; color:#FFFFFF;
   }
-  .code-pill .copy-btn{
+  .code-pill .copy-btn,
+  .code-pill .qr-btn{
     background:transparent; border:none;
     color:var(--cyan); cursor:pointer;
-    padding:6px; border-radius:8px;
+    padding:5px; border-radius:8px;
     display:flex; align-items:center; justify-content:center;
+    transition:color .15s, background .15s;
   }
-  .code-pill .copy-btn:hover{ color:var(--cyan-soft); background:rgba(62,199,255,0.1); }
+  .code-pill .copy-btn:hover,
+  .code-pill .qr-btn:hover{ color:var(--cyan-soft); background:rgba(62,199,255,0.1); }
+  .code-pill .qr-btn{ margin-left:2px; }
 
   .online-badge{
     display:flex; align-items:center; justify-content:center; gap:6px;
@@ -1596,8 +1600,20 @@
   <div class="code-label">Il tuo codice dispositivo</div>
   <div class="code-pill">
     <b id="myCodeInline">······</b>
+    <button class="qr-btn" id="showQrIconBtn" title="Mostra il mio QR" aria-label="Mostra il mio QR">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+        <path d="M14 14h2v2h-2z" fill="currentColor"></path>
+        <path d="M18 14h3v1h-3z" fill="currentColor"></path>
+        <path d="M14 18h1v3h-1z" fill="currentColor"></path>
+        <path d="M18 17h3v1h-3z" fill="currentColor"></path>
+        <path d="M18 20h3v1h-3z" fill="currentColor"></path>
+      </svg>
+    </button>
     <button class="copy-btn" id="copyCodeBtn" title="Copia codice" aria-label="Copia codice">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
         <rect x="9" y="9" width="13" height="13" rx="2"></rect>
         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
       </svg>
@@ -1805,7 +1821,7 @@
         </div>
         <div class="guida-step-text">
           <div class="guida-step-title">Il tuo codice dispositivo</div>
-          <div class="guida-step-desc">È fisso e identificativo: comunicalo all'altro dispositivo oppure lascia che <b>scansioni il tuo QR</b> dal pulsante "Collega device".</div>
+          <div class="guida-step-desc">È fisso e identificativo: comunicalo all'altro dispositivo oppure tocca <b>l'icona QR</b> accanto al codice per mostrare il QR all'altro device. Puoi anche copiarlo con il pulsante copia.</div>
         </div>
       </div>
 
@@ -2537,7 +2553,6 @@
       wrap.style.setProperty('--y', y + 'px');
       wrap.style.transform = 'translate(calc(-50% + ' + x + 'px), calc(-50% + ' + y + 'px))';
       wrap.title = d.name;
-      // Click sul radar: apre direttamente "Invia file"
       wrap.addEventListener('click', () => onRadarAvatarClick(d.code));
 
       const dot = document.createElement('div');
@@ -2614,7 +2629,6 @@
     nearbySub.textContent = online + (online === 1 ? ' dispositivo connesso' : ' dispositivi connessi');
   }
 
-  // Click dalla lista dispositivi / drawer: seleziona soltanto
   function onDeviceRowClick(code){
     const conn = connections[code];
     if(conn && conn.open){
@@ -2628,7 +2642,6 @@
     }
   }
 
-  // Click dall'avatar sul radar: seleziona E apre "Invia file"
   function onRadarAvatarClick(code){
     const conn = connections[code];
     if(conn && conn.open){
@@ -2800,15 +2813,47 @@
   });
   peerCodeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') connectBtn.click(); });
 
+  // Icona copia codice
   $('copyCodeBtn').addEventListener('click', async () => {
     try{
       await navigator.clipboard.writeText(myCode);
       const btn = $('copyCodeBtn');
       const orig = btn.innerHTML;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#2ED47A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#2ED47A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="20 6 9 17 4 12"></polyline></svg>';
       setTimeout(() => { btn.innerHTML = orig; }, 1200);
     }catch(e){}
   });
+
+  // Icona QR accanto al codice dispositivo
+  $('showQrIconBtn').addEventListener('click', () => {
+    showMyQrModal();
+  });
+
+  function showMyQrModal(){
+    const qrShowOverlay = $('qrShowOverlay');
+    qrShowOverlay.classList.add('open');
+    $('qrShowCodeText').textContent = myCode || '——';
+    const container = $('qrShowCanvas');
+    container.innerHTML = '';
+    container.style.color = '#555';
+    container.style.fontSize = '13px';
+    container.style.textAlign = 'center';
+    container.style.padding = '10px';
+    if(!myCode){
+      container.textContent = 'Codice non ancora pronto, riprova tra un istante';
+      return;
+    }
+    if(!window.QRCode){
+      container.textContent = 'Libreria QR non disponibile (controlla la connessione)';
+      return;
+    }
+    new QRCode(container, {
+      text: myCode,
+      width: 220,
+      height: 220,
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
 
   const modalOverlay = $('modalOverlay');
   const modalTitle = $('modalTitle');
@@ -2872,28 +2917,8 @@
 
   const qrShowOverlay = $('qrShowOverlay');
   $('showMyQrBtn').addEventListener('click', () => {
-    qrShowOverlay.classList.add('open');
-    $('qrShowCodeText').textContent = myCode || '——';
-    const container = $('qrShowCanvas');
-    container.innerHTML = '';
-    container.style.color = '#555';
-    container.style.fontSize = '13px';
-    container.style.textAlign = 'center';
-    container.style.padding = '10px';
-    if(!myCode){
-      container.textContent = 'Codice non ancora pronto, riprova tra un istante';
-      return;
-    }
-    if(!window.QRCode){
-      container.textContent = 'Libreria QR non disponibile (controlla la connessione)';
-      return;
-    }
-    new QRCode(container, {
-      text: myCode,
-      width: 220,
-      height: 220,
-      correctLevel: QRCode.CorrectLevel.M
-    });
+    showMyQrModal();
+    closeDevices();
   });
   $('qrShowClose').addEventListener('click', () => qrShowOverlay.classList.remove('open'));
   qrShowOverlay.addEventListener('click', (e) => { if(e.target === qrShowOverlay) qrShowOverlay.classList.remove('open'); });
@@ -3691,7 +3716,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.7.3</p>
+        <p>Versione 3.7.4</p>
         <p style="margin-top:14px;">Miki by Claude &amp; DeepSeek</p>
       </div>
     `);
