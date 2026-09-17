@@ -1830,7 +1830,7 @@
         </div>
         <div class="guida-step-text">
           <div class="guida-step-title">Invia file</div>
-          <div class="guida-step-desc">Tocca <b>Invia file</b>, scegli un dispositivo connesso e trascina il file (o tocca per sceglierlo). Vedi la barra di avanzamento in tempo reale.</div>
+          <div class="guida-step-desc">Tocca <b>Invia file</b>, scegli un dispositivo connesso e trascina il file (o tocca per sceglierlo). Vedi la barra di avanzamento in tempo reale. Puoi anche <b>toccare un avatar sul radar</b> per aprire direttamente questo pannello.</div>
         </div>
       </div>
 
@@ -2537,7 +2537,8 @@
       wrap.style.setProperty('--y', y + 'px');
       wrap.style.transform = 'translate(calc(-50% + ' + x + 'px), calc(-50% + ' + y + 'px))';
       wrap.title = d.name;
-      wrap.addEventListener('click', () => onDeviceRowClick(d.code));
+      // Click sul radar: apre direttamente "Invia file"
+      wrap.addEventListener('click', () => onRadarAvatarClick(d.code));
 
       const dot = document.createElement('div');
       dot.className = 'radar-avatar' + (isOnline ? ' online' : '') + (isSelected ? ' selected' : '');
@@ -2613,6 +2614,7 @@
     nearbySub.textContent = online + (online === 1 ? ' dispositivo connesso' : ' dispositivi connessi');
   }
 
+  // Click dalla lista dispositivi / drawer: seleziona soltanto
   function onDeviceRowClick(code){
     const conn = connections[code];
     if(conn && conn.open){
@@ -2621,6 +2623,21 @@
       renderRadarAvatars();
       updateDropzoneState();
       updateSendTargetLabel();
+    } else {
+      attemptConnect(code);
+    }
+  }
+
+  // Click dall'avatar sul radar: seleziona E apre "Invia file"
+  function onRadarAvatarClick(code){
+    const conn = connections[code];
+    if(conn && conn.open){
+      selectedTarget = code;
+      renderDevicesList();
+      renderRadarAvatars();
+      updateDropzoneState();
+      updateSendTargetLabel();
+      openSend();
     } else {
       attemptConnect(code);
     }
@@ -2899,7 +2916,6 @@
     qrScanOverlay.classList.remove('open');
   }
 
-  // Analizza un frame a una certa risoluzione target. Ritorna il codice se trovato.
   function tryScanAtResolution(targetWidth){
     const vw = qrScanVideo.videoWidth, vh = qrScanVideo.videoHeight;
     if(!vw || !vh) return null;
@@ -2908,7 +2924,6 @@
     qrScanCanvas.height = Math.round(vh * scale);
     qrScanCtx.drawImage(qrScanVideo, 0, 0, qrScanCanvas.width, qrScanCanvas.height);
     const imageData = qrScanCtx.getImageData(0, 0, qrScanCanvas.width, qrScanCanvas.height);
-    // attemptBoth: legge anche QR con colori invertiti
     const result = jsQR(imageData.data, imageData.width, imageData.height, {
       inversionAttempts: 'attemptBoth'
     });
@@ -2921,7 +2936,6 @@
 
   let qrScanLastTime = 0;
   function qrScanTick(now){
-    // Limita scansione a ~10 fps per non scaldare la CPU
     now = now || performance.now();
     if(now - qrScanLastTime < 100){
       qrScanRAF = requestAnimationFrame(qrScanTick);
@@ -2930,14 +2944,12 @@
     qrScanLastTime = now;
 
     if(qrScanVideo.readyState === qrScanVideo.HAVE_ENOUGH_DATA && window.jsQR){
-      // Provo prima a risoluzione bassa (veloce), poi media, poi alta
       let code = tryScanAtResolution(480);
       if(!code) code = tryScanAtResolution(720);
       if(!code) code = tryScanAtResolution(1080);
 
       if(code){
         qrScanStatus.textContent = 'Codice trovato: ' + code;
-        // Feedback aptico se supportato
         if(navigator.vibrate) navigator.vibrate(80);
         closeQrScan();
         closeDevices();
@@ -2957,7 +2969,6 @@
     }
     qrScanStatus.textContent = 'Inquadra il QR dell\'altro dispositivo…';
     try{
-      // Chiedo risoluzione alta per leggere QR anche a distanza
       const constraints = {
         video: {
           facingMode: { ideal: 'environment' },
@@ -2971,7 +2982,6 @@
       qrScanVideo.srcObject = qrScanStream;
       await qrScanVideo.play();
 
-      // Provo ad attivare la messa a fuoco continua e lo zoom digitale (se supportati)
       const track = qrScanStream.getVideoTracks()[0];
       if(track){
         const caps = track.getCapabilities ? track.getCapabilities() : {};
@@ -3681,7 +3691,7 @@
     openModal('Info', `
       <div style="text-align:center;">
         <p style="font-size:16px; margin-bottom:4px;"><b>DropMiki</b></p>
-        <p>Versione 3.7.2</p>
+        <p>Versione 3.7.3</p>
         <p style="margin-top:14px;">Miki by Claude &amp; DeepSeek</p>
       </div>
     `);
